@@ -1,0 +1,267 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Tsumiki.SourceGenerator;
+
+[Generator]
+public class VstModelSourceGenerator : IIncrementalGenerator
+{
+    private static readonly Dictionary<string, string> ParameterAttributeNameToAudioName = new()
+    {
+        ["VstParameterAttribute"] = "AudioParameter",
+        ["VstRangeParameterAttribute"] = "AudioRangeParameter",
+        ["VstBoolParameterAttribute"] = "AudioBoolParameter",
+    };
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        var classDeclarations = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
+                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
+            .Where(static m => m is not null);
+
+        context.RegisterSourceOutput(classDeclarations, static (spc, source) => Execute(source!, spc));
+    }
+
+    private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
+    {
+        return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
+    }
+
+    private class ModelInfo(string modelName, INamedTypeSymbol classSymbol, INamedTypeSymbol definitionType)
+    {
+        public string ModelName { get; } = modelName;
+        public INamedTypeSymbol ClassSymbol { get; } = classSymbol;
+        public INamedTypeSymbol DefinitionType { get; } = definitionType;
+    }
+
+    private static ModelInfo? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    {
+        var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
+        if (context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax) is not INamedTypeSymbol classSymbol)
+            return null;
+
+        var attribute = classSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Tsumiki.Core.VstModelAttribute");
+        if (attribute is null)
+            return null;
+
+        if (attribute.ConstructorArguments[0].Value is not string modelName)
+            return null;
+
+        if (attribute.ConstructorArguments[1].Value is not INamedTypeSymbol definitionType)
+            return null;
+
+        return new ModelInfo(modelName, classSymbol, definitionType);
+    }
+
+    private static void Execute(ModelInfo modelInfo, SourceProductionContext context)
+    {
+        var classSymbol = modelInfo.ClassSymbol;
+        var definitionType = modelInfo.DefinitionType;
+
+        var sourceBuilder = new StringBuilder();
+        sourceBuilder.AppendLine("using NPlug;");
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine($"namespace {classSymbol.ContainingNamespace.ToDisplayString()};");
+        sourceBuilder.AppendLine();
+
+        // Generate unit classes
+        var unitProperties = GetUnitProperties(definitionType);
+
+        foreach (var unitProperty in unitProperties)
+        {
+            GenerateUnitClass(sourceBuilder, unitProperty);
+        }
+
+        // Generate partial class implementation
+        GenerateClassImplementation(
+            sourceBuilder,
+            className: classSymbol.Name,
+            interfaceType: definitionType,
+            parameterIdOffset: 0,
+            baseClassConstructor: $"base(\"{modelInfo.ModelName}\")",
+            includeByPassParameter: true,
+            unitProperties: unitProperties);
+
+        var sourceText = SourceText.From(sourceBuilder.ToString(), Encoding.UTF8);
+        context.AddSource($"{classSymbol.Name}.g.cs", sourceText);
+    }
+
+    private static IPropertySymbol[] GetUnitProperties(INamedTypeSymbol typeSymbol)
+    {
+        return [.. typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "VstUnitAttribute"))];
+    }
+
+    private static IPropertySymbol[] GetParameterProperties(INamedTypeSymbol typeSymbol)
+    {
+        return [.. typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetAttributes().Any(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name)))];
+    }
+
+    private static void GenerateClassImplementation(
+        StringBuilder sourceBuilder,
+        string className,
+        INamedTypeSymbol interfaceType,
+        int parameterIdOffset,
+        string? baseClassConstructor,
+        bool includeByPassParameter,
+        IEnumerable<IPropertySymbol> unitProperties)
+    {
+        var parameterProperties = GetParameterProperties(interfaceType);
+
+        // Determine base class
+        var baseClass = includeByPassParameter ? "AudioProcessorModel" : "AudioUnit";
+        sourceBuilder.AppendLine($"public partial class {className} : {baseClass}, {interfaceType.ToDisplayString()}");
+        sourceBuilder.AppendLine("{");
+
+        // Generate fields for parameters
+        foreach (var property in parameterProperties)
+        {
+            var paramType = GetParameterFieldType(property);
+            sourceBuilder.AppendLine($"    private readonly {paramType} _{ToCamelCase(property.Name)};");
+        }
+
+        // Generate fields for units
+        foreach (var unitProperty in unitProperties)
+        {
+            var unitClassName = GetUnitClassName(unitProperty);
+            sourceBuilder.AppendLine($"    private readonly {unitClassName} _{ToCamelCase(unitProperty.Name)};");
+        }
+
+        sourceBuilder.AppendLine();
+
+        // Generate interface implementations for parameters
+        foreach (var property in parameterProperties)
+        {
+            GeneratePropertyImplementation(sourceBuilder, property);
+        }
+
+        // Generate interface implementations for units
+        foreach (var unitProperty in unitProperties)
+        {
+            sourceBuilder.AppendLine($"    public {unitProperty.Type.ToDisplayString()} {unitProperty.Name} => _{ToCamelCase(unitProperty.Name)};");
+        }
+
+        sourceBuilder.AppendLine();
+
+        // Generate constructor
+        var constructorBase = baseClassConstructor != null ? $" : {baseClassConstructor}" : "";
+        sourceBuilder.AppendLine($"    public {className}(){constructorBase}");
+        sourceBuilder.AppendLine("    {");
+
+        if (includeByPassParameter)
+        {
+            sourceBuilder.AppendLine("        AddByPassParameter();");
+        }
+
+        // Initialize parameters
+        foreach (var property in parameterProperties)
+        {
+            GenerateParameterInitialization(sourceBuilder, property, parameterIdOffset);
+        }
+
+        // Initialize units
+        foreach (var unitProperty in unitProperties)
+        {
+            var unitClassName = GetUnitClassName(unitProperty);
+            sourceBuilder.AppendLine($"        _{ToCamelCase(unitProperty.Name)} = AddUnit(new {unitClassName}());");
+        }
+
+        sourceBuilder.AppendLine("    }");
+        sourceBuilder.AppendLine("}");
+    }
+
+    private static void GenerateUnitClass(StringBuilder sourceBuilder, IPropertySymbol unitProperty)
+    {
+        if (unitProperty.Type is not INamedTypeSymbol unitType)
+            return;
+
+        var unitClassName = GetUnitClassName(unitProperty);
+        var unitAttribute = unitProperty.GetAttributes()
+            .First(a => a.AttributeClass?.Name == "VstUnitAttribute");
+
+        var unitId = (int)unitAttribute.ConstructorArguments[0].Value!;
+        var parameterIdOffset = (int)unitAttribute.ConstructorArguments[1].Value!;
+        var unitName = unitProperty.Name;
+
+        // Generate unit classes
+        var unitProperties = GetUnitProperties(unitType);
+
+        foreach (var innerProperty in unitProperties)
+        {
+            GenerateUnitClass(sourceBuilder, innerProperty);
+        }
+
+        GenerateClassImplementation(
+            sourceBuilder,
+            className: unitClassName,
+            interfaceType: unitType,
+            parameterIdOffset: parameterIdOffset,
+            baseClassConstructor: $"base(\"{unitName}\", id: {unitId})",
+            includeByPassParameter: false,
+            unitProperties: unitProperties);
+
+        sourceBuilder.AppendLine();
+    }
+
+    private static string GetUnitClassName(IPropertySymbol unitProperty)
+    {
+        return $"{unitProperty.Name}{unitProperty.Type.Name.Substring(1)}";
+    }
+
+    private static string GetParameterFieldType(IPropertySymbol property)
+    {
+        var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
+        return ParameterAttributeNameToAudioName[attribute.AttributeClass!.Name];
+    }
+
+    private static void GeneratePropertyImplementation(StringBuilder sourceBuilder, IPropertySymbol property)
+    {
+        var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
+
+        var fieldName = $"_{ToCamelCase(property.Name)}";
+        var returnType = property.Type.ToDisplayString();
+        var valueAccess = attribute.AttributeClass?.Name switch
+        {
+            "VstBoolParameterAttribute" => $"{fieldName}.Value",
+            "VstRangeParameterAttribute" => $"({returnType}){fieldName}.Value",
+            _ => $"({returnType}){fieldName}.NormalizedValue"
+        };
+
+        sourceBuilder.AppendLine($"    public {returnType} {property.Name} => {valueAccess};");
+    }
+
+    private static void GenerateParameterInitialization(StringBuilder sourceBuilder, IPropertySymbol property, int parameterIdOffset)
+    {
+        var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
+
+        var fieldName = $"_{ToCamelCase(property.Name)}";
+        var id = (int)attribute.ConstructorArguments[0].Value! + parameterIdOffset;
+        var parameterClassName = ParameterAttributeNameToAudioName[attribute.AttributeClass!.Name];
+
+        sourceBuilder.Append($"        {fieldName} = AddParameter(new {parameterClassName}(\"{property.Name}\", id: {id}");
+
+        foreach (var namedArgument in attribute.NamedArguments)
+        {
+            var value = namedArgument.Value.ToCSharpString().Replace("Tsumiki.Core.VstParameterFlags", "NPlug.AudioParameterFlags");
+            sourceBuilder.Append($", {ToCamelCase(namedArgument.Key)}: {value}");
+        }
+
+        sourceBuilder.AppendLine("));");
+    }
+
+    private static string ToCamelCase(string name)
+    {
+        return string.IsNullOrEmpty(name) ? name : char.ToLowerInvariant(name[0]) + name.Substring(1);
+    }
+}

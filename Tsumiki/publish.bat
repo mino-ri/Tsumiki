@@ -1,2 +1,2 @@
-dotnet publish -c Release -r win-x64 -p:PublishAot=true
+dotnet publish -c Release -r win-x64
 pause

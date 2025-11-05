@@ -2,14 +2,28 @@ using NPlug;
 
 namespace Tsumiki;
 
-public class SampleMidiModel : AudioProcessorModel
+public partial class SampleMidiUnit : AudioUnit
+{
+    public SampleMidiUnit() : base("MidiUnit", id: 1)
+    {
+    }
+}
+
+
+public partial class SampleMidiModel : AudioProcessorModel
 {
     public AudioParameter Gain { get; }
 
     public SampleMidiModel() : base("Tsumiki")
     {
         AddByPassParameter();
-        Gain = AddParameter(new AudioParameter("Gain", units: "dB", defaultNormalizedValue: 0.7));
+        Gain = AddParameter(new AudioParameter("Gain", units: "dB", defaultNormalizedValue: 0.75, flags: AudioParameterFlags.NoFlags));
+        new AudioParameter(new AudioParameterInfo());
+    }
+
+    private void AddParameters()
+    {
+
     }
 }
 

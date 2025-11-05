@@ -28,4 +28,9 @@
   <ItemGroup>
     <PackageReference Include="NPlug" Version="0.4.0.377" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.fsproj" />
+    <ProjectReference Include="..\Tsumiki.SourceGenerator\Tsumiki.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>
