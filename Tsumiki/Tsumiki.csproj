@@ -21,8 +21,9 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-    <!-- 例：Avalonia UI では有効化が必要 -->
-    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
   </PropertyGroup>
   
   <ItemGroup>
@@ -30,7 +31,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.fsproj" />
+    <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.csproj" />
     <ProjectReference Include="..\Tsumiki.SourceGenerator\Tsumiki.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

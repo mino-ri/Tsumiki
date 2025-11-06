@@ -7,8 +7,8 @@ public static class TsumikiPlugin
     public static AudioPluginFactory GetFactory()
     {
         var factory = new AudioPluginFactory(new("Minori", "https://github.com/mino-ri/Tsumiki", "hojo.origami@gmail.com"));
-        factory.RegisterPlugin(new AudioProcessorClassInfo(SampleMidiProcessor.ClassId, "Tsumiki", AudioProcessorCategory.Instrument), () => new SampleMidiProcessor());
-        factory.RegisterPlugin(new AudioControllerClassInfo(SampleMidiController.ClassId, "Tsumiki Controller"), () => new SampleMidiController());
+        factory.RegisterPlugin(new AudioProcessorClassInfo(TsumikiProcessor.ClassId, "Tsumiki", AudioProcessorCategory.Instrument), () => new TsumikiProcessor());
+        factory.RegisterPlugin(new AudioControllerClassInfo(TsumikiController.ClassId, "Tsumiki Controller"), () => new TsumikiController());
         return factory;
     }
 
