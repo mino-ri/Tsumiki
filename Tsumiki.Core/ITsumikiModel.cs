@@ -3,28 +3,28 @@ namespace Tsumiki.Core;
 public interface ITsumikiModel
 {
     [VstRangeParameter(2, 0.0, 1.0, 1.0)]
-    float Master { get; }
+    float Master { get; set; }
 
     [VstRangeParameter(3, 0, 24, 12, StepCount = 24)]
-    int Bend { get; }
+    int Bend { get; set; }
 
-    [VstRangeParameter(4, -1, 100, 0, StepCount = 100, Flags = VstParameterFlags.IsWrapAround)]
-    int Glide { get; }
+    [VstRangeParameter(4, -1, 100, 0, StepCount = 101, Flags = VstParameterFlags.IsWrapAround)]
+    int Glide { get; set; }
 
     [VstRangeParameter(5, -6, 6, 0, StepCount = 12)]
-    int Octave { get; }
+    int Octave { get; set; }
 
     [VstRangeParameter(6, 1, 9, 1, StepCount = 8, Flags = VstParameterFlags.IsWrapAround)]
-    int Mux { get; }
+    int Mux { get; set; }
 
     [VstBoolParameter(7, false)]
-    bool MuxHarmonic { get; }
+    bool MuxHarmonic { get; set; }
 
     [VstRangeParameter(8, 0, 100, 10, StepCount = 100, Units = "cent")]
-    int MuxDetune { get; }
+    int MuxDetune { get; set; }
 
     [VstRangeParameter(9, 0.0, 1.0, 1.0)]
-    float MuxStereo { get; }
+    float MuxStereo { get; set; }
 
     [VstUnit(1, 10)]
     ICarrierUnit A1 { get; }
@@ -51,103 +51,103 @@ public interface ITsumikiModel
 public interface ICarrierUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
-    float Level { get; }
+    float Level { get; set; }
 
     [VstRangeParameter(1, 0.01, 16.0, 1.0)]
-    double Pitch { get; }
+    double Pitch { get; set; }
 
     [VstBoolParameter(2, false)]
-    bool Sync { get; }
+    bool Sync { get; set; }
 
     [VstRangeParameter(3, 0.0, 1.0, 0.0)]
-    float Phase { get; }
+    float Phase { get; set; }
 
     [VstRangeParameter(4, -1.0, 1.0, 0.0)]
-    float ShapeX { get; }
+    float ShapeX { get; set; }
 
     [VstRangeParameter(5, -1.0, 1.0, 0.0)]
-    float ShapeY { get; }
+    float ShapeY { get; set; }
 
     [VstRangeParameter(6, -1.0, 1.0, 0.0)]
-    float Pan { get; }
+    float Pan { get; set; }
 
     [VstRangeParameter(15, 0, 80, 40, StepCount = 80)]
-    int Attack { get; }
+    int Attack { get; set; }
 
     [VstRangeParameter(16, 0, 80, 40, StepCount = 80)]
-    int Decay { get; }
+    int Decay { get; set; }
 
     [VstRangeParameter(17, 0.0, 1.0, 1.0)]
-    float Sustain { get; }
+    float Sustain { get; set; }
 
     [VstRangeParameter(18, 0, 80, 40, StepCount = 80)]
-    int Release { get; }
+    int Release { get; set; }
 }
 
 public interface IModulatorUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
-    float Level { get; }
+    float Level { get; set; }
 
     [VstRangeParameter(1, 0.01, 16.0, 1.0)]
-    double Pitch { get; }
+    double Pitch { get; set; }
 
     [VstBoolParameter(2, false)]
-    bool Sync { get; }
+    bool Sync { get; set; }
 
     [VstRangeParameter(3, 0.0, 1.0, 0.0)]
-    float Phase { get; }
+    float Phase { get; set; }
 
     [VstRangeParameter(4, 0.0, 1.0, 1.0)]
-    float Feedback { get; }
+    float Feedback { get; set; }
 
     [VstRangeParameter(15, 0, 80, 40, StepCount = 80)]
-    int Attack { get; }
+    int Attack { get; set; }
 
     [VstRangeParameter(16, 0, 80, 40, StepCount = 80)]
-    int Decay { get; }
+    int Decay { get; set; }
 
     [VstRangeParameter(17, 0.0, 1.0, 1.0)]
-    float Sustain { get; }
+    float Sustain { get; set; }
 
     [VstRangeParameter(18, 0, 80, 40, StepCount = 80)]
-    int Release { get; }
+    int Release { get; set; }
 }
 
 public interface IFilterUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
-    float Mix { get; }
+    float Mix { get; set; }
 
     [VstRangeParameter(1, -1.0, 1.0, 0.0)]
-    float MorphFactor { get; }
+    float MorphFactor { get; set; }
 
     [VstRangeParameter(2, -64, 64, 0, StepCount = 128)]
-    int Cutoff { get; }
+    int Cutoff { get; set; }
 
     [VstRangeParameter(3, 0.0, 0.98, 0.49)]
-    float Resonance { get; }
+    float Resonance { get; set; }
 }
 
 public interface IDelayUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
-    float Mix { get; }
+    float Mix { get; set; }
 
     [VstRangeParameter(1, 2, 500, 250, StepCount = 498, Units = "ms")]
-    int Delay { get; }
+    int Delay { get; set; }
 
     [VstRangeParameter(2, 0.0, 1.0, 1.0)]
-    float Feedback { get; }
+    float Feedback { get; set; }
 
     [VstBoolParameter(3, false)]
-    bool Cross { get; }
+    bool Cross { get; set; }
 
     [VstRangeParameter(4, 20, 120, 50, StepCount = 100)]
-    int LowCut { get; }
+    int LowCut { get; set; }
 
     [VstRangeParameter(5, 20, 120, 90, StepCount = 100)]
-    int HighCut { get; }
+    int HighCut { get; set; }
 }
 
 public interface IModulationUnit
@@ -177,70 +177,70 @@ public interface IModulationUnit
 public interface IModulationDestinationUnit
 {
     [VstRangeParameter(0, -16.0, 16.0, 0.0)]
-    double APitch { get; }
+    double APitch { get; set; }
 
     [VstRangeParameter(1, 0.0, 1.0, 1.0)]
-    float ALevel { get; }
+    float ALevel { get; set; }
 
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
-    float APan { get; }
+    float APan { get; set; }
 
     [VstRangeParameter(3, -16.0, 16.0, 0.0)]
-    double BPitch { get; }
+    double BPitch { get; set; }
 
     [VstRangeParameter(4, 0.0, 1.0, 1.0)]
-    float BLevel { get; }
+    float BLevel { get; set; }
 
     [VstRangeParameter(5, -1.0, 1.0, 0.0)]
-    float BPan { get; }
+    float BPan { get; set; }
 
     [VstRangeParameter(6, -64, 64, 0, StepCount = 128)]
-    int FilterCutoff { get; }
+    int FilterCutoff { get; set; }
 
     [VstRangeParameter(7, 0.0, 0.98, 0.49)]
-    float FilterResonance { get; }
+    float FilterResonance { get; set; }
 
     [VstRangeParameter(8, 0.0, 1.0, 1.0)]
-    float LfoLevel { get; }
+    float LfoLevel { get; set; }
 
     [VstRangeParameter(9, 0.01, 500.0, 4.0, Units = "Hz")]
-    double LfoSpeed { get; }
+    double LfoSpeed { get; set; }
 }
 
 public interface IEnvelopeUnit
 {
     [VstRangeParameter(0, 0, 80, 40, StepCount = 80)]
-    int Attack { get; }
+    int Attack { get; set; }
 
     [VstRangeParameter(1, 0, 80, 40, StepCount = 80)]
-    int Decay { get; }
+    int Decay { get; set; }
 
     [VstRangeParameter(2, 0.0, 1.0, 1.0)]
-    float Sustain { get; }
+    float Sustain { get; set; }
 
     [VstRangeParameter(3, 0, 80, 40, StepCount = 80)]
-    int Release { get; }
+    int Release { get; set; }
 }
 
 public interface ILfoUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
-    float Level { get; }
+    float Level { get; set; }
 
     [VstRangeParameter(1, 0.01, 500.0, 4.0, Units = "Hz")]
-    double Speed { get; }
+    double Speed { get; set; }
 
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
-    float ShapeX { get; }
+    float ShapeX { get; set; }
 
     [VstRangeParameter(3, -1.0, 1.0, 0.0)]
-    float ShapeY { get; }
+    float ShapeY { get; set; }
 }
 
 public interface ITuningUnit
 {
-    [VstRangeParameter(6, 0, 127, 0, StepCount = 127)]
-    int Root { get; }
+    [VstRangeParameter(6, 0, 128, 0, StepCount = 128)]
+    int Root { get; set; }
 
     [VstUnit(20, 10)]
     ITuningSetUnit TuningA { get; }
@@ -302,35 +302,35 @@ public interface ITuningUnit
 
 public interface ITuningSetUnit
 {
-    [VstRangeParameter(0, 1, 999, 0, StepCount = 998)]
-    int GeneratorN { get; }
+    [VstRangeParameter(0, 0, 999, 3, StepCount = 999)]
+    int GeneratorN { get; set; }
 
-    [VstRangeParameter(1, 0, 999, 0, StepCount = 999)]
-    int GeneratorD { get; }
+    [VstRangeParameter(1, 1, 999, 2, StepCount = 998)]
+    int GeneratorD { get; set; }
 
-    [VstRangeParameter(2, 1, 999, 0, StepCount = 998)]
-    int GeneratorPn { get; }
+    [VstRangeParameter(2, 0, 999, 1, StepCount = 998)]
+    int GeneratorPn { get; set; }
 
-    [VstRangeParameter(3, 0, 999, 0, StepCount = 999)]
-    int GeneratorPd { get; }
+    [VstRangeParameter(3, 1, 999, 1, StepCount = 998)]
+    int GeneratorPd { get; set; }
 
-    [VstRangeParameter(4, 1, 999, 0, StepCount = 998)]
-    int PeriodN { get; }
+    [VstRangeParameter(4, 0, 999, 2, StepCount = 999)]
+    int PeriodN { get; set; }
 
-    [VstRangeParameter(5, 0, 999, 0, StepCount = 999)]
-    int PeriodD { get; }
+    [VstRangeParameter(5, 1, 999, 1, StepCount = 998)]
+    int PeriodD { get; set; }
 
-    [VstRangeParameter(6, 1, 999, 0, StepCount = 998)]
-    int PeriodPn { get; }
+    [VstRangeParameter(6, 0, 999, 1, StepCount = 999)]
+    int PeriodPn { get; set; }
 
-    [VstRangeParameter(7, 0, 999, 0, StepCount = 999)]
-    int PeriodPd { get; }
+    [VstRangeParameter(7, 1, 999, 1, StepCount = 998)]
+    int PeriodPd { get; set; }
 
     [VstRangeParameter(8, -64, 64, 0, StepCount = 128)]
-    int Offset { get; }
+    int Offset { get; set; }
 
     [VstRangeParameter(9, 1, 127, 0, StepCount = 126)]
-    int KeyPeriod { get; }
+    int KeyPeriod { get; set; }
 }
 
 public interface IKeyTuningSetUnit
@@ -363,38 +363,38 @@ public interface IKeyTuningSetUnit
 
 public interface IKeyTuningUnit
 {
-    [VstRangeParameter(0, 1, 999, 0, StepCount = 998)]
-    int GeneratorN { get; }
+    [VstRangeParameter(0, 0, 999, 2, StepCount = 999)]
+    int GeneratorN { get; set; }
 
-    [VstRangeParameter(1, 2, 999, 0, StepCount = 999)]
-    int GeneratorD { get; }
+    [VstRangeParameter(1, 1, 999, 1, StepCount = 998)]
+    int GeneratorD { get; set; }
 
-    [VstRangeParameter(2, 12, 999, 0, StepCount = 998)]
-    int GeneratorPn { get; }
+    [VstRangeParameter(2, 0, 999, 0, StepCount = 999)]
+    int GeneratorPn { get; set; }
 
-    [VstRangeParameter(3, 0, 999, 0, StepCount = 999)]
-    int GeneratorPd { get; }
+    [VstRangeParameter(3, 1, 999, 12, StepCount = 998)]
+    int GeneratorPd { get; set; }
 }
 
 public interface IChannelTuningUnit
 {
     [VstStringListParameter(0, typeof(TuningSetType))]
-    TuningSetType Set { get; }
+    TuningSetType Set { get; set; }
 
-    [VstRangeParameter(1, 1, 999, 0, StepCount = 998)]
-    int RatioN { get; }
+    [VstRangeParameter(1, 0, 999, 2, StepCount = 999)]
+    int RatioN { get; set; }
 
-    [VstRangeParameter(2, 2, 999, 0, StepCount = 999)]
-    int RatioD { get; }
+    [VstRangeParameter(2, 1, 999, 1, StepCount = 998)]
+    int RatioD { get; set; }
 
-    [VstRangeParameter(3, 12, 999, 0, StepCount = 998)]
-    int RatioPn { get; }
+    [VstRangeParameter(3, 0, 999, 0, StepCount = 999)]
+    int RatioPn { get; set; }
 
-    [VstRangeParameter(4, 0, 999, 0, StepCount = 999)]
-    int RatioPd { get; }
+    [VstRangeParameter(4, 1, 999, 12, StepCount = 998)]
+    int RatioPd { get; set; }
 
     [VstRangeParameter(5, -64, 64, 0, StepCount = 128)]
-    int KeyOffset { get; }
+    int KeyOffset { get; set; }
 }
 
 public enum TuningSetType
