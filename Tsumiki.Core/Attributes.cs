@@ -49,20 +49,20 @@ public sealed class VstUnitAttribute(int id, int parameterIdOffset) : Attribute(
 
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class VstParameterAttribute(int id, float defaultNormalizedValue) : Attribute()
+public sealed class VstParameterAttribute(int id, double defaultNormalizedValue) : Attribute()
 {
     public string? Units { get; set; }
     public string? ShortTitle { get; set; }
     public int StepCount { get; set; }
     public VstParameterFlags Flags { get; set; } = VstParameterFlags.CanAutomate;
 
-    public float DefaultNormalizedValue => defaultNormalizedValue;
+    public double DefaultNormalizedValue => defaultNormalizedValue;
     public int Id => id;
 }
 
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class VstRangeParameterAttribute(int id, float minValue, float maxValue, float defaultPlainValue) : Attribute()
+public sealed class VstRangeParameterAttribute(int id, double minValue, double maxValue, double defaultPlainValue) : Attribute()
 {
     public string? Units { get; set; }
     public string? ShortTitle { get; set; }
@@ -70,9 +70,9 @@ public sealed class VstRangeParameterAttribute(int id, float minValue, float max
     public VstParameterFlags Flags { get; set; } = VstParameterFlags.CanAutomate;
 
     public int Id => id;
-    public float MinValue => minValue;
-    public float MaxValue => maxValue;
-    public float DefaultPlainValue => defaultPlainValue;
+    public double MinValue => minValue;
+    public double MaxValue => maxValue;
+    public double DefaultPlainValue => defaultPlainValue;
 }
 
 [AttributeUsage(AttributeTargets.Property)]
@@ -85,4 +85,16 @@ public sealed class VstBoolParameterAttribute(int id, bool defaultValue) : Attri
 
     public bool DefaultValue => defaultValue;
     public int Id => id;
+}
+
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class VstStringListParameterAttribute(int id, Type items) : Attribute()
+{
+    public string? Units { get; set; }
+    public string? ShortTitle { get; set; }
+    public int SelectedItem { get; set; }
+    public VstParameterFlags Flags { get; set; } = VstParameterFlags.CanAutomate | VstParameterFlags.IsList;
+
+    public int Id => id;
+    public Type Items => items;
 }

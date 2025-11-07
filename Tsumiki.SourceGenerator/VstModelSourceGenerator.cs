@@ -16,6 +16,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         ["VstParameterAttribute"] = "AudioParameter",
         ["VstRangeParameterAttribute"] = "AudioRangeParameter",
         ["VstBoolParameterAttribute"] = "AudioBoolParameter",
+        ["VstStringListParameterAttribute"] = "AudioStringListParameter",
     };
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -77,7 +78,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
         foreach (var unitProperty in unitProperties)
         {
-            GenerateUnitClass(sourceBuilder, unitProperty);
+            GenerateUnitClass(sourceBuilder, unitProperty, 0);
         }
 
         // Generate partial class implementation
@@ -181,7 +182,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("}");
     }
 
-    private static void GenerateUnitClass(StringBuilder sourceBuilder, IPropertySymbol unitProperty)
+    private static void GenerateUnitClass(StringBuilder sourceBuilder, IPropertySymbol unitProperty, int idOffset)
     {
         if (unitProperty.Type is not INamedTypeSymbol unitType)
             return;
@@ -191,7 +192,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             .First(a => a.AttributeClass?.Name == "VstUnitAttribute");
 
         var unitId = (int)unitAttribute.ConstructorArguments[0].Value!;
-        var parameterIdOffset = (int)unitAttribute.ConstructorArguments[1].Value!;
+        var parameterIdOffset = idOffset + (int)unitAttribute.ConstructorArguments[1].Value!;
         var unitName = unitProperty.Name;
 
         // Generate unit classes
@@ -199,7 +200,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
         foreach (var innerProperty in unitProperties)
         {
-            GenerateUnitClass(sourceBuilder, innerProperty);
+            GenerateUnitClass(sourceBuilder, innerProperty, parameterIdOffset);
         }
 
         GenerateClassImplementation(
@@ -231,14 +232,35 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
         var fieldName = $"_{ToCamelCase(property.Name)}";
         var returnType = property.Type.ToDisplayString();
-        var valueAccess = attribute.AttributeClass?.Name switch
+        var valueGetter = attribute.AttributeClass?.Name switch
         {
             "VstBoolParameterAttribute" => $"{fieldName}.Value",
             "VstRangeParameterAttribute" => $"({returnType}){fieldName}.Value",
-            _ => $"({returnType}){fieldName}.NormalizedValue"
+            "VstStringListParameterAttribute" => $"({returnType}){fieldName}.SelectedItem",
+            _ => $"({returnType}){fieldName}.NormalizedValue",
+        };
+        var valueSetter = attribute.AttributeClass?.Name switch
+        {
+            "VstBoolParameterAttribute" => $"{fieldName}.Value = value",
+            "VstRangeParameterAttribute" => $"{fieldName}.Value = (double)value",
+            "VstStringListParameterAttribute" => $"{fieldName}.SelectedItem = (int)value",
+            _ => $"{fieldName}.NormalizedValue = (double)value",
         };
 
-        sourceBuilder.AppendLine($"    public {returnType} {property.Name} => {valueAccess};");
+        sourceBuilder.AppendLine($"    public {returnType} {property.Name}");
+        sourceBuilder.AppendLine("    {");
+        sourceBuilder.AppendLine($"        get => {valueGetter};");
+        sourceBuilder.AppendLine($"        set => {valueSetter};");
+        sourceBuilder.AppendLine("    }");
+    }
+
+    private static string GetEnumFieldsString(INamedTypeSymbol enumType)
+    {
+        var fieldString = string.Join(", ", enumType.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(f => f.IsConst)
+            .Select(s => $"\"{s.Name}\""));
+        return $"[{fieldString}]";
     }
 
     private static void GenerateParameterInitialization(StringBuilder sourceBuilder, IPropertySymbol property, int parameterIdOffset)
@@ -248,8 +270,21 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var fieldName = $"_{ToCamelCase(property.Name)}";
         var id = (int)attribute.ConstructorArguments[0].Value! + parameterIdOffset;
         var parameterClassName = ParameterAttributeNameToAudioName[attribute.AttributeClass!.Name];
+        
+        sourceBuilder.Append($"        {fieldName} = AddParameter(new {parameterClassName}(\"{property.Name}\"");
 
-        sourceBuilder.Append($"        {fieldName} = AddParameter(new {parameterClassName}(\"{property.Name}\", id: {id}");
+        for (var i = 0; i < attribute.AttributeConstructor!.Parameters.Length; i++)
+        {
+            var parameterName = attribute.AttributeConstructor!.Parameters[i].Name;
+            var value = parameterName switch
+            {
+                "id" => ((int)attribute.ConstructorArguments[i].Value! + parameterIdOffset).ToString(),
+                "items" => GetEnumFieldsString((INamedTypeSymbol)attribute.ConstructorArguments[i].Value!),
+                _ => attribute.ConstructorArguments[i].ToCSharpString(),
+            };
+
+            sourceBuilder.Append($", {parameterName}: {value}");
+        }
 
         foreach (var namedArgument in attribute.NamedArguments)
         {

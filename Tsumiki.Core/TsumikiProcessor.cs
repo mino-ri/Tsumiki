@@ -138,7 +138,7 @@ public class TsumikiProcessor()
 
     public void ProcessMain(ITsumikiModel model, int sampleCount, Span<float> leftOutput, Span<float> rightOutput)
     {
-        var gain = model.Gain;
+        var gain = model.Master;
         for (var sample = 0; sample < sampleCount; sample++)
         {
             var output = 0f;
