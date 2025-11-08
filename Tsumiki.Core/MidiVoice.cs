@@ -83,6 +83,14 @@ internal readonly struct MidiVoiceContainer
     [InitTiming]
     public MidiVoiceContainer(int voiceCount)
     {
+        if (voiceCount == 0)
+        {
+            Reservations = [];
+            PressureReservations = [];
+            Voices = [];
+            return;
+        }
+
         Reservations = GC.AllocateArray<MidiEventReservation<MidiNote>>(voiceCount, true);
         PressureReservations = GC.AllocateArray<MidiEventReservation<MidiPolyPressure>>(voiceCount, true);
         Voices = GC.AllocateArray<MidiVoice>(voiceCount, true);

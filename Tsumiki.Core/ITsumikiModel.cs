@@ -18,13 +18,13 @@ public interface ITsumikiModel
 
     [VstUnit(1, 6)]
     IInputUnit Input { get; }
-
+    /*
     [VstUnit(2, 20)]
     ICarrierUnit A1 { get; }
-
+    */
     [VstUnit(3, 40)]
     IModulatorUnit A2 { get; }
-
+    /*
     [VstUnit(4, 50)]
     ICarrierUnit B1 { get; }
 
@@ -42,6 +42,7 @@ public interface ITsumikiModel
 
     [VstUnit(9, 200)]
     ITuningUnit Tuning { get; }
+    */
 }
 
 public enum StackMode

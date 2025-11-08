@@ -35,4 +35,23 @@ internal static class MathT
 
     [AudioTiming]
     public static float Sqr(float x) => x >= 0.5 ? 1f : -1f;
+
+    [AudioTiming]
+    public static double PitchToDelta(double pitch, double sampleRate)
+    {
+        var frequency = 440.0 * Math.Pow(2.0, (pitch - 69.0) / 12.0);
+        return frequency / sampleRate;
+    }
+
+    public const double ExpThreshold = 1.0 / 1024.0;
+
+    /// <summary>
+    /// 指数曲線で変化する、エンベロープの1サンプルあたりの変化レートを返します。
+    /// </summary>
+    [AudioTiming]
+    public static double GetEnvelopeRate(int value, double sampleRate)
+    {
+        var seconds = Math.Pow(10, value / 20.0 - 3.0);
+        return 1.0 - Math.Pow(ExpThreshold, 1.0 / (seconds * sampleRate));
+    }
 }
