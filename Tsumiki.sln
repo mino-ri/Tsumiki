@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tsumiki.Test", "Tsumiki.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tsumiki.Metadata", "Tsumiki.Metadata\Tsumiki.Metadata.csproj", "{D06C9F9A-2A73-44A4-BDD8-DA19C5236C31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tsumiki.Analyzers", "Tsumiki.Analyzers\Tsumiki.Analyzers.csproj", "{3F9942E4-DF40-4998-8166-43C93C1BB155}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{D06C9F9A-2A73-44A4-BDD8-DA19C5236C31}.Release|x64.Build.0 = Release|Any CPU
 		{D06C9F9A-2A73-44A4-BDD8-DA19C5236C31}.Release|x86.ActiveCfg = Release|Any CPU
 		{D06C9F9A-2A73-44A4-BDD8-DA19C5236C31}.Release|x86.Build.0 = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|x64.Build.0 = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Debug|x86.Build.0 = Debug|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|x64.ActiveCfg = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|x64.Build.0 = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|x86.ActiveCfg = Release|Any CPU
+		{3F9942E4-DF40-4998-8166-43C93C1BB155}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

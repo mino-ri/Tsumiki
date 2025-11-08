@@ -96,7 +96,7 @@ internal readonly struct MidiVoiceContainer
     }
 
     [EventTiming]
-    private readonly void Reserve<T>(MidiEventReservation<T>[] storage, in MidiEventReservation<T> reservation)
+    private static void Reserve<T>(MidiEventReservation<T>[] storage, in MidiEventReservation<T> reservation)
         where T : struct
     {
 
