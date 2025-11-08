@@ -15,4 +15,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Tsumiki.Test" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tsumiki.Metadata\Tsumiki.Metadata.csproj" />
+  </ItemGroup>
 </Project>

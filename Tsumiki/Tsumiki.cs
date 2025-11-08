@@ -1,5 +1,6 @@
 using NPlug;
 using Tsumiki.Core;
+using Tsumiki.Metadata;
 
 namespace Tsumiki;
 
@@ -65,6 +66,7 @@ public class TsumikiProcessor()
                 break;
 
             case AudioEventKind.PolyPressure:
+                ref readonly var polyPressure = ref audioEvent.Value.PolyPressure;
                 break;
         }
     }

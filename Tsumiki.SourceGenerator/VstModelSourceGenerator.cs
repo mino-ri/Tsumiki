@@ -49,7 +49,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             return null;
 
         var attribute = classSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Tsumiki.Core.VstModelAttribute");
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Tsumiki.Metadata.VstModelAttribute");
         if (attribute is null)
             return null;
 
@@ -292,7 +292,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
         foreach (var namedArgument in attribute.NamedArguments)
         {
-            var value = namedArgument.Value.ToCSharpString().Replace("Tsumiki.Core.VstParameterFlags", "NPlug.AudioParameterFlags");
+            var value = namedArgument.Value.ToCSharpString().Replace("Tsumiki.Metadata.VstParameterFlags", "NPlug.AudioParameterFlags");
             sourceBuilder.Append($", {ToCamelCase(namedArgument.Key)}: {value}");
         }
 

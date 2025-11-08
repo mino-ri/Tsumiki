@@ -1,3 +1,5 @@
+using Tsumiki.Metadata;
+
 namespace Tsumiki.Core;
 
 public interface ITsumikiModel
@@ -69,7 +71,7 @@ public interface IInputUnit
     int StackDetune { get; set; }
 
     [VstRangeParameter(6, 0.0, 1.0, 0.0)]
-    float StackSpread { get; set; }
+    float StackStereo { get; set; }
 }
 
 public interface ICarrierUnit

@@ -1,3 +1,5 @@
+using Tsumiki.Metadata;
+
 namespace Tsumiki.Core;
 
 internal static class MathT

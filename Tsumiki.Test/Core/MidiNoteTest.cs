@@ -110,4 +110,67 @@ public static class MidiNoteTest
 
         Assert.False(note1.IsSame(in note2));
     }
+
+    [Fact]
+    public static void IsSame_PolyPressureと同じNoteIdの場合Trueを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, 100);
+        var pressure = new MidiPolyPressure(0, 62, 0.5f, 100);
+
+        Assert.True(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureと異なるNoteIdの場合Falseを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, 100);
+        var pressure = new MidiPolyPressure(0, 60, 0.5f, 101);
+
+        Assert.False(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureとNoteIdが負で同じピッチの場合Trueを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, -1);
+        var pressure = new MidiPolyPressure(0, 60, 0.5f, -1);
+
+        Assert.True(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureとNoteIdが負で異なるピッチの場合Falseを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, -1);
+        var pressure = new MidiPolyPressure(0, 62, 0.5f, -1);
+
+        Assert.False(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureと異なるチャンネルの場合Falseを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, 100);
+        var pressure = new MidiPolyPressure(1, 60, 0.5f, 100);
+
+        Assert.False(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureと片方のNoteIdが負で同じピッチの場合Trueを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, 100);
+        var pressure = new MidiPolyPressure(0, 60, 0.5f, -1);
+
+        Assert.True(note.IsSame(in pressure));
+    }
+
+    [Fact]
+    public static void IsSame_PolyPressureと片方のNoteIdが負で異なるピッチの場合Falseを返す()
+    {
+        var note = new MidiNote(0, 60, 0.8f, 100);
+        var pressure = new MidiPolyPressure(0, 62, 0.5f, -1);
+
+        Assert.False(note.IsSame(in pressure));
+    }
 }
