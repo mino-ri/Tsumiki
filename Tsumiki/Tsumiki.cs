@@ -4,11 +4,25 @@ using Tsumiki.Core;
 namespace Tsumiki;
 
 [VstModel("Tsumiki", typeof(ITsumikiModel))]
-public partial class TsumikiModel { }
+public partial class TsumikiModel
+{
+    public AudioParameter PitchBendParameter => _pitchBend;
+
+    public AudioParameter WheelParameter => _wheel;
+
+    public AudioParameter AfterTouchParameter => _afterTouch;
+}
 
 public class TsumikiController : AudioController<TsumikiModel>
 {
     public static readonly Guid ClassId = new("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d");
+
+    public TsumikiController()
+    {
+        SetMidiCCMapping(AudioMidiControllerNumber.PitchBend, Model.PitchBendParameter);
+        SetMidiCCMapping(AudioMidiControllerNumber.ModWheel, Model.WheelParameter);
+        SetMidiCCMapping(AudioMidiControllerNumber.AfterTouch, Model.AfterTouchParameter);
+    }
 }
 
 public class TsumikiProcessor()
@@ -37,13 +51,20 @@ public class TsumikiProcessor()
         switch (audioEvent.Kind)
         {
             case AudioEventKind.NoteOn:
-                var noteOn = audioEvent.Value.NoteOn;
+                ref readonly var noteOn = ref audioEvent.Value.NoteOn;
                 _processor.OnNoteOn(noteOn.Pitch, noteOn.Velocity, noteOn.NoteId, ProcessSetupData.SampleRate, audioEvent.SampleOffset);
                 break;
 
             case AudioEventKind.NoteOff:
-                var noteOff = audioEvent.Value.NoteOff;
+                ref readonly var noteOff = ref audioEvent.Value.NoteOff;
                 _processor.OnNoteOff(noteOff.Pitch, noteOff.NoteId, audioEvent.SampleOffset);
+                break;
+
+            case AudioEventKind.LegacyMIDICCOut:
+                ref readonly var cc = ref audioEvent.Value.MidiCCOut;
+                break;
+
+            case AudioEventKind.PolyPressure:
                 break;
         }
     }

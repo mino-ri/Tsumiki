@@ -11,4 +11,8 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tsumiki.Test" />
+  </ItemGroup>
 </Project>

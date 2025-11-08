@@ -98,3 +98,23 @@ public sealed class VstStringListParameterAttribute(int id, Type items) : Attrib
     public int Id => id;
     public Type Items => items;
 }
+
+/// <summary>
+/// メソッドが初期化タイミングでのみ更新されることを表します。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Constructor)]
+internal sealed class InitTimingAttribute : Attribute { }
+
+/// <summary>
+/// 型が表すデータがイベントタイミングで更新されること、またはメソッドがイベントタイミングで呼び出されることを表します。
+/// この処理内では、ヒープ上にメモリ確保することは避けるべきです。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Constructor)]
+internal sealed class EventTimingAttribute : Attribute { }
+
+/// <summary>
+/// 型が表すデータがオーディオタイミングで更新されること、またはメソッドがオーディオタイミングで呼び出されることを表します。
+/// この処理内では、ヒープ上にメモリ確保することは絶対にしてはいけません。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Constructor)]
+internal sealed class AudioTimingAttribute : Attribute { }

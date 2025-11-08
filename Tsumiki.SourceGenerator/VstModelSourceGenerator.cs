@@ -164,6 +164,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         {
             sourceBuilder.AppendLine("        AddByPassParameter();");
         }
+        sourceBuilder.AppendLine("        AddUserParameters();");
 
         // Initialize parameters
         foreach (var property in parameterProperties)
@@ -179,6 +180,9 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         }
 
         sourceBuilder.AppendLine("    }");
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("    partial void AddUserParameters();");
+        sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("}");
     }
 

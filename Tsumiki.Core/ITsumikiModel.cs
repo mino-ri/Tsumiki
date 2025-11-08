@@ -5,47 +5,71 @@ public interface ITsumikiModel
     [VstRangeParameter(2, 0.0, 1.0, 1.0)]
     float Master { get; set; }
 
-    [VstRangeParameter(3, 0, 24, 12, StepCount = 24)]
-    int Bend { get; set; }
+    [VstParameter(3, 0.5)]
+    float PitchBend { get; set; }
 
-    [VstRangeParameter(4, -1, 100, 0, StepCount = 101, Flags = VstParameterFlags.IsWrapAround)]
-    int Glide { get; set; }
+    [VstParameter(4, 0)]
+    float Wheel { get; set; }
 
-    [VstRangeParameter(5, -6, 6, 0, StepCount = 12)]
-    int Octave { get; set; }
+    [VstParameter(5, 0)]
+    float AfterTouch { get; set; }
 
-    [VstRangeParameter(6, 1, 9, 1, StepCount = 8, Flags = VstParameterFlags.IsWrapAround)]
-    int Mux { get; set; }
+    [VstUnit(1, 6)]
+    IInputUnit Input { get; }
 
-    [VstBoolParameter(7, false)]
-    bool MuxHarmonic { get; set; }
-
-    [VstRangeParameter(8, 0, 100, 10, StepCount = 100, Units = "cent")]
-    int MuxDetune { get; set; }
-
-    [VstRangeParameter(9, 0.0, 1.0, 1.0)]
-    float MuxStereo { get; set; }
-
-    [VstUnit(1, 10)]
+    [VstUnit(2, 20)]
     ICarrierUnit A1 { get; }
 
-    [VstUnit(2, 30)]
+    [VstUnit(3, 40)]
     IModulatorUnit A2 { get; }
 
-    [VstUnit(3, 50)]
+    [VstUnit(4, 50)]
     ICarrierUnit B1 { get; }
 
-    [VstUnit(4, 70)]
+    [VstUnit(5, 70)]
     IModulatorUnit B2 { get; }
 
-    [VstUnit(5, 90)]
+    [VstUnit(6, 80)]
     IFilterUnit Filter { get; }
 
-    [VstUnit(6, 100)]
+    [VstUnit(7, 90)]
+    IDelayUnit Delay { get; }
+
+    [VstUnit(8, 100)]
     IModulationUnit Modulation { get; }
 
-    [VstUnit(7, 200)]
+    [VstUnit(9, 200)]
     ITuningUnit Tuning { get; }
+}
+
+public enum StackMode
+{
+    Unison,
+    Harmonic,
+}
+
+public interface IInputUnit
+{
+    [VstRangeParameter(0, 0, 24, 12, StepCount = 24)]
+    int Bend { get; set; }
+
+    [VstRangeParameter(1, -1, 100, 0, StepCount = 101, Flags = VstParameterFlags.IsWrapAround)]
+    int Glide { get; set; }
+
+    [VstRangeParameter(2, -6, 6, 0, StepCount = 12)]
+    int Octave { get; set; }
+
+    [VstRangeParameter(3, 1, 9, 1, StepCount = 8, Flags = VstParameterFlags.IsWrapAround)]
+    int Stack { get; set; }
+
+    [VstStringListParameter(4, typeof(StackMode))]
+    StackMode StackMode { get; set; }
+
+    [VstRangeParameter(5, 0, 100, 10, StepCount = 100, Units = "cent")]
+    int StackDetune { get; set; }
+
+    [VstRangeParameter(6, 0.0, 1.0, 0.0)]
+    float StackSpread { get; set; }
 }
 
 public interface ICarrierUnit
@@ -101,16 +125,16 @@ public interface IModulatorUnit
     [VstRangeParameter(4, 0.0, 1.0, 1.0)]
     float Feedback { get; set; }
 
-    [VstRangeParameter(15, 0, 80, 40, StepCount = 80)]
+    [VstRangeParameter(5, 0, 80, 40, StepCount = 80)]
     int Attack { get; set; }
 
-    [VstRangeParameter(16, 0, 80, 40, StepCount = 80)]
+    [VstRangeParameter(6, 0, 80, 40, StepCount = 80)]
     int Decay { get; set; }
 
-    [VstRangeParameter(17, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(7, 0.0, 1.0, 1.0)]
     float Sustain { get; set; }
 
-    [VstRangeParameter(18, 0, 80, 40, StepCount = 80)]
+    [VstRangeParameter(8, 0, 80, 40, StepCount = 80)]
     int Release { get; set; }
 }
 
