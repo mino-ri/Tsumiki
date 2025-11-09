@@ -18,24 +18,29 @@ public class Processor()
     const int MaxVoices = 6;
     private MidiVoiceContainer _container = new(0);
     private Voice[] _voices = [];
+    private Delay _delay;
     private CarrierWaveConfig _carrierWaveConfig;
     private ModulatorWaveConfig _modulatorWaveConfig;
     private EnvelopeConfig _envelope1Config;
     private EnvelopeConfig _envelope2Config;
+    private DelayConfig _delayConfig;
 
     public bool IsActive => _voices.Length > 0;
 
     [InitTiming]
-    public void OnActive(bool isActive)
+    public void OnActive(bool isActive, ITsumikiModel model, double sampleRate)
     {
         if (isActive)
         {
             _container = new MidiVoiceContainer(MaxVoices);
+            _delay = new Delay(sampleRate);
             _voices = GC.AllocateArray<Voice>(MaxVoices, true);
+            Recalculate(model, sampleRate);
         }
         else
         {
             _container = new(0);
+            _delay = new(0);
             _voices = [];
         }
     }
@@ -47,6 +52,7 @@ public class Processor()
         _modulatorWaveConfig = new ModulatorWaveConfig(model.A2);
         _envelope1Config = new EnvelopeConfig(model.A1, sampleRate);
         _envelope2Config = new EnvelopeConfig(model.A2, sampleRate);
+        _delayConfig = new DelayConfig(model.Delay, sampleRate);
     }
 
     [EventTiming]
@@ -62,6 +68,8 @@ public class Processor()
         var filterMix = model.Filter.Mix;
         var passVolume = 1f - filterMix;
         var pitchBend = model.PitchBend * model.Input.Bend;
+        var delayMix = model.Delay.Mix;
+        var delaySource = 1f - delayMix;
 
         for (var sample = 0; sample < sampleCount; sample++)
         {
@@ -102,9 +110,10 @@ public class Processor()
                 }
             }
 
-            output *= masterVolume;
-            leftOutput[sample] = output;
-            rightOutput[sample] = output;
+            var (leftDelay, rightDelay) = _delay.TickAndRender(in _delayConfig, output, output);
+
+            leftOutput[sample] = (output * delaySource + leftDelay * delayMix) * masterVolume;
+            rightOutput[sample] = (output * delaySource + rightDelay * delayMix) * masterVolume;
         }
     }
 

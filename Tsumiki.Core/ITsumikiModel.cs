@@ -33,10 +33,10 @@ public interface ITsumikiModel
     */
     [VstUnit(6, 80)]
     IFilterUnit Filter { get; }
-    /*
+
     [VstUnit(7, 90)]
     IDelayUnit Delay { get; }
-
+    /*
     [VstUnit(8, 100)]
     IModulationUnit Modulation { get; }
 

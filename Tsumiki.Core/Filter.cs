@@ -8,11 +8,11 @@ internal readonly struct FilterConfig
     public readonly float Alpha;
 
     [EventTiming]
-    public FilterConfig(double cutoff, double pitch, double sampleRate)
+    public FilterConfig(double cutoff, double sampleRate)
     {
-        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoff + pitch)));
+        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoff)));
         double dt = 1.0 / sampleRate;
-        Alpha = (float)(dt / (rc + dt));
+        Alpha = MathF.Min(1f, (float)(dt / (rc + dt)));
     }
 }
 
@@ -39,21 +39,18 @@ internal struct LowPassFilter
 internal struct HighPassFilter
 {
     private float _lastOutput;
-    private float _lastInput;
 
     [EventTiming]
     public void Reset()
     {
         _lastOutput = 0f;
-        _lastInput = 0f;
     }
 
     [AudioTiming]
     public float TickAndRender(in FilterConfig config, float input)
     {
-        _lastOutput = config.Alpha * (_lastOutput + input - _lastInput);
-        _lastInput = input;
-        return _lastOutput;
+        _lastOutput += config.Alpha * (input - _lastOutput);
+        return input - _lastOutput;
     }
 }
 

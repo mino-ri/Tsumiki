@@ -11,7 +11,7 @@ public static class ProcessorTest
 
         Assert.False(processor.IsActive);
 
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
 
         Assert.True(processor.IsActive);
     }
@@ -21,10 +21,10 @@ public static class ProcessorTest
     {
         var processor = new Processor();
 
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
         Assert.True(processor.IsActive);
 
-        processor.OnActive(false);
+        processor.OnActive(false, new TsumikiModel(), 44100);
         Assert.False(processor.IsActive);
     }
 
@@ -35,7 +35,7 @@ public static class ProcessorTest
         var model = new TsumikiModel();
 
         // プロセッサをアクティブ化
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
 
         // サンプルレートとパラメータを設定
         const double sampleRate = 44100.0;
@@ -81,7 +81,7 @@ public static class ProcessorTest
         var processor = new Processor();
         var model = new TsumikiModel();
 
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
 
         const double sampleRate = 44100.0;
         processor.Recalculate(model, sampleRate);
@@ -109,7 +109,7 @@ public static class ProcessorTest
         var processor = new Processor();
         var model = new TsumikiModel();
 
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
 
         const double sampleRate = 44100.0;
         model.Master = 0.5f;
@@ -151,7 +151,7 @@ public static class ProcessorTest
         var processor = new Processor();
         var model = new TsumikiModel();
 
-        processor.OnActive(true);
+        processor.OnActive(true, new TsumikiModel(), 44100);
 
         const double sampleRate = 44100.0;
         model.Master = 0.5f;

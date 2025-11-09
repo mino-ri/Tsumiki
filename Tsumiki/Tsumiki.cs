@@ -75,11 +75,7 @@ public class TsumikiProcessor()
 
     protected override void OnActivate(bool isActive)
     {
-        _processor.OnActive(isActive);
-        if (isActive)
-        {
-            _processor.Recalculate(Model, ProcessSetupData.SampleRate);
-        }
+        _processor.OnActive(isActive, Model, ProcessSetupData.SampleRate);
     }
 
     protected override void ProcessEvent(in AudioEvent audioEvent)
