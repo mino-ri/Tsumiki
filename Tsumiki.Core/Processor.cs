@@ -44,14 +44,14 @@ public class Processor()
         _container.Reserve(in reservation);
     }
 
-    [AudioTiming]
+    [EventTiming]
     public void ProcessMain(ITsumikiModel model, double sampleRate, int sampleCount, Span<float> leftOutput, Span<float> rightOutput)
     {
         var masterVolume = model.Master;
         var delayMix = model.Delay.Mix;
         var delaySource = 1f - delayMix;
 
-        var tickConfig = new TickConfig(model.PitchBend * model.Input.Bend, sampleRate, model.Filter.Mix);
+        var tickConfig = new TickConfig(model.PitchBend * model.Input.Bend, sampleRate, model.Filter.Mix, model.A1.Pan);
 
         for (var sample = 0; sample < sampleCount; sample++)
         {

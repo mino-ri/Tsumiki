@@ -7,7 +7,7 @@ public interface ITsumikiModel
     [VstRangeParameter(2, 0.0, 1.0, 0.5)]
     float Master { get; set; }
 
-    [VstParameter(3, 0.5)]
+    [VstRangeParameter(3, -1.0, 1.0, 0.0)]
     float PitchBend { get; set; }
 
     [VstParameter(4, 0)]

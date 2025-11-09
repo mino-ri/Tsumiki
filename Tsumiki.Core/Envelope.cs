@@ -6,7 +6,7 @@ namespace Tsumiki.Core;
 [method: EventTiming]
 internal readonly struct EnvelopeConfig(int attack, int decay, float sustain, int release, double sampleRate)
 {
-    public readonly double AttackRate = MathT.GetEnvelopeRate(attack, sampleRate);
+    public readonly double AttackDelta = MathT.GetEnvAttackDelta(attack, sampleRate);
     public readonly double DecayRate = MathT.GetEnvelopeRate(decay, sampleRate);
     public readonly double SustainLevel = sustain;
     public readonly double ReleaseRate = MathT.GetEnvelopeRate(release, sampleRate);
@@ -66,7 +66,7 @@ internal struct Envelope
         }
         else if (!_decaying)
         {
-            _level += (1.0 - _level) * config.AttackRate;
+            _level += config.AttackDelta;
             if (_level >= MaxThreashold)
             {
                 _level = 1.0;

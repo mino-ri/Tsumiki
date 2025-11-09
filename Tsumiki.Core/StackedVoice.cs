@@ -31,8 +31,33 @@ internal struct ConfigSet
 [EventTiming]
 internal readonly struct StackConfig
 {
+    private static readonly int[][] DetuneFactors =
+    [
+        [],
+        [ 0 ],
+        [ -1, 1 ],
+        [ 0, -4, 4 ],
+        [ -1, 1, -9, 9 ],
+        [ 0, -4, 4, -16, 16 ],
+        [ -1, 1, -9, 9, -25, 25 ],
+        [ 0, -4, 4, -16, 16, 36, -36 ],
+    ];
+
+    private static readonly int[][] PanFactors =
+    [
+        [],
+        [ 0 ],
+        [ -1, 1 ],
+        [ 0, -2, 2 ],
+        [ -1, 1, 3, -3 ],
+        [ 0, -2, 2, 4, -4 ],
+        [ -1, 1, 3, -3, -5, 5 ],
+        [ 0, -2, 2, 4, -4, -6, 6 ],
+    ];
+
     public readonly int Stack;
     public readonly Stacked<double> Pitches;
+    public readonly Stacked<float> Pans;
 
     [EventTiming]
     public StackConfig(IInputUnit unit)
@@ -40,12 +65,11 @@ internal readonly struct StackConfig
         Stack = unit.Stack;
         if (unit.StackMode == StackMode.Unison)
         {
-            var halfCent = -unit.StackDetune * (Stack - 1);
-            var step = unit.StackDetune * 2;
+            var detune = unit.StackDetune;
+            var factor = DetuneFactors[Stack];
             for (var i = 0; i < Stack; i++)
             {
-                Pitches[i] = Math.Pow(2.0, halfCent / 24000.0);
-                halfCent += step;
+                Pitches[i] = Math.Pow(2.0, detune * factor[i] / 48000.0);
             }
         }
         else
@@ -56,18 +80,33 @@ internal readonly struct StackConfig
             }
             Pitches[MathT.MaxStackCount - 1] = 8;
         }
+
+        var stereo = unit.StackStereo;
+        if (stereo == 0f)
+        {
+            ((Span<float>)Pans).Clear();
+        }
+        else
+        {
+            var factor = PanFactors[Stack];
+            for (var i = 0; i < Stack; i++)
+            {
+                Pans[i] = factor[i] * stereo / Stack;
+            }
+        }
     }
 }
 
 [EventTiming]
 [method: EventTiming]
-internal readonly struct TickConfig(double pitchBend, double sampleRate, float filterMix)
+internal struct TickConfig(double pitchBend, double sampleRate, float filterMix, float pan)
 {
-    public readonly double PitchBend = pitchBend;
-    public readonly double SampleRate = sampleRate;
-    public readonly bool UseFilter = filterMix != 0f;
-    public readonly float FilterMix = filterMix;
-    public readonly float FilterSource = 1f - filterMix;
+    public double PitchBend = pitchBend;
+    public double SampleRate = sampleRate;
+    public bool UseFilter = filterMix != 0f;
+    public float FilterMix = filterMix;
+    public float FilterSource = 1f - filterMix;
+    public float Pan = pan;
 }
 
 [EventTiming]
@@ -79,7 +118,8 @@ internal struct StackedVoice
     public Envelope Envelope1;
     public Envelope Envelope2;
     public ResonantLowPassFilterConfig FilterConfig;
-    public ResonantLowPassFilter Filter;
+    public ResonantLowPassFilter LeftFilter;
+    public ResonantLowPassFilter RightFilter;
 
     [AudioTiming]
     public (float left, float right) TickAndRender(in ConfigSet config, in MidiVoice midi, in TickConfig tick, ITsumikiModel model)
@@ -108,19 +148,30 @@ internal struct StackedVoice
         }
 
         var lavel2 = Envelope2.TickAndRender(in config.Envelope2, noteOn);
-        var voiceOutput = 0f;
+        var left = 0f;
+        var right = 0f;
         for (var i = 0; i < config.Stack.Stack; i++)
         {
             var delta = SynthVoice.Delta * config.Stack.Pitches[i];
             var fm = lavel2 * Modulator[i].TickAndRender(in config.ModulatorWave, delta, -1.0);
-            voiceOutput += level1 * Carrier[i].TickAndRender(in config.CarrierWave, delta, -1.0, fm);
+            var voiceOutput = level1 * Carrier[i].TickAndRender(in config.CarrierWave, delta, -1.0, fm);
+            var (lPan, rPan) = MathT.GetPanLevel(tick.Pan + config.Stack.Pans[i]);
+            left += voiceOutput * lPan;
+            right += voiceOutput * rPan;
         }
-        voiceOutput /= config.Stack.Stack;
 
-        var output = tick.UseFilter
-            ? tick.FilterSource * voiceOutput + tick.FilterMix * Filter.TickAndRender(in FilterConfig, voiceOutput)
-            : voiceOutput;
-        return (output, output);
+        left /= config.Stack.Stack;
+        right /= config.Stack.Stack;
+
+        if (tick.UseFilter)
+        {
+            return (tick.FilterSource * left + tick.FilterMix * LeftFilter.TickAndRender(in FilterConfig, left),
+                tick.FilterSource * right + tick.FilterMix * RightFilter.TickAndRender(in FilterConfig, right));
+        }
+        else
+        {
+            return (left, right);
+        }
     }
 
     [EventTiming]
@@ -134,7 +185,8 @@ internal struct StackedVoice
 
         Envelope2.Reset();
         FilterConfig = new ResonantLowPassFilterConfig(model.Filter, SynthVoice.Pitch, sampleRate);
-        Filter.Reset();
+        LeftFilter.Reset();
+        RightFilter.Reset();
     }
 
     [EventTiming]

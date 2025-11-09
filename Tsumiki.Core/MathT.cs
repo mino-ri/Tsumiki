@@ -54,6 +54,15 @@ internal static class MathT
     public const double ExpThreshold = 1.0 / 1024.0;
 
     /// <summary>
+    /// 線形に変化する、エンベロープの1サンプルあたりの変化レートを返します。
+    /// </summary>
+    public static double GetEnvAttackDelta(int value, double sampleRate)
+    {
+        var seconds = Math.Pow(10, value / 20.0 - 3.0);
+        return 1.0 / seconds / sampleRate;
+    }
+
+    /// <summary>
     /// 指数曲線で変化する、エンベロープの1サンプルあたりの変化レートを返します。
     /// </summary>
     [AudioTiming]
@@ -61,5 +70,12 @@ internal static class MathT
     {
         var seconds = Math.Pow(10, value / 20.0 - 3.0);
         return 1.0 - Math.Pow(ExpThreshold, 1.0 / (seconds * sampleRate));
+    }
+
+    /// <summary>パン(-1.0～1.0)の値から、左チャンネルの音量を取得します。合計値は常に2です。</summary>
+    public static (float, float) GetPanLevel(float pan)
+    {
+        var sin = Sin(pan * 0.25f);
+        return (1f - sin, 1f + sin);
     }
 }

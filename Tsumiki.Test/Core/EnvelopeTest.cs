@@ -19,10 +19,10 @@ public static class EnvelopeTest
     public static void TickAndRender_ノートオンでアタックフェーズが開始される()
     {
         var envelope = new Envelope();
-        var config = new EnvelopeConfig(40, 40, 0.5f, 40, 44100.0);
+        var config = new EnvelopeConfig(40, 40, 0.5f, 40, 1000.0);
 
         var prev = 0f;
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < 1200; i++)
         {
             var result = envelope.TickAndRender(in config, true);
             // アタックフェーズでは値が増加する
@@ -35,6 +35,7 @@ public static class EnvelopeTest
             {
                 // 最大値に達したら終了
                 Assert.Equal(1f, result);
+                Assert.Equal(99, i);
                 break;
             }
         }
@@ -45,7 +46,7 @@ public static class EnvelopeTest
     {
         var envelope = new Envelope();
         var sustainLevel = 0.5f;
-        var config = new EnvelopeConfig(80, 80, sustainLevel, 40, 44100.0);
+        var config = new EnvelopeConfig(60, 60, sustainLevel, 40, 44100.0);
 
         // アタックで最大値まで到達させる
         for (var i = 0; i < 10000; i++)
@@ -132,7 +133,7 @@ public static class EnvelopeTest
     public static void TickAndRender_リリース途中からノートオンできる()
     {
         var envelope = new Envelope();
-        var config = new EnvelopeConfig(40, 40, 0.5f, 40, 44100.0);
+        var config = new EnvelopeConfig(20, 20, 0.5f, 40, 44100.0);
 
         // アタック
         for (var i = 0; i < 1000; i++)
@@ -191,7 +192,7 @@ public static class EnvelopeTest
         var config = new EnvelopeConfig(40, 50, 0.6f, 60, sampleRate);
 
         // レートは0～1の範囲内
-        Assert.InRange(config.AttackRate, 0.0, 1.0);
+        Assert.InRange(config.AttackDelta, 0.0, 1.0);
         Assert.InRange(config.DecayRate, 0.0, 1.0);
         Assert.InRange(config.ReleaseRate, 0.0, 1.0);
 
@@ -208,8 +209,8 @@ public static class EnvelopeTest
         var config3 = new EnvelopeConfig(60, 60, 0.5f, 60, sampleRate);
 
         // GetEnvelopeRate の実装により、値が大きいほどレートは小さくなる（ゆっくり変化する）
-        Assert.True(config1.AttackRate > config2.AttackRate);
-        Assert.True(config2.AttackRate > config3.AttackRate);
+        Assert.True(config1.AttackDelta > config2.AttackDelta);
+        Assert.True(config2.AttackDelta > config3.AttackDelta);
         Assert.True(config1.DecayRate > config2.DecayRate);
         Assert.True(config2.DecayRate > config3.DecayRate);
         Assert.True(config1.ReleaseRate > config2.ReleaseRate);
