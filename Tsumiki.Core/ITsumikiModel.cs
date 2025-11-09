@@ -62,7 +62,7 @@ public interface IInputUnit
     [VstRangeParameter(2, -6, 6, 0, StepCount = 12)]
     int Octave { get; set; }
 
-    [VstRangeParameter(3, 1, 9, 1, StepCount = 8, Flags = VstParameterFlags.IsWrapAround)]
+    [VstRangeParameter(3, 1, MathT.MaxStackCount, 1, StepCount = 6, Flags = VstParameterFlags.IsWrapAround)]
     int Stack { get; set; }
 
     [VstStringListParameter(4, typeof(StackMode))]

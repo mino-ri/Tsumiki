@@ -57,12 +57,12 @@ internal struct CarrierWave
 
         var dActualPhase = _phase + fm;
         // 扱いやすさのため、 -0.5～0.5 に正規化する
-        var actualPhase = (float)(dActualPhase - Math.Floor(dActualPhase) - 0.5f);
+        var actualPhase = (float)(dActualPhase - (int)dActualPhase - 0.5f);
         var absPhase = Math.Abs((float)actualPhase);
 
         float output =
-            absPhase > config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * config.DownSlope
-            : absPhase < config.UpEnd ? actualPhase * config.UpSlope
+            absPhase < config.UpEnd ? actualPhase * config.UpSlope
+            : absPhase > config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * config.DownSlope
             : actualPhase >= 0f ? 0.5f : -0.5f;
 
         output = config.SinFactor > 0f
@@ -70,11 +70,7 @@ internal struct CarrierWave
             : output * config.TriFactor;
 
         _phase += delta * config.Pitch;
-
-        if (_phase > 1.0)
-        {
-            _phase -= Math.Floor(_phase);
-        }
+        _phase -= (int)_phase;
 
         return output * config.Level;
     }

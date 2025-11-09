@@ -35,14 +35,10 @@ internal struct ModulatorWave
         }
 
         var actualPhase = _phase + config.Feedback * _output;
-        actualPhase -= Math.Floor(actualPhase);
+        actualPhase -= (int)actualPhase;
         _output = MathT.Sin((float)actualPhase);
         _phase += delta * config.Pitch;
-
-        if (_phase > 1.0)
-        {
-            _phase -= Math.Floor(_phase);
-        }
+        _phase -= (int)_phase;
 
         return (float)_output * config.Level;
     }
