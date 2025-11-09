@@ -10,6 +10,7 @@ internal readonly struct ModulatorWaveConfig(IModulatorUnit unit)
     public readonly float Phase = unit.Phase;
     public readonly float Feedback = unit.Feedback;
     public readonly bool Sync = unit.Sync;
+    public readonly float Level = unit.Level;
 }
 
 [AudioTiming]
@@ -43,6 +44,6 @@ internal struct ModulatorWave
             _phase -= Math.Floor(_phase);
         }
 
-        return (float)_output;
+        return (float)_output * config.Level;
     }
 }

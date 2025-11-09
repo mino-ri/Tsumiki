@@ -15,7 +15,7 @@ public static class SynthVoiceTest
 
         Assert.Equal(VoiceState.Active, voice.State);
         Assert.Equal(0.8f, voice.Velocity);
-        Assert.True(result); // Length == 1 なので true
+        Assert.Equal(VoiceEvent.StartNote, result);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public static class SynthVoiceTest
         var result = voice.Tick(in offVoice, 0.0, 44100.0);
 
         Assert.Equal(VoiceState.Release, voice.State);
-        Assert.False(result); // Length != 1 なので false
+        Assert.Equal(VoiceEvent.None, result);
     }
 
     [Fact]
@@ -87,8 +87,8 @@ public static class SynthVoiceTest
         var midiVoice2 = new MidiVoice(in midiNote) { Length = 2 };
         var midiVoice0 = new MidiVoice(in midiNote) { Length = 0 };
 
-        Assert.True(voice.Tick(in midiVoice1, 0.0, 44100.0));
-        Assert.False(voice.Tick(in midiVoice2, 0.0, 44100.0));
-        Assert.False(voice.Tick(in midiVoice0, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.StartNote, voice.Tick(in midiVoice1, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice2, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice0, 0.0, 44100.0));
     }
 }

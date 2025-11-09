@@ -4,7 +4,7 @@ namespace Tsumiki.Core;
 
 public interface ITsumikiModel
 {
-    [VstRangeParameter(2, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(2, 0.0, 1.0, 0.5)]
     float Master { get; set; }
 
     [VstParameter(3, 0.5)]
@@ -18,10 +18,10 @@ public interface ITsumikiModel
 
     [VstUnit(1, 6)]
     IInputUnit Input { get; }
-    /*
+    
     [VstUnit(2, 20)]
     ICarrierUnit A1 { get; }
-    */
+    
     [VstUnit(3, 40)]
     IModulatorUnit A2 { get; }
     /*
@@ -30,10 +30,10 @@ public interface ITsumikiModel
 
     [VstUnit(5, 70)]
     IModulatorUnit B2 { get; }
-
+    */
     [VstUnit(6, 80)]
     IFilterUnit Filter { get; }
-
+    /*
     [VstUnit(7, 90)]
     IDelayUnit Delay { get; }
 
@@ -77,10 +77,10 @@ public interface IInputUnit
 
 public interface ICarrierUnit
 {
-    [VstRangeParameter(0, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(0, 0.0, 1.0, 0.5)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.01, 16.0, 1.0)]
+    [VstRangeParameter(1, 0.0, 20.0, 1.0)]
     double Pitch { get; set; }
 
     [VstBoolParameter(2, false)]
@@ -116,7 +116,7 @@ public interface IModulatorUnit
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.01, 16.0, 1.0)]
+    [VstRangeParameter(1, 0.0, 20.0, 1.0)]
     double Pitch { get; set; }
 
     [VstBoolParameter(2, false)]
@@ -125,7 +125,7 @@ public interface IModulatorUnit
     [VstRangeParameter(3, 0.0, 1.0, 0.0)]
     float Phase { get; set; }
 
-    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(4, 0.0, 1.0, 0.0)]
     float Feedback { get; set; }
 
     [VstRangeParameter(5, 0, 80, 40, StepCount = 80)]
@@ -146,13 +146,10 @@ public interface IFilterUnit
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
     float Mix { get; set; }
 
-    [VstRangeParameter(1, -1.0, 1.0, 0.0)]
-    float MorphFactor { get; set; }
-
-    [VstRangeParameter(2, -64, 64, 0, StepCount = 128)]
+    [VstRangeParameter(1, -64, 64, 0, StepCount = 128)]
     int Cutoff { get; set; }
 
-    [VstRangeParameter(3, 0.0, 0.98, 0.49)]
+    [VstRangeParameter(2, 0.0, 0.98, 0.49)]
     float Resonance { get; set; }
 }
 
@@ -203,7 +200,7 @@ public interface IModulationUnit
 
 public interface IModulationDestinationUnit
 {
-    [VstRangeParameter(0, -16.0, 16.0, 0.0)]
+    [VstRangeParameter(0, -12.0, 12.0, 0.0)]
     double APitch { get; set; }
 
     [VstRangeParameter(1, 0.0, 1.0, 1.0)]
@@ -212,7 +209,7 @@ public interface IModulationDestinationUnit
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
     float APan { get; set; }
 
-    [VstRangeParameter(3, -16.0, 16.0, 0.0)]
+    [VstRangeParameter(3, -12.0, 12.0, 0.0)]
     double BPitch { get; set; }
 
     [VstRangeParameter(4, 0.0, 1.0, 1.0)]

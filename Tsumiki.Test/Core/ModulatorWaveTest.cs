@@ -22,7 +22,7 @@ public static class ModulatorWaveTest
     public static void Reset_位相とフィードバックがリセットされる()
     {
         var wave = new ModulatorWave();
-        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0.25f, Feedback = 0f, Sync = false };
+        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0.25f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
 
         // 事前に位相を進めておく
@@ -44,7 +44,7 @@ public static class ModulatorWaveTest
     public static void TickAndRender_出力値が範囲内()
     {
         var wave = new ModulatorWave();
-        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false };
+        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
 
         wave.Reset(in config);
@@ -60,7 +60,7 @@ public static class ModulatorWaveTest
     public static void TickAndRender_位相が進む()
     {
         var wave = new ModulatorWave();
-        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false };
+        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
 
         wave.Reset(in config);
@@ -91,8 +91,8 @@ public static class ModulatorWaveTest
         var wave1 = new ModulatorWave();
         var wave2 = new ModulatorWave();
 
-        var unit1 = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false };
-        var unit2 = new TestModulatorUnit { Pitch = 2.0, Phase = 0f, Feedback = 0f, Sync = false };
+        var unit1 = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
+        var unit2 = new TestModulatorUnit { Pitch = 2.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config1 = new ModulatorWaveConfig(unit1);
         var config2 = new ModulatorWaveConfig(unit2);
 
@@ -119,8 +119,8 @@ public static class ModulatorWaveTest
         var waveNoFb = new ModulatorWave();
         var waveFb = new ModulatorWave();
 
-        var unitNoFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false };
-        var unitFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0.5f, Sync = false };
+        var unitNoFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
+        var unitFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0.3f, Sync = false, Level = 1f };
         var configNoFb = new ModulatorWaveConfig(unitNoFb);
         var configFb = new ModulatorWaveConfig(unitFb);
 
@@ -141,7 +141,7 @@ public static class ModulatorWaveTest
         var different = false;
         for (var i = 0; i < 100; i++)
         {
-            if (MathF.Abs(resultsNoFb[i] - resultsFb[i]) > 0.01f)
+            if (MathF.Abs(resultsNoFb[i] - resultsFb[i]) > 0.001f)
             {
                 different = true;
                 break;
@@ -154,7 +154,7 @@ public static class ModulatorWaveTest
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
         var wave = new ModulatorWave();
-        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = true };
+        var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = true, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
 
         wave.Reset(in config);

@@ -1,3 +1,4 @@
+using System;
 using NPlug;
 using Tsumiki.Core;
 using Tsumiki.Metadata;
@@ -12,6 +13,36 @@ public partial class TsumikiModel
     public AudioParameter WheelParameter => _wheel;
 
     public AudioParameter AfterTouchParameter => _afterTouch;
+
+    private static readonly AudioProgramListBuilder<TsumikiModel> DefaultProgramListBuilder = CreateAudioProgramListBuilder();
+
+    private static AudioProgramListBuilder<TsumikiModel> CreateAudioProgramListBuilder()
+    {
+        return new AudioProgramListBuilder<TsumikiModel>("Bank")
+        {
+            model =>
+            {
+                InitModel(model);
+                return new("Default");
+            },
+            model =>
+            {
+                InitModel(model);
+                return new("Sine");
+            },
+        };
+    }
+
+    private static void InitModel(TsumikiModel model)
+    {
+        for (var i = 0; i < 300; i++)
+        {
+            if (model.TryGetParameterById(new AudioParameterId(i), out var parameter))
+            {
+                parameter.NormalizedValue = parameter.DefaultNormalizedValue;
+            }
+        }
+    }
 }
 
 public class TsumikiController : AudioController<TsumikiModel>
@@ -45,6 +76,10 @@ public class TsumikiProcessor()
     protected override void OnActivate(bool isActive)
     {
         _processor.OnActive(isActive);
+        if (isActive)
+        {
+            _processor.Recalculate(Model, ProcessSetupData.SampleRate);
+        }
     }
 
     protected override void ProcessEvent(in AudioEvent audioEvent)

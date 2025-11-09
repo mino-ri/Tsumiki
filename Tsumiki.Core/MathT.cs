@@ -37,9 +37,15 @@ internal static class MathT
     public static float Sqr(float x) => x >= 0.5 ? 1f : -1f;
 
     [AudioTiming]
+    public static double PitchToFreq(double pitch)
+    {
+        return 440.0 * Math.Pow(2.0, (Math.Min(127.0, pitch) - 69.0) / 12.0);
+    }
+
+    [AudioTiming]
     public static double PitchToDelta(double pitch, double sampleRate)
     {
-        var frequency = 440.0 * Math.Pow(2.0, (pitch - 69.0) / 12.0);
+        var frequency = 440.0 * Math.Pow(2.0, (Math.Min(127.0, pitch) - 69.0) / 12.0);
         return frequency / sampleRate;
     }
 

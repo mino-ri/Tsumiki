@@ -29,6 +29,19 @@ internal struct Envelope
     double _level;
     bool _decaying;
 
+    [EventTiming]
+    public void Restart()
+    {
+        _decaying = false;
+    }
+
+    [EventTiming]
+    public void Reset()
+    {
+        _level = 0;
+        _decaying = false;
+    }
+
     [AudioTiming]
     public float TickAndRender(in EnvelopeConfig config, bool noteOn)
     {

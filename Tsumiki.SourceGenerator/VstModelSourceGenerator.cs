@@ -87,7 +87,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             className: classSymbol.Name,
             interfaceType: definitionType,
             parameterIdOffset: 0,
-            baseClassConstructor: $"base(\"{modelInfo.ModelName}\")",
+            baseClassConstructor: $"base(\"{modelInfo.ModelName}\", DefaultProgramListBuilder)",
             includeByPassParameter: true,
             unitProperties: unitProperties);
 
@@ -159,11 +159,6 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var constructorBase = baseClassConstructor != null ? $" : {baseClassConstructor}" : "";
         sourceBuilder.AppendLine($"    public {className}(){constructorBase}");
         sourceBuilder.AppendLine("    {");
-
-        if (includeByPassParameter)
-        {
-            sourceBuilder.AppendLine("        AddByPassParameter();");
-        }
         sourceBuilder.AppendLine("        AddUserParameters();");
 
         // Initialize parameters

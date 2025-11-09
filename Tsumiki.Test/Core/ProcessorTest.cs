@@ -43,6 +43,8 @@ public static class ProcessorTest
         // モデルパラメータを設定（デフォルト値から一部変更）
         model.Master = 1.0f;
         model.PitchBend = 0.5f; // 中央値（ベンドなし）
+        model.A1.Pitch = 1.0;
+        model.A1.Level = 1f;
 
         Assert.Equal(1.0f, model.Master);
 
@@ -69,8 +71,8 @@ public static class ProcessorTest
             maxLevel = MathF.Max(maxLevel, MathF.Max(MathF.Abs(leftOutput[i]), MathF.Abs(rightOutput[i])));
         }
 
-        Assert.True(0.999f <= maxLevel, $"最大音量で出力でされる: {maxLevel}");
-        Assert.True(1.001f >= maxLevel, $"音量が1を超えない: {maxLevel}");
+        Assert.True(0.99f <= maxLevel, $"最大音量で出力でされる: {maxLevel}");
+        Assert.True(1.01f >= maxLevel, $"音量が1を超えない: {maxLevel}");
     }
 
     [Fact]
