@@ -20,7 +20,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
   </PropertyGroup>
@@ -32,5 +32,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.csproj" />
     <ProjectReference Include="..\Tsumiki.SourceGenerator\Tsumiki.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Tsumiki.View\Tsumiki.View.csproj" />
   </ItemGroup>
 </Project>

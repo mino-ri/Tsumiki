@@ -1,5 +1,7 @@
+using System;
 using System.Runtime.CompilerServices;
 using NPlug;
+using Tsumiki.View;
 
 namespace Tsumiki;
 public static class TsumikiPlugin
@@ -15,6 +17,23 @@ public static class TsumikiPlugin
     [ModuleInitializer]
     internal static void ExportThisPlugin()
     {
-        AudioPluginFactoryExporter.Instance = GetFactory();
+        try
+        {
+            TsumikiLogger.WriteAccess([]);
+            ViewInitializer.Initialize();
+        }
+        catch (Exception ex)
+        {
+            TsumikiLogger.WriteLog(ex.ToString());
+        }
+
+        try
+        {
+            AudioPluginFactoryExporter.Instance = GetFactory();
+        }
+        catch (Exception ex)
+        {
+            TsumikiLogger.WriteLog(ex.ToString());
+        }
     }
 }
