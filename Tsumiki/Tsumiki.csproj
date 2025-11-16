@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
   </PropertyGroup>
