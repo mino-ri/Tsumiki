@@ -31,7 +31,7 @@ internal struct ModulatorWave
     {
         if (config.Sync && syncPhase >= 0)
         {
-            _phase += delta * config.Pitch + config.Phase;
+            _phase = delta * config.Pitch + config.Phase;
         }
 
         var actualPhase = _phase + config.Feedback * _output;

@@ -73,12 +73,19 @@ internal struct MidiVoice(in MidiNote note)
     public float PolyPressure = 0f;
 }
 
+[EventTiming]
+internal class VoiceSelector
+{
+    public int LatestIndex = 0;
+}
+
 [InitTiming]
 internal readonly struct MidiVoiceContainer
 {
     public readonly MidiEventReservation<MidiNote>[] Reservations;
     public readonly MidiEventReservation<MidiPolyPressure>[] PressureReservations;
     public readonly MidiVoice[] Voices;
+    public readonly VoiceSelector Selector;
 
     [InitTiming]
     public MidiVoiceContainer(int voiceCount)
@@ -88,12 +95,14 @@ internal readonly struct MidiVoiceContainer
             Reservations = [];
             PressureReservations = [];
             Voices = [];
+            Selector = null!;
             return;
         }
 
         Reservations = GC.AllocateArray<MidiEventReservation<MidiNote>>(voiceCount, true);
         PressureReservations = GC.AllocateArray<MidiEventReservation<MidiPolyPressure>>(voiceCount, true);
         Voices = GC.AllocateArray<MidiVoice>(voiceCount, true);
+        Selector = new VoiceSelector();
 
         for (var i = 0; i < voiceCount; i++)
         {
@@ -236,16 +245,32 @@ internal readonly struct MidiVoiceContainer
         }
 
         Voices[targetIndex] = new MidiVoice(in note);
+        Selector.LatestIndex = targetIndex;
     }
 
     [EventTiming]
     private readonly void NoteOff(in MidiNote note)
     {
+        var isLatestNoteOff = false;
+        if (Voices[Selector.LatestIndex].Note.IsOn && Voices[Selector.LatestIndex].Note.IsSame(in note))
+        {
+            Voices[Selector.LatestIndex] = new MidiVoice(in MidiNote.Off);
+            isLatestNoteOff = true;
+        }
+
         for (var i = 0; i < Voices.Length; i++)
         {
-            if (Voices[i].Note.IsOn && Voices[i].Note.IsSame(in note))
+            if (i != Selector.LatestIndex && Voices[i].Note.IsOn)
             {
-                Voices[i] = new MidiVoice(in MidiNote.Off);
+                if (Voices[i].Note.IsSame(in note))
+                {
+                    Voices[i] = new MidiVoice(in MidiNote.Off);
+                }
+                else if (isLatestNoteOff || Voices[i].Length < Voices[Selector.LatestIndex].Length)
+                {
+                    isLatestNoteOff = false;
+                    Selector.LatestIndex = i;
+                }
             }
         }
     }

@@ -8,11 +8,25 @@ internal readonly struct FilterConfig
     public readonly float Alpha;
 
     [EventTiming]
-    public FilterConfig(double cutoff, double sampleRate)
+    public FilterConfig(double cutoffPitchNumber, double sampleRate)
     {
-        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoff)));
+        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoffPitchNumber)));
         double dt = 1.0 / sampleRate;
         Alpha = MathF.Min(1f, (float)(dt / (rc + dt)));
+    }
+}
+
+[EventTiming]
+internal readonly struct FilterConfigD
+{
+    public readonly double Alpha;
+
+    [EventTiming]
+    public FilterConfigD(double cutoffPitchNumber, double sampleRate)
+    {
+        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoffPitchNumber)));
+        double dt = 1.0 / sampleRate;
+        Alpha = Math.Min(1.0, dt / (rc + dt));
     }
 }
 
@@ -22,13 +36,32 @@ internal struct LowPassFilter
     private float _lastOutput;
 
     [EventTiming]
-    public void Reset()
+    public void Reset(float resetValue = 0f)
     {
-        _lastOutput = 0f;
+        _lastOutput = resetValue;
     }
 
     [AudioTiming]
     public float TickAndRender(in FilterConfig config, float input)
+    {
+        _lastOutput += config.Alpha * (input - _lastOutput);
+        return _lastOutput;
+    }
+}
+
+[AudioTiming]
+internal struct LowPassFilterD
+{
+    private double _lastOutput;
+
+    [EventTiming]
+    public void Reset(double resetValue = 0f)
+    {
+        _lastOutput = resetValue;
+    }
+
+    [AudioTiming]
+    public double TickAndRender(in FilterConfigD config, double input)
     {
         _lastOutput += config.Alpha * (input - _lastOutput);
         return _lastOutput;

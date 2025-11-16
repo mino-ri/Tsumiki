@@ -8,7 +8,7 @@ public static class LowPassFilterTest
     public static void TickAndRender_出力値が有限()
     {
         var filter = new LowPassFilter();
-        var config = new FilterConfig(cutoff: 60, sampleRate: 44100);
+        var config = new FilterConfig(cutoffPitchNumber: 60, sampleRate: 44100);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -22,7 +22,7 @@ public static class LowPassFilterTest
     public static void TickAndRender_ピッチ0でも発散しない()
     {
         var filter = new LowPassFilter();
-        var config = new FilterConfig(cutoff: 0, sampleRate: 44100);
+        var config = new FilterConfig(cutoffPitchNumber: 0, sampleRate: 44100);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -36,7 +36,7 @@ public static class LowPassFilterTest
     public static void TickAndRender_ピッチ127でも発散しない()
     {
         var filter = new LowPassFilter();
-        var config = new FilterConfig(cutoff: 127, sampleRate: 44100);
+        var config = new FilterConfig(cutoffPitchNumber: 127, sampleRate: 44100);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -51,7 +51,7 @@ public static class LowPassFilterTest
     {
         var filter = new LowPassFilter();
         // 低いカットオフ周波数を設定
-        var config = new FilterConfig(cutoff: 30, sampleRate: 44100);
+        var config = new FilterConfig(cutoffPitchNumber: 30, sampleRate: 44100);
 
         // 高周波ノイズのような入力を与える
         float previousOutput = 0f;

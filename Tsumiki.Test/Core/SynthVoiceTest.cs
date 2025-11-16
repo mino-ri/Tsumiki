@@ -11,7 +11,7 @@ public static class SynthVoiceTest
         var midiNote = new MidiNote(0, 60, 0.8f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
-        var result = voice.Tick(in midiVoice, 0.0, 44100.0);
+        var result = voice.Tick(in midiVoice, default, 0.0, 44100.0);
 
         Assert.Equal(VoiceState.Active, voice.State);
         Assert.Equal(0.8f, voice.Velocity);
@@ -26,13 +26,13 @@ public static class SynthVoiceTest
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
         // まずノート・オン
-        voice.Tick(in midiVoice, 0.0, 44100.0);
+        voice.Tick(in midiVoice, default, 0.0, 44100.0);
         Assert.Equal(VoiceState.Active, voice.State);
 
         // ノート・オフ
         var offNote = MidiNote.Off;
         var offVoice = new MidiVoice(in offNote) { Length = 2 };
-        var result = voice.Tick(in offVoice, 0.0, 44100.0);
+        var result = voice.Tick(in offVoice, default, 0.0, 44100.0);
 
         Assert.Equal(VoiceState.Release, voice.State);
         Assert.Equal(VoiceEvent.None, result);
@@ -46,7 +46,7 @@ public static class SynthVoiceTest
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
         var pitchBend = 2.0; // 2半音上げる
-        voice.Tick(in midiVoice, pitchBend, 44100.0);
+        voice.Tick(in midiVoice, default, pitchBend, 44100.0);
 
         // ピッチ60 + ベンド2 = 62 のデルタが計算されているはず
         var expectedDelta = MathT.PitchToDelta(62.0, 44100.0);
@@ -61,7 +61,7 @@ public static class SynthVoiceTest
         var midiNote = new MidiNote(0, 60, velocity, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
-        voice.Tick(in midiVoice, 0.0, 44100.0);
+        voice.Tick(in midiVoice, default, 0.0, 44100.0);
 
         Assert.Equal(velocity, voice.Velocity);
     }
@@ -73,7 +73,7 @@ public static class SynthVoiceTest
         var midiNote = new MidiNote(0, 60, 1.0f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1, PolyPressure = 0.6f };
 
-        voice.Tick(in midiVoice, 0.0, 44100.0);
+        voice.Tick(in midiVoice, default, 0.0, 44100.0);
 
         Assert.Equal(0.6f, voice.PolyPressure);
     }
@@ -87,8 +87,8 @@ public static class SynthVoiceTest
         var midiVoice2 = new MidiVoice(in midiNote) { Length = 2 };
         var midiVoice0 = new MidiVoice(in midiNote) { Length = 0 };
 
-        Assert.Equal(VoiceEvent.StartNote, voice.Tick(in midiVoice1, 0.0, 44100.0));
-        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice2, 0.0, 44100.0));
-        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice0, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.StartNote, voice.Tick(in midiVoice1, default, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice2, default, 0.0, 44100.0));
+        Assert.Equal(VoiceEvent.None, voice.Tick(in midiVoice0, default, 0.0, 44100.0));
     }
 }

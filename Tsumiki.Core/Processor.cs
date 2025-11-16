@@ -4,7 +4,7 @@ namespace Tsumiki.Core;
 
 public class Processor()
 {
-    const int MaxVoices = 6;
+    const int MaxVoices = 8;
     private MidiVoiceContainer _container = new(0);
     private StackedVoice[] _voices = [];
     private Delay _delay;
@@ -58,9 +58,19 @@ public class Processor()
             var left = 0f;
             var right = 0f;
             _container.Tick();
-            for (var i = 0; i < MaxVoices; i++)
+
+            if (_config.VoceConfig.Polyphony)
             {
-                var (l, r) = _voices[i].TickAndRender(in _config, in _container.Voices[i], in tickConfig, model);
+                for (var i = 0; i < MaxVoices; i++)
+                {
+                    var (l, r) = _voices[i].TickAndRender(in _config, in _container.Voices[i], in tickConfig, model);
+                    left += l;
+                    right += r;
+                }
+            }
+            else
+            {
+                var (l, r) = _voices[0].TickAndRender(in _config, in _container.Voices[_container.Selector.LatestIndex], in tickConfig, model);
                 left += l;
                 right += r;
             }

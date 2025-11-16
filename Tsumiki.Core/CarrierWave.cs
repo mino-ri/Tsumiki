@@ -52,7 +52,7 @@ internal struct CarrierWave
     {
         if (config.Sync && syncPhase >= 0)
         {
-            _phase += delta * config.Pitch + config.Phase;
+            _phase = delta * config.Pitch + config.Phase;
         }
 
         var dActualPhase = _phase + fm;
@@ -60,10 +60,17 @@ internal struct CarrierWave
         var actualPhase = (float)(dActualPhase - (int)dActualPhase - 0.5f);
         var absPhase = Math.Abs((float)actualPhase);
 
-        float output =
+        var output =
             absPhase < config.UpEnd ? actualPhase * config.UpSlope
             : absPhase > config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * config.DownSlope
             : actualPhase >= 0f ? 0.5f : -0.5f;
+
+        if (!float.IsFinite(output))
+        {
+            output = float.IsNaN(output)
+                ? 0f : float.IsPositive(output)
+                ? 0.5f : -0.5f;
+        }
 
         output = config.SinFactor > 0f
             ? output * config.TriFactor + MathT.TriToSin(output) * config.SinFactor

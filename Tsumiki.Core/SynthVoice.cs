@@ -27,17 +27,37 @@ internal struct SynthVoice
     public float PolyPressure;
     public double Pitch;
     public double Delta;
+    private double _targetDelta;
+    private double _targetVelocity;
+    private LowPassFilterD _pitchGlider;
+    private LowPassFilterD _velocityGlider;
 
     [AudioTiming]
-    public VoiceEvent Tick(in MidiVoice midi, double pitchBend, double sampleRate)
+    public VoiceEvent Tick(in MidiVoice midi, in VoiceConfig glideConfig, double pitchBend, double sampleRate)
     {
+        if (glideConfig.Enable)
+        {
+            Delta = _pitchGlider.TickAndRender(in glideConfig.Filter, _targetDelta);
+            Velocity = (float)_velocityGlider.TickAndRender(in glideConfig.Filter, _targetVelocity);
+        }
+
         if (midi.Note.IsOn)
         {
             var oldState = State;
             State = VoiceState.Active;
             Pitch = midi.Note.Pitch + pitchBend;
-            Delta = MathT.PitchToDelta(Pitch, sampleRate);
-            Velocity = midi.Note.Velocity;
+            _targetDelta = MathT.PitchToDelta(Pitch, sampleRate);
+            _targetVelocity = midi.Note.Velocity;
+            if (!glideConfig.Enable || oldState != VoiceState.Active)
+            {
+                Delta = _targetDelta;
+                Velocity = (float)_targetVelocity;
+                // EVENT CALL
+                _pitchGlider.Reset(_targetDelta);
+                // EVENT CALL
+                _velocityGlider.Reset(_targetVelocity);
+            }
+
             PolyPressure = midi.PolyPressure;
 
             return midi.Length != 1 ? VoiceEvent.None

@@ -2,6 +2,9 @@ using Tsumiki.Metadata;
 
 namespace Tsumiki.Core;
 
+/// <summary>
+/// ユニゾン/倍音を統合した「スタック機能」の最大数だけ並んだ固定長配列。プログラミング用語の Stack とは無関係なので注意。
+/// </summary>
 [System.Runtime.CompilerServices.InlineArray(MathT.MaxStackCount)]
 internal struct Stacked<T>
 {
@@ -16,6 +19,7 @@ internal struct ConfigSet
     public EnvelopeConfig Envelope1;
     public EnvelopeConfig Envelope2;
     public StackConfig Stack;
+    public VoiceConfig VoceConfig;
 
     [EventTiming]
     public void Recalculate(ITsumikiModel model, double sampleRate)
@@ -25,7 +29,17 @@ internal struct ConfigSet
         Envelope1 = new EnvelopeConfig(model.A1, sampleRate);
         Envelope2 = new EnvelopeConfig(model.A2, sampleRate);
         Stack = new StackConfig(model.Input);
+        VoceConfig = new VoiceConfig(model.Input, sampleRate);
     }
+}
+
+internal struct VoiceConfig(IInputUnit unit, double sampleRate)
+{
+    public bool Enable = unit.Glide > 0;
+    public bool Polyphony = unit.Glide < 0;
+    public FilterConfigD Filter = unit.Glide > 0
+        ? new FilterConfigD(50 - unit.Glide, sampleRate)
+        : default;
 }
 
 [EventTiming]
@@ -97,6 +111,7 @@ internal readonly struct StackConfig
     }
 }
 
+/// <summary>毎フレーム渡される設定値。</summary>
 [EventTiming]
 [method: EventTiming]
 internal struct TickConfig(double pitchBend, double sampleRate, float filterMix, float pan)
@@ -109,12 +124,14 @@ internal struct TickConfig(double pitchBend, double sampleRate, float filterMix,
     public float Pan = pan;
 }
 
+/// <summary>スタック機能を適用した後の音声出力器。</summary>
 [EventTiming]
 internal struct StackedVoice
 {
     public SynthVoice SynthVoice;
-    public Stacked<CarrierWave> Carrier;
-    public Stacked<ModulatorWave> Modulator;
+    public Stacked<ResetPulse> Pulses;
+    public Stacked<CarrierWave> Carriers;
+    public Stacked<ModulatorWave> Modulators;
     public Envelope Envelope1;
     public Envelope Envelope2;
     public ResonantLowPassFilterConfig FilterConfig;
@@ -124,7 +141,7 @@ internal struct StackedVoice
     [AudioTiming]
     public (float left, float right) TickAndRender(in ConfigSet config, in MidiVoice midi, in TickConfig tick, ITsumikiModel model)
     {
-        switch (SynthVoice.Tick(in midi, tick.PitchBend, tick.SampleRate))
+        switch (SynthVoice.Tick(in midi, in config.VoceConfig, tick.PitchBend, tick.SampleRate))
         {
             case VoiceEvent.StartNote:
                 // EVENT CALL
@@ -147,14 +164,15 @@ internal struct StackedVoice
             return default;
         }
 
-        var lavel2 = Envelope2.TickAndRender(in config.Envelope2, noteOn);
+        var level2 = Envelope2.TickAndRender(in config.Envelope2, noteOn);
         var left = 0f;
         var right = 0f;
         for (var i = 0; i < config.Stack.Stack; i++)
         {
             var delta = SynthVoice.Delta * config.Stack.Pitches[i];
-            var fm = lavel2 * Modulator[i].TickAndRender(in config.ModulatorWave, delta, -1.0);
-            var voiceOutput = level1 * Carrier[i].TickAndRender(in config.CarrierWave, delta, -1.0, fm);
+            var resetPhase = Pulses[i].Tick(delta);
+            var fm = level2 * Modulators[i].TickAndRender(in config.ModulatorWave, delta, resetPhase);
+            var voiceOutput = level1 * Carriers[i].TickAndRender(in config.CarrierWave, delta, resetPhase, fm);
             var (lPan, rPan) = MathT.GetPanLevel(tick.Pan + config.Stack.Pans[i]);
             left += voiceOutput * lPan;
             right += voiceOutput * rPan;
@@ -179,8 +197,9 @@ internal struct StackedVoice
     {
         for (var i = 0; i < config.Stack.Stack; i++)
         {
-            Carrier[i].Reset(in config.CarrierWave);
-            Modulator[i].Reset(in config.ModulatorWave);
+            Carriers[i].Reset(in config.CarrierWave);
+            Modulators[i].Reset(in config.ModulatorWave);
+            Pulses[i].Reset();
         }
 
         Envelope2.Reset();
