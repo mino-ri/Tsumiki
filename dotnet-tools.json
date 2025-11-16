@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "indirectx.hlslcodegenerator": {
+      "version": "1.0.0",
+      "commands": [
+        "indxgen"
+      ],
+      "rollForward": false
+    }
+  }
+}
