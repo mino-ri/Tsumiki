@@ -24,13 +24,13 @@ public interface ITsumikiModel
     
     [VstUnit(3, 40)]
     IModulatorUnit A2 { get; }
-    /*
+    
     [VstUnit(4, 50)]
     ICarrierUnit B1 { get; }
 
     [VstUnit(5, 70)]
     IModulatorUnit B2 { get; }
-    */
+    
     [VstUnit(6, 80)]
     IFilterUnit Filter { get; }
 

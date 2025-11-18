@@ -41,12 +41,14 @@ public static class ProcessorTest
         const double sampleRate = 44100.0;
 
         // モデルパラメータを設定（デフォルト値から一部変更）
-        model.Master = 1.0f;
+        model.Master = 0.5f;
         model.PitchBend = 0.5f; // 中央値（ベンドなし）
-        model.A1.Pitch = 1.0;
+        model.A1.Pitch = 1f;
         model.A1.Level = 1f;
+        model.B1.Pitch = 1f;
+        model.B1.Level = 1f;
 
-        Assert.Equal(1.0f, model.Master);
+        Assert.Equal(0.5f, model.Master);
 
         // Recalculateを呼び出してパラメータを反映
         processor.Recalculate(model, sampleRate);

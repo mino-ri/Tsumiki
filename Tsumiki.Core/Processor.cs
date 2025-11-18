@@ -51,7 +51,7 @@ public class Processor()
         var delayMix = model.Delay.Mix;
         var delaySource = 1f - delayMix;
 
-        var tickConfig = new TickConfig(model.PitchBend * model.Input.Bend, sampleRate, model.Filter.Mix, model.A1.Pan);
+        var tickConfig = new TickConfig(model.PitchBend * model.Input.Bend, sampleRate, model.Filter.Mix);
 
         for (var sample = 0; sample < sampleCount; sample++)
         {

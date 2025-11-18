@@ -14,22 +14,48 @@ internal struct Stacked<T>
 [EventTiming]
 internal struct ConfigSet
 {
-    public CarrierWaveConfig CarrierWave;
-    public ModulatorWaveConfig ModulatorWave;
-    public EnvelopeConfig Envelope1;
-    public EnvelopeConfig Envelope2;
+    public OscillatorConfig OscillatorA;
+    public OscillatorConfig OscillatorB;
     public StackConfig Stack;
     public VoiceConfig VoceConfig;
 
     [EventTiming]
     public void Recalculate(ITsumikiModel model, double sampleRate)
     {
+        OscillatorA.RecalculateA(model, sampleRate);
+        OscillatorB.RecalculateB(model, sampleRate);
+        Stack = new StackConfig(model.Input);
+        VoceConfig = new VoiceConfig(model.Input, sampleRate);
+    }
+}
+
+[EventTiming]
+internal struct OscillatorConfig
+{
+    public CarrierWaveConfig CarrierWave;
+    public ModulatorWaveConfig ModulatorWave;
+    public EnvelopeConfig Envelope1;
+    public EnvelopeConfig Envelope2;
+    public float Pan;
+
+    [EventTiming]
+    public void RecalculateA(ITsumikiModel model, double sampleRate)
+    {
         CarrierWave = new CarrierWaveConfig(model.A1);
         ModulatorWave = new ModulatorWaveConfig(model.A2);
         Envelope1 = new EnvelopeConfig(model.A1, sampleRate);
         Envelope2 = new EnvelopeConfig(model.A2, sampleRate);
-        Stack = new StackConfig(model.Input);
-        VoceConfig = new VoiceConfig(model.Input, sampleRate);
+        Pan = model.A1.Pan;
+    }
+
+    [EventTiming]
+    public void RecalculateB(ITsumikiModel model, double sampleRate)
+    {
+        CarrierWave = new CarrierWaveConfig(model.B1);
+        ModulatorWave = new ModulatorWaveConfig(model.B2);
+        Envelope1 = new EnvelopeConfig(model.B1, sampleRate);
+        Envelope2 = new EnvelopeConfig(model.B2, sampleRate);
+        Pan = model.B1.Pan;
     }
 }
 
@@ -114,14 +140,13 @@ internal readonly struct StackConfig
 /// <summary>毎フレーム渡される設定値。</summary>
 [EventTiming]
 [method: EventTiming]
-internal struct TickConfig(double pitchBend, double sampleRate, float filterMix, float pan)
+internal struct TickConfig(double pitchBend, double sampleRate, float filterMix)
 {
     public double PitchBend = pitchBend;
     public double SampleRate = sampleRate;
     public bool UseFilter = filterMix != 0f;
     public float FilterMix = filterMix;
     public float FilterSource = 1f - filterMix;
-    public float Pan = pan;
 }
 
 /// <summary>スタック機能を適用した後の音声出力器。</summary>
@@ -129,11 +154,8 @@ internal struct TickConfig(double pitchBend, double sampleRate, float filterMix,
 internal struct StackedVoice
 {
     public SynthVoice SynthVoice;
-    public Stacked<ResetPulse> Pulses;
-    public Stacked<CarrierWave> Carriers;
-    public Stacked<ModulatorWave> Modulators;
-    public Envelope Envelope1;
-    public Envelope Envelope2;
+    public StackedOscillator OscillatorA;
+    public StackedOscillator OscillatorB;
     public ResonantLowPassFilterConfig FilterConfig;
     public ResonantLowPassFilter LeftFilter;
     public ResonantLowPassFilter RightFilter;
@@ -151,35 +173,25 @@ internal struct StackedVoice
                 // EVENT CALL
                 RestartNote(model, tick.SampleRate);
                 break;
+            case VoiceEvent.PitchChanged:
+                FilterConfig.RecalculatePitch(SynthVoice.Pitch, tick.SampleRate);
+                break;
         }
 
         if (SynthVoice.State == VoiceState.Inactive)
             return default;
 
         var noteOn = SynthVoice.State == VoiceState.Active;
-        var level1 = Envelope1.TickAndRender(in config.Envelope1, noteOn);
-        if (SynthVoice.State == VoiceState.Release && level1 == 0)
+        var (leftA, rightA, levelA) = OscillatorA.TickAndRender(in config.OscillatorA, in config.Stack, noteOn, SynthVoice.Delta);
+        var (leftB, rightB, levelB) = OscillatorB.TickAndRender(in config.OscillatorB, in config.Stack, noteOn, SynthVoice.Delta);
+        if (SynthVoice.State == VoiceState.Release && levelA == 0f && levelB == 0f)
         {
             SynthVoice.State = VoiceState.Inactive;
             return default;
         }
 
-        var level2 = Envelope2.TickAndRender(in config.Envelope2, noteOn);
-        var left = 0f;
-        var right = 0f;
-        for (var i = 0; i < config.Stack.Stack; i++)
-        {
-            var delta = SynthVoice.Delta * config.Stack.Pitches[i];
-            var resetPhase = Pulses[i].Tick(delta);
-            var fm = level2 * Modulators[i].TickAndRender(in config.ModulatorWave, delta, resetPhase);
-            var voiceOutput = level1 * Carriers[i].TickAndRender(in config.CarrierWave, delta, resetPhase, fm);
-            var (lPan, rPan) = MathT.GetPanLevel(tick.Pan + config.Stack.Pans[i]);
-            left += voiceOutput * lPan;
-            right += voiceOutput * rPan;
-        }
-
-        left /= config.Stack.Stack;
-        right /= config.Stack.Stack;
+        var left = (leftA + leftB) / config.Stack.Stack;
+        var right = (rightA + rightB) / config.Stack.Stack;
 
         if (tick.UseFilter)
         {
@@ -195,14 +207,8 @@ internal struct StackedVoice
     [EventTiming]
     private void StartNote(in ConfigSet config, ITsumikiModel model, double sampleRate)
     {
-        for (var i = 0; i < config.Stack.Stack; i++)
-        {
-            Carriers[i].Reset(in config.CarrierWave);
-            Modulators[i].Reset(in config.ModulatorWave);
-            Pulses[i].Reset();
-        }
-
-        Envelope2.Reset();
+        OscillatorA.StartNote(in config.OscillatorA, in config.Stack);
+        OscillatorB.StartNote(in config.OscillatorB, in config.Stack);
         FilterConfig = new ResonantLowPassFilterConfig(model.Filter, SynthVoice.Pitch, sampleRate);
         LeftFilter.Reset();
         RightFilter.Reset();
@@ -211,8 +217,8 @@ internal struct StackedVoice
     [EventTiming]
     private void RestartNote(ITsumikiModel model, double sampleRate)
     {
-        Envelope1.Restart();
-        Envelope2.Restart();
+        OscillatorA.RestartNote();
+        OscillatorB.RestartNote();
         FilterConfig = new ResonantLowPassFilterConfig(model.Filter, SynthVoice.Pitch, sampleRate);
     }
 }

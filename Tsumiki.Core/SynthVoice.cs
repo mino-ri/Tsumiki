@@ -17,6 +17,8 @@ internal enum VoiceEvent
     StartNote = 1,
     /// <summary>リリース途中から発音状態に移行する</summary>
     RestartNote = 2,
+    /// <summary>発音中にピッチが変化した</summary>
+    PitchChanged = 3,
 }
 
 [AudioTiming]
@@ -60,7 +62,7 @@ internal struct SynthVoice
 
             PolyPressure = midi.PolyPressure;
 
-            return midi.Length != 1 ? VoiceEvent.None
+            return midi.Length != 1 ? (glideConfig.Enable ? VoiceEvent.PitchChanged : VoiceEvent.None)
                 : oldState == VoiceState.Inactive ? VoiceEvent.StartNote
                 : VoiceEvent.RestartNote;
         }

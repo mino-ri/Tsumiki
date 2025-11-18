@@ -87,12 +87,19 @@ internal struct HighPassFilter
     }
 }
 
-[EventTiming]
+[AudioTiming]
 [method: EventTiming]
-internal readonly struct ResonantLowPassFilterConfig(IFilterUnit unit, double pitch, double sampleRate)
+internal struct ResonantLowPassFilterConfig(IFilterUnit unit, double pitch, double sampleRate)
 {
-    public readonly float Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(unit.Cutoff + pitch) / sampleRate / 2.0)));
+    public readonly float Cutoff = unit.Cutoff;
     public readonly float Damping = 1f - unit.Resonance;
+    public float Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(unit.Cutoff + pitch) / sampleRate / 2.0)));
+
+    [AudioTiming]
+    public void RecalculatePitch(double pitch, double sampleRate)
+    {
+        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(Cutoff + pitch) / sampleRate / 2.0)));
+    }
 }
 
 [AudioTiming]
