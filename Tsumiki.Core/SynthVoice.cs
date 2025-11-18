@@ -22,8 +22,9 @@ internal enum VoiceEvent
 }
 
 [AudioTiming]
-internal struct SynthVoice
+internal struct SynthVoice(GliderConfig glideConfig)
 {
+    private readonly GliderConfig _glideConfig = glideConfig;
     public VoiceState State;
     public float Velocity;
     public float PolyPressure;
@@ -35,12 +36,12 @@ internal struct SynthVoice
     private LowPassFilterD _velocityGlider;
 
     [AudioTiming]
-    public VoiceEvent Tick(in MidiVoice midi, in VoiceConfig glideConfig, double pitchBend, double sampleRate)
+    public VoiceEvent Tick(in MidiVoice midi, double pitchBend)
     {
-        if (glideConfig.Enable)
+        if (_glideConfig.Enable)
         {
-            Delta = _pitchGlider.TickAndRender(in glideConfig.Filter, _targetDelta);
-            Velocity = (float)_velocityGlider.TickAndRender(in glideConfig.Filter, _targetVelocity);
+            Delta = _pitchGlider.TickAndRender(in _glideConfig.Filter, _targetDelta);
+            Velocity = (float)_velocityGlider.TickAndRender(in _glideConfig.Filter, _targetVelocity);
         }
 
         if (midi.Note.IsOn)
@@ -48,9 +49,9 @@ internal struct SynthVoice
             var oldState = State;
             State = VoiceState.Active;
             Pitch = midi.Note.Pitch + pitchBend;
-            _targetDelta = MathT.PitchToDelta(Pitch, sampleRate);
+            _targetDelta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
             _targetVelocity = midi.Note.Velocity;
-            if (!glideConfig.Enable || oldState != VoiceState.Active)
+            if (!_glideConfig.Enable || oldState != VoiceState.Active)
             {
                 Delta = _targetDelta;
                 Velocity = (float)_targetVelocity;
@@ -62,7 +63,7 @@ internal struct SynthVoice
 
             PolyPressure = midi.PolyPressure;
 
-            return midi.Length != 1 ? (glideConfig.Enable ? VoiceEvent.PitchChanged : VoiceEvent.None)
+            return midi.Length != 1 ? (_glideConfig.Enable ? VoiceEvent.PitchChanged : VoiceEvent.None)
                 : oldState == VoiceState.Inactive ? VoiceEvent.StartNote
                 : VoiceEvent.RestartNote;
         }

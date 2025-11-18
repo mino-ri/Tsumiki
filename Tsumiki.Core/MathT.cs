@@ -73,6 +73,7 @@ internal static class MathT
     }
 
     /// <summary>パン(-1.0～1.0)の値から、左チャンネルの音量を取得します。合計値は常に2です。</summary>
+    [AudioTiming]
     public static (float, float) GetPanLevel(float pan)
     {
         var sin = Sin(pan * 0.25f);

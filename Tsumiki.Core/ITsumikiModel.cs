@@ -75,70 +75,46 @@ public interface IInputUnit
     float StackStereo { get; set; }
 }
 
-public interface ICarrierUnit
+public interface ICarrierUnit : IEnvelopeUnit
 {
-    [VstRangeParameter(0, 0.0, 1.0, 0.5)]
+    [VstRangeParameter(4, 0.0, 1.0, 0.5)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.0, 20.0, 1.0)]
+    [VstRangeParameter(5, 0.0, 20.0, 1.0)]
     double Pitch { get; set; }
 
-    [VstBoolParameter(2, false)]
+    [VstBoolParameter(6, false)]
     bool Sync { get; set; }
 
-    [VstRangeParameter(3, 0.0, 1.0, 0.0)]
+    [VstRangeParameter(7, 0.0, 1.0, 0.0)]
     float Phase { get; set; }
 
-    [VstRangeParameter(4, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(8, -1.0, 1.0, 0.0)]
     float ShapeX { get; set; }
 
-    [VstRangeParameter(5, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(9, -1.0, 1.0, 0.0)]
     float ShapeY { get; set; }
 
-    [VstRangeParameter(6, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(10, -1.0, 1.0, 0.0)]
     float Pan { get; set; }
-
-    [VstRangeParameter(15, 0, 80, 40, StepCount = 80)]
-    int Attack { get; set; }
-
-    [VstRangeParameter(16, 0, 80, 40, StepCount = 80)]
-    int Decay { get; set; }
-
-    [VstRangeParameter(17, 0.0, 1.0, 1.0)]
-    float Sustain { get; set; }
-
-    [VstRangeParameter(18, 0, 80, 40, StepCount = 80)]
-    int Release { get; set; }
 }
 
-public interface IModulatorUnit
+public interface IModulatorUnit : IEnvelopeUnit
 {
-    [VstRangeParameter(0, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.0, 20.0, 1.0)]
+    [VstRangeParameter(5, 0.0, 20.0, 1.0)]
     double Pitch { get; set; }
 
-    [VstBoolParameter(2, false)]
+    [VstBoolParameter(6, false)]
     bool Sync { get; set; }
 
-    [VstRangeParameter(3, 0.0, 1.0, 0.0)]
+    [VstRangeParameter(7, 0.0, 1.0, 0.0)]
     float Phase { get; set; }
 
-    [VstRangeParameter(4, 0.0, 1.0, 0.0)]
+    [VstRangeParameter(8, 0.0, 1.0, 0.0)]
     float Feedback { get; set; }
-
-    [VstRangeParameter(5, 0, 80, 40, StepCount = 80)]
-    int Attack { get; set; }
-
-    [VstRangeParameter(6, 0, 80, 40, StepCount = 80)]
-    int Decay { get; set; }
-
-    [VstRangeParameter(7, 0.0, 1.0, 1.0)]
-    float Sustain { get; set; }
-
-    [VstRangeParameter(8, 0, 80, 40, StepCount = 80)]
-    int Release { get; set; }
 }
 
 public interface IFilterUnit

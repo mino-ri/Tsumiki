@@ -17,7 +17,8 @@ public static class ResonantLowPassFilterConfigTest
     public static void ResonantLowPassFilterConfig_通常のパラメータで正常に動作()
     {
         var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
-        var config = new ResonantLowPassFilterConfig(unit, pitch: 60, sampleRate: 44100);
+        var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
+        config.RecalculatePitch(60);
 
         // Alpha と Damping が有効な範囲内であることを確認
         Assert.InRange(config.Alpha, 0f, 1f);
@@ -28,7 +29,8 @@ public static class ResonantLowPassFilterConfigTest
     public static void ResonantLowPassFilterConfig_ピッチ0でも発散しない()
     {
         var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
-        var config = new ResonantLowPassFilterConfig(unit, pitch: 0, sampleRate: 44100);
+        var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
+        config.RecalculatePitch(0);
 
         Assert.InRange(config.Alpha, 0f, 1f);
         Assert.False(float.IsNaN(config.Alpha), "Alpha が NaN になっている");
@@ -43,7 +45,8 @@ public static class ResonantLowPassFilterConfigTest
     public static void ResonantLowPassFilterConfig_ピッチ127でも発散しない()
     {
         var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
-        var config = new ResonantLowPassFilterConfig(unit, pitch: 127, sampleRate: 44100);
+        var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
+        config.RecalculatePitch(127);
 
         Assert.InRange(config.Alpha, 0f, 1f);
         Assert.False(float.IsNaN(config.Alpha), "Alpha が NaN になっている");
@@ -58,7 +61,8 @@ public static class ResonantLowPassFilterConfigTest
     public static void ResonantLowPassFilterConfig_レゾナンス最大でも発散しない()
     {
         var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.98f };
-        var config = new ResonantLowPassFilterConfig(unit, pitch: 60, sampleRate: 44100);
+        var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
+        config.RecalculatePitch(60);
 
         Assert.InRange(config.Alpha, 0f, 1f);
         Assert.InRange(config.Damping, 0f, 1f);

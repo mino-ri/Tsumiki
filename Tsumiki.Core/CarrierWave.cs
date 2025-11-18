@@ -3,56 +3,77 @@ using Tsumiki.Metadata;
 namespace Tsumiki.Core;
 
 [EventTiming]
-internal readonly struct CarrierWaveConfig
+internal sealed class CarrierWaveConfig
 {
+    private readonly ICarrierUnit _unit;
+    private float _shapeX;
+    private float _shapeY;
     // ShapeX は上昇フェーズと下降フェーズのバランスを変える
     // ShapeY が正の値なら、三角波 → 矩形波の変化
     // ShapeY が負の値なら、三角波 → サイン波の変化
-    public readonly double Pitch;
-    public readonly float Phase;
-    public readonly bool Sync;
-    public readonly float Level;
-    public readonly float TriFactor;
-    public readonly float SinFactor;
-    public readonly float UpSlope;
-    public readonly float DownSlope;
-    public readonly float UpEnd;
-    public readonly float DownStart;
+    public double Pitch;
+    public float Phase;
+    public bool Sync;
+    public float Level;
+    public float TriFactor;
+    public float SinFactor;
+    public float UpSlope;
+    public float DownSlope;
+    public float UpEnd;
+    public float DownStart;
 
-    [EventTiming]
+    [InitTiming]
     public CarrierWaveConfig(ICarrierUnit unit)
     {
-        Pitch = unit.Pitch;
-        Phase = unit.Phase;
-        Sync = unit.Sync;
-        Level = unit.Level;
-        TriFactor = unit.ShapeY > 0f ? 2f : (1f + unit.ShapeY) * 2f;
-        SinFactor = unit.ShapeY > 0f ? 0f : -unit.ShapeY;
-        var flatness = unit.ShapeY > 0f ? 1f - unit.ShapeY : 1f;
-        UpSlope = 1f / flatness / (0.5f + unit.ShapeX * 0.5f);
-        DownSlope = 1f / flatness / (0.5f - unit.ShapeX * 0.5f);
-        UpEnd = (0.25f + unit.ShapeX * 0.25f) * flatness;
-        DownStart = 0.5f - (0.25f - unit.ShapeX * 0.25f) * flatness;
+        _unit = unit;
+        // 有効値は -1 ～ 1 なので、初期値として範囲外を設定することで計算を実行させる
+        _shapeX = -2;
+        _shapeY = -2;
+        Recalculate();
+    }
+
+    [EventTiming]
+    public void Recalculate()
+    {
+        Pitch = _unit.Pitch;
+        Phase = _unit.Phase;
+        Sync = _unit.Sync;
+        Level = _unit.Level;
+
+        if (_shapeX != _unit.ShapeX || _shapeY != _unit.ShapeY)
+        {
+            _shapeX = _unit.ShapeX;
+            _shapeY = _unit.ShapeY;
+            TriFactor = _shapeY > 0f ? 2f : (1f + _shapeY) * 2f;
+            SinFactor = _shapeY > 0f ? 0f : -_shapeY;
+            var flatness = _shapeY > 0f ? 1f - _shapeY : 1f;
+            UpSlope = 1f / flatness / (0.5f + _shapeX * 0.5f);
+            DownSlope = 1f / flatness / (0.5f - _shapeX * 0.5f);
+            UpEnd = (0.25f + _shapeX * 0.25f) * flatness;
+            DownStart = 0.5f - (0.25f - _shapeX * 0.25f) * flatness;
+        }
     }
 }
 
 [AudioTiming]
-internal struct CarrierWave
+[method: InitTiming]
+internal struct CarrierWave(CarrierWaveConfig config)
 {
+    private readonly CarrierWaveConfig _config = config;
     double _phase;
 
     [EventTiming]
-    public void Reset(in CarrierWaveConfig config)
+    public void Reset()
     {
-        _phase = config.Phase;
+        _phase = _config.Phase;
     }
 
     [AudioTiming]
-    public float TickAndRender(in CarrierWaveConfig config, double delta, double syncPhase, float fm)
+    public float TickAndRender(double delta, double syncPhase, float fm)
     {
-        if (config.Sync && syncPhase >= 0)
+        if (_config.Sync && syncPhase >= 0)
         {
-            _phase = delta * config.Pitch + config.Phase;
+            _phase = delta * _config.Pitch + _config.Phase;
         }
 
         var dActualPhase = _phase + fm;
@@ -61,8 +82,8 @@ internal struct CarrierWave
         var absPhase = Math.Abs((float)actualPhase);
 
         var output =
-            absPhase < config.UpEnd ? actualPhase * config.UpSlope
-            : absPhase > config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * config.DownSlope
+            absPhase < _config.UpEnd ? actualPhase * _config.UpSlope
+            : absPhase > _config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * _config.DownSlope
             : actualPhase >= 0f ? 0.5f : -0.5f;
 
         if (!float.IsFinite(output))
@@ -72,13 +93,13 @@ internal struct CarrierWave
                 ? 0.5f : -0.5f;
         }
 
-        output = config.SinFactor > 0f
-            ? output * config.TriFactor + MathT.TriToSin(output) * config.SinFactor
-            : output * config.TriFactor;
+        output = _config.SinFactor > 0f
+            ? output * _config.TriFactor + MathT.TriToSin(output) * _config.SinFactor
+            : output * _config.TriFactor;
 
-        _phase += delta * config.Pitch;
+        _phase += delta * _config.Pitch;
         _phase -= (int)_phase;
 
-        return output * config.Level;
+        return output * _config.Level;
     }
 }

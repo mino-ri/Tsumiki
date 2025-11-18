@@ -4,14 +4,20 @@ using Tsumiki.Core;
 
 namespace Tsumiki;
 
-public class TsumikiProcessor()
-    : AudioProcessor<TsumikiModel>(AudioSampleSizeSupport.Float32)
+public class TsumikiProcessor : AudioProcessor<TsumikiModel>
 {
-    private readonly Core.Processor _processor = new();
+    private double _sampleRate;
+    private readonly Processor _processor;
 
     public static readonly Guid ClassId = new("f6e5d4c3-b2a1-4d5e-9f8e-7d6c5b4a3210");
 
     public override Guid ControllerClassId => TsumikiController.ClassId;
+
+    public TsumikiProcessor() : base(AudioSampleSizeSupport.Float32)
+    {
+        _sampleRate = ProcessSetupData.SampleRate;
+        _processor = new Processor(Model, _sampleRate);
+    }
 
     protected override bool Initialize(AudioHostApplication host)
     {
@@ -22,7 +28,7 @@ public class TsumikiProcessor()
 
     protected override void OnActivate(bool isActive)
     {
-        _processor.OnActive(isActive, Model, ProcessSetupData.SampleRate);
+        _processor.OnActive(isActive);
     }
 
     protected override void ProcessEvent(in AudioEvent audioEvent)
@@ -51,11 +57,25 @@ public class TsumikiProcessor()
 
     protected override void ProcessRecalculate(in AudioProcessData data)
     {
-        _processor.Recalculate(Model, ProcessSetupData.SampleRate);
+        if (_sampleRate != ProcessSetupData.SampleRate)
+        {
+            _sampleRate = ProcessSetupData.SampleRate;
+            _processor.ChangeSampleRate(_sampleRate);
+        }
+        else
+        {
+            _processor.Recalculate();
+        }
     }
 
     protected override void ProcessMain(in AudioProcessData data)
     {
+        if (_sampleRate != ProcessSetupData.SampleRate)
+        {
+            _sampleRate = ProcessSetupData.SampleRate;
+            _processor.ChangeSampleRate(_sampleRate);
+        }
+
         var leftChannel = data.Output[0].GetChannelSpanAsFloat32(ProcessSetupData, data, 0);
         var rightChannel = data.Output[0].GetChannelSpanAsFloat32(ProcessSetupData, data, 1);
         var sampleCount = data.SampleCount;
@@ -67,6 +87,6 @@ public class TsumikiProcessor()
             return;
         }
 
-        _processor.ProcessMain(Model, ProcessSetupData.SampleRate, sampleCount, leftChannel, rightChannel);
+        _processor.ProcessMain(sampleCount, leftChannel, rightChannel);
     }
 }

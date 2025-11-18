@@ -18,7 +18,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_出力値が有限()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 100,
@@ -27,11 +26,12 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
 
         for (var i = 0; i < 10000; i++)
         {
-            var (left, right) = delay.TickAndRender(in config, left: 1.0f, right: 1.0f);
+            var (left, right) = delay.TickAndRender(1.0f, 1.0f);
             Assert.False(float.IsNaN(left), $"サンプル {i} の左チャンネルで NaN が発生");
             Assert.False(float.IsInfinity(left), $"サンプル {i} の左チャンネルで無限大が発生");
             Assert.False(float.IsNaN(right), $"サンプル {i} の右チャンネルで NaN が発生");
@@ -42,7 +42,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_左右チャンネルが独立して動作する()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 10,
@@ -51,7 +50,8 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
         var delaySamples = config.DelaySampleCount;
 
         // 左チャンネルのみにインパルスを入力
@@ -61,7 +61,7 @@ public static class DelayTest
         for (var i = 0; i < leftOutputs.Length; i++)
         {
             var leftInput = (i == 0) ? 1.0f : 0.0f;
-            var (left, right) = delay.TickAndRender(in config, left: leftInput, right: 0.0f);
+            var (left, right) = delay.TickAndRender(leftInput, 0.0f);
             leftOutputs[i] = left;
             rightOutputs[i] = right;
         }
@@ -88,7 +88,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックなしで正常に動作()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 100,
@@ -97,11 +96,12 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
 
         for (var i = 0; i < 1000; i++)
         {
-            var (left, right) = delay.TickAndRender(in config, left: 1.0f, right: -1.0f);
+            var (left, right) = delay.TickAndRender(1.0f, -1.0f);
             Assert.False(float.IsNaN(left));
             Assert.False(float.IsInfinity(left));
             Assert.False(float.IsNaN(right));
@@ -112,7 +112,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックありで正常に動作()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 100,
@@ -121,11 +120,12 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
 
         for (var i = 0; i < 1000; i++)
         {
-            var (left, right) = delay.TickAndRender(in config, left: 1.0f, right: -1.0f);
+            var (left, right) = delay.TickAndRender(1.0f, -1.0f);
             Assert.False(float.IsNaN(left));
             Assert.False(float.IsInfinity(left));
             Assert.False(float.IsNaN(right));
@@ -136,9 +136,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックで左右が混ざる()
     {
-        var delayNoCross = new Delay(sampleRate: 44100);
-        var delayCross = new Delay(sampleRate: 44100);
-
         var unitNoCross = new TestDelayUnit
         {
             Delay = 50, // 遅延時間を長くして、フィードバックが回るようにする
@@ -156,8 +153,10 @@ public static class DelayTest
             HighCut = 90
         };
 
-        var configNoCross = new DelayConfig(unitNoCross, sampleRate: 44100);
-        var configCross = new DelayConfig(unitCross, sampleRate: 44100);
+        var configNoCross = new DelayConfig(unitNoCross, 44100);
+        var configCross = new DelayConfig(unitCross, 44100);
+        var delayNoCross = new Delay(configNoCross, 44100);
+        var delayCross = new Delay(configCross, 44100);
 
         // 継続的に左チャンネルに入力を与える
         var samplesCount = 5000; // サンプル数を増やす
@@ -170,8 +169,8 @@ public static class DelayTest
         {
             // 継続的に入力を与える（最初の1000サンプル）
             var input = (i < 1000) ? 0.5f : 0.0f;
-            var (l1, r1) = delayNoCross.TickAndRender(in configNoCross, left: input, right: 0.0f);
-            var (l2, r2) = delayCross.TickAndRender(in configCross, left: input, right: 0.0f);
+            var (l1, r1) = delayNoCross.TickAndRender(input, 0.0f);
+            var (l2, r2) = delayCross.TickAndRender(input, 0.0f);
 
             leftOutputsNoCross[i] = l1;
             rightOutputsNoCross[i] = r1;
@@ -201,7 +200,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_フィードバック最大でも発散しない()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 100,
@@ -210,11 +208,12 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
 
         for (var i = 0; i < 10000; i++)
         {
-            var (left, right) = delay.TickAndRender(in config, left: 0.1f, right: 0.1f);
+            var (left, right) = delay.TickAndRender(0.1f, 0.1f);
             Assert.False(float.IsNaN(left), $"サンプル {i} の左チャンネルで NaN が発生");
             Assert.False(float.IsInfinity(left), $"サンプル {i} の左チャンネルで無限大が発生");
             Assert.False(float.IsNaN(right), $"サンプル {i} の右チャンネルで NaN が発生");
@@ -227,7 +226,6 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_変動する入力でも安定している()
     {
-        var delay = new Delay(sampleRate: 44100);
         var unit = new TestDelayUnit
         {
             Delay = 100,
@@ -236,13 +234,14 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var config = new DelayConfig(unit, sampleRate: 44100);
+        var config = new DelayConfig(unit, 44100);
+        var delay = new Delay(config, 44100);
 
         for (var i = 0; i < 10000; i++)
         {
             var leftInput = MathF.Sin(i * 0.01f);
             var rightInput = MathF.Cos(i * 0.01f);
-            var (left, right) = delay.TickAndRender(in config, left: leftInput, right: rightInput);
+            var (left, right) = delay.TickAndRender(leftInput, rightInput);
             Assert.False(float.IsNaN(left));
             Assert.False(float.IsInfinity(left));
             Assert.False(float.IsNaN(right));

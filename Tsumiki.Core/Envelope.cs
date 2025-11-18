@@ -3,29 +3,59 @@ using Tsumiki.Metadata;
 namespace Tsumiki.Core;
 
 [EventTiming]
-[method: EventTiming]
-internal readonly struct EnvelopeConfig(int attack, int decay, float sustain, int release, double sampleRate)
+internal sealed class EnvelopeConfig
 {
-    public readonly double AttackDelta = MathT.GetEnvAttackDelta(attack, sampleRate);
-    public readonly double DecayRate = MathT.GetEnvelopeRate(decay, sampleRate);
-    public readonly double SustainLevel = sustain;
-    public readonly double ReleaseRate = MathT.GetEnvelopeRate(release, sampleRate);
+    private readonly IEnvelopeUnit _unit;
+    private double _sampleRate;
+    private int _attack;
+    private int _decay;
+    private int _release;
 
-    public EnvelopeConfig(ICarrierUnit unit, double sampleRate)
-        : this(unit.Attack, unit.Decay, unit.Sustain, unit.Release, sampleRate) { }
+    public double AttackDelta;
+    public double DecayRate;
+    public double SustainLevel;
+    public double ReleaseRate;
 
-    public EnvelopeConfig(IModulatorUnit unit, double sampleRate)
-        : this(unit.Attack, unit.Decay, unit.Sustain, unit.Release, sampleRate) { }
-
+    [InitTiming]
     public EnvelopeConfig(IEnvelopeUnit unit, double sampleRate)
-        : this(unit.Attack, unit.Decay, unit.Sustain, unit.Release, sampleRate) { }
+    {
+        _unit = unit;
+        Recalculate(sampleRate);
+    }
+
+    [EventTiming]
+    public void Recalculate(double sampleRate)
+    {
+        var isSampleRateChanged = _sampleRate != sampleRate;
+        _sampleRate = sampleRate;
+        SustainLevel = _unit.Sustain;
+
+        if (isSampleRateChanged || _attack != _unit.Attack)
+        {
+            _attack = _unit.Attack;
+            AttackDelta = MathT.GetEnvAttackDelta(_attack, _sampleRate);
+        }
+
+        if (isSampleRateChanged || _decay != _unit.Decay)
+        {
+            _decay = _unit.Decay;
+            DecayRate = MathT.GetEnvelopeRate(_decay, _sampleRate);
+        }
+
+        if (isSampleRateChanged || _release != _unit.Release)
+        {
+            _release = _unit.Release;
+            ReleaseRate = MathT.GetEnvelopeRate(_release, _sampleRate);
+        }
+    }
 }
 
 /// <summary>一般的なADSRエンベロープを表します。</summary>
 [AudioTiming]
-internal struct Envelope
+internal struct Envelope(EnvelopeConfig config)
 {
-    const double MaxThreashold = 1.0 - MathT.ExpThreshold;
+    const double MaxThreshold = 1.0 - MathT.ExpThreshold;
+    private readonly EnvelopeConfig _config = config;
     double _level;
     bool _decaying;
 
@@ -43,7 +73,7 @@ internal struct Envelope
     }
 
     [AudioTiming]
-    public float TickAndRender(in EnvelopeConfig config, bool noteOn)
+    public float TickAndRender(bool noteOn)
     {
         if (!noteOn)
         {
@@ -55,7 +85,7 @@ internal struct Envelope
                 return 0f;
             }
 
-            _level -= _level * config.ReleaseRate;
+            _level -= _level * _config.ReleaseRate;
             if (_level <= MathT.ExpThreshold)
             {
                 _level = 0.0;
@@ -66,8 +96,8 @@ internal struct Envelope
         }
         else if (!_decaying)
         {
-            _level += config.AttackDelta;
-            if (_level >= MaxThreashold)
+            _level += _config.AttackDelta;
+            if (_level >= MaxThreshold)
             {
                 _level = 1.0;
                 _decaying = true;
@@ -76,16 +106,16 @@ internal struct Envelope
 
             return (float)(_level + MathT.ExpThreshold);
         }
-        else if (_level <= config.SustainLevel)
+        else if (_level <= _config.SustainLevel)
         {
             return (float)_level;
         }
         else
         {
-            _level += (config.SustainLevel - _level) * config.DecayRate;
-            if (_level <= config.SustainLevel + MathT.ExpThreshold)
+            _level += (_config.SustainLevel - _level) * _config.DecayRate;
+            if (_level <= _config.SustainLevel + MathT.ExpThreshold)
             {
-                _level = config.SustainLevel;
+                _level = _config.SustainLevel;
                 return (float)_level;
             }
 

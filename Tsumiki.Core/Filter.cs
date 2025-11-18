@@ -3,29 +3,55 @@ using Tsumiki.Metadata;
 namespace Tsumiki.Core;
 
 [EventTiming]
-internal readonly struct FilterConfig
+internal sealed class FilterConfig
 {
-    public readonly float Alpha;
+    private double _cutoffPitchNumber;
+    private double _sampleRate;
+    public float Alpha;
 
-    [EventTiming]
+    [InitTiming]
     public FilterConfig(double cutoffPitchNumber, double sampleRate)
     {
-        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoffPitchNumber)));
-        double dt = 1.0 / sampleRate;
+        Recalculate(cutoffPitchNumber, sampleRate);
+    }
+
+    [EventTiming]
+    public void Recalculate(double cutoffPitchNumber, double sampleRate)
+    {
+        if (_cutoffPitchNumber == cutoffPitchNumber && _sampleRate == sampleRate)
+            return;
+
+        _cutoffPitchNumber = cutoffPitchNumber;
+        _sampleRate = sampleRate;
+        var rc = 1.0 / (2.0 * Math.PI * Math.Min(_sampleRate / 2.0, MathT.PitchToFreq(_cutoffPitchNumber)));
+        var dt = 1.0 / _sampleRate;
         Alpha = MathF.Min(1f, (float)(dt / (rc + dt)));
     }
 }
 
 [EventTiming]
-internal readonly struct FilterConfigD
+internal sealed class FilterConfigD
 {
-    public readonly double Alpha;
+    private double _cutoffPitchNumber;
+    private double _sampleRate;
+    public double Alpha;
 
-    [EventTiming]
+    [InitTiming]
     public FilterConfigD(double cutoffPitchNumber, double sampleRate)
     {
-        double rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoffPitchNumber)));
-        double dt = 1.0 / sampleRate;
+        Recalculate(cutoffPitchNumber, sampleRate);
+    }
+
+    [EventTiming]
+    public void Recalculate(double cutoffPitchNumber, double sampleRate)
+    {
+        if (_cutoffPitchNumber == cutoffPitchNumber && _sampleRate == sampleRate)
+            return;
+
+        _cutoffPitchNumber = cutoffPitchNumber;
+        _sampleRate = sampleRate;
+        var rc = 1.0 / (2.0 * Math.PI * Math.Min(sampleRate / 2.0, MathT.PitchToFreq(cutoffPitchNumber)));
+        var dt = 1.0 / sampleRate;
         Alpha = Math.Min(1.0, dt / (rc + dt));
     }
 }
@@ -89,22 +115,38 @@ internal struct HighPassFilter
 
 [AudioTiming]
 [method: EventTiming]
-internal struct ResonantLowPassFilterConfig(IFilterUnit unit, double pitch, double sampleRate)
+internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampleRate)
 {
-    public readonly float Cutoff = unit.Cutoff;
-    public readonly float Damping = 1f - unit.Resonance;
-    public float Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(unit.Cutoff + pitch) / sampleRate / 2.0)));
+    private double _sampleRate = sampleRate;
+    private double _pitch = 128.0;
+    public float _cutoff = unit.Cutoff;
+    public float Damping = 1f - unit.Resonance;
+    public float Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(unit.Cutoff) / sampleRate / 2.0)));
+
+    [EventTiming]
+    public void Recalculate(double sampleRate)
+    {
+        _sampleRate = sampleRate;
+        _cutoff = unit.Cutoff;
+        Damping = 1f - unit.Resonance;
+        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(_cutoff + _pitch) / _sampleRate / 2.0)));
+    }
 
     [AudioTiming]
-    public void RecalculatePitch(double pitch, double sampleRate)
+    public void RecalculatePitch(double pitch)
     {
-        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(Cutoff + pitch) / sampleRate / 2.0)));
+        if (_pitch == pitch)
+            return;
+        _pitch = pitch;
+        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(_cutoff + _pitch) / _sampleRate / 2.0)));
     }
 }
 
 [AudioTiming]
-internal struct ResonantLowPassFilter
+[method: InitTiming]
+internal struct ResonantLowPassFilter(ResonantLowPassFilterConfig config)
 {
+    private readonly ResonantLowPassFilterConfig _config = config;
     private float _low;
     private float _band;
 
@@ -116,11 +158,11 @@ internal struct ResonantLowPassFilter
     }
 
     [AudioTiming]
-    public float TickAndRender(in ResonantLowPassFilterConfig config, float input)
+    public float TickAndRender(float input)
     {
-        _low += config.Alpha * _band;
-        var high = input - _low - config.Damping * _band;
-        _band += config.Alpha * high;
+        _low += _config.Alpha * _band;
+        var high = input - _low - _config.Damping * _band;
+        _band += _config.Alpha * high;
 
         return _low;
     }

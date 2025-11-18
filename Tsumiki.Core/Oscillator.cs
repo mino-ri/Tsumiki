@@ -5,27 +5,29 @@ namespace Tsumiki.Core;
 /// <summary>
 /// ユニゾン適用後の1つのオシレータ (Tsumiki は2つのオシレータを組み合わせて音を出す)
 /// </summary>
-internal struct StackedOscillator
+internal struct StackedOscillator(StackConfig stackConfig, OscillatorConfig oscConfig)
 {
-    public Stacked<ResetPulse> Pulses;
-    public Stacked<CarrierWave> Carriers;
-    public Stacked<ModulatorWave> Modulators;
-    public Envelope Envelope1;
-    public Envelope Envelope2;
+    private readonly StackConfig _stackConfig = stackConfig;
+    private readonly OscillatorConfig _oscConfig = oscConfig;
+    private Stacked<ResetPulse> _pulses;
+    private Stacked<CarrierWave> _carriers = new(new(oscConfig.CarrierWave));
+    private Stacked<ModulatorWave> _modulators = new(new(oscConfig.ModulatorWave));
+    private Envelope _envelope1 = new(oscConfig.Envelope1);
+    private Envelope _envelope2 = new(oscConfig.Envelope2);
 
-    public (float left, float right, float level) TickAndRender(in OscillatorConfig config, in StackConfig stackConfig, bool noteOn, double voiceDelta)
+    public (float left, float right, float level) TickAndRender(bool noteOn, double voiceDelta)
     {
-        var level1 = Envelope1.TickAndRender(in config.Envelope1, noteOn);
-        var level2 = Envelope2.TickAndRender(in config.Envelope2, noteOn);
+        var level1 = _envelope1.TickAndRender(noteOn);
+        var level2 = _envelope2.TickAndRender(noteOn);
         var left = 0f;
         var right = 0f;
-        for (var i = 0; i < stackConfig.Stack; i++)
+        for (var i = 0; i < _stackConfig.Stack; i++)
         {
-            var delta = voiceDelta * stackConfig.Pitches[i];
-            var resetPhase = Pulses[i].Tick(delta);
-            var fm = level2 * Modulators[i].TickAndRender(in config.ModulatorWave, delta, resetPhase);
-            var voiceOutput = level1 * Carriers[i].TickAndRender(in config.CarrierWave, delta, resetPhase, fm);
-            var (lPan, rPan) = MathT.GetPanLevel(config.Pan + stackConfig.Pans[i]);
+            var delta = voiceDelta * _stackConfig.Pitches[i];
+            var resetPhase = _pulses[i].Tick(delta);
+            var fm = level2 * _modulators[i].TickAndRender(delta, resetPhase);
+            var voiceOutput = level1 * _carriers[i].TickAndRender(delta, resetPhase, fm);
+            var (lPan, rPan) = MathT.GetPanLevel(_oscConfig.Pan + _stackConfig.Pans[i]);
             left += voiceOutput * lPan;
             right += voiceOutput * rPan;
         }
@@ -34,22 +36,22 @@ internal struct StackedOscillator
     }
 
     [EventTiming]
-    public void StartNote(in OscillatorConfig config, in StackConfig stackConfig)
+    public void StartNote()
     {
-        for (var i = 0; i < stackConfig.Stack; i++)
+        for (var i = 0; i < _stackConfig.Stack; i++)
         {
-            Carriers[i].Reset(in config.CarrierWave);
-            Modulators[i].Reset(in config.ModulatorWave);
-            Pulses[i].Reset();
+            _carriers[i].Reset();
+            _modulators[i].Reset();
+            _pulses[i].Reset();
         }
 
-        Envelope2.Reset();
+        _envelope2.Reset();
     }
 
     [EventTiming]
     public void RestartNote()
     {
-        Envelope1.Restart();
-        Envelope2.Restart();
+        _envelope1.Restart();
+        _envelope2.Restart();
     }
 }

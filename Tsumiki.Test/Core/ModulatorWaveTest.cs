@@ -21,21 +21,21 @@ public static class ModulatorWaveTest
     [Fact]
     public static void Reset_位相とフィードバックがリセットされる()
     {
-        var wave = new ModulatorWave();
         var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0.25f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
+        var wave = new ModulatorWave(config);
 
         // 事前に位相を進めておく
         for (var i = 0; i < 100; i++)
         {
-            wave.TickAndRender(in config, 0.01, -1.0);
+            wave.TickAndRender(0.01, -1.0);
         }
 
         // リセット実行
-        wave.Reset(in config);
+        wave.Reset();
 
         // リセット後の最初の出力を確認（位相が初期化されている）
-        var result = wave.TickAndRender(in config, 0.01, -1.0);
+        var result = wave.TickAndRender(0.01, -1.0);
         // Phase = 0.25f で開始し、そこから sin を計算するので、おおよそ sin(0.25 * 2π) 付近の値になる
         Assert.InRange(result, -1f, 1f);
     }
@@ -43,15 +43,15 @@ public static class ModulatorWaveTest
     [Fact]
     public static void TickAndRender_出力値が範囲内()
     {
-        var wave = new ModulatorWave();
         var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
+        var wave = new ModulatorWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         for (var i = 0; i < 1000; i++)
         {
-            var result = wave.TickAndRender(in config, 0.01, -1.0);
+            var result = wave.TickAndRender(0.01, -1.0);
             Assert.InRange(result, -1.1f, 1.1f);
         }
     }
@@ -59,16 +59,16 @@ public static class ModulatorWaveTest
     [Fact]
     public static void TickAndRender_位相が進む()
     {
-        var wave = new ModulatorWave();
         var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
+        var wave = new ModulatorWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         var results = new float[100];
         for (var i = 0; i < 100; i++)
         {
-            results[i] = wave.TickAndRender(in config, 0.01, -1.0);
+            results[i] = wave.TickAndRender(0.01, -1.0);
         }
 
         // 位相が進むので、出力が周期的に変化するはず
@@ -88,16 +88,15 @@ public static class ModulatorWaveTest
     [Fact]
     public static void TickAndRender_ピッチが2倍だと周期が半分()
     {
-        var wave1 = new ModulatorWave();
-        var wave2 = new ModulatorWave();
-
         var unit1 = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var unit2 = new TestModulatorUnit { Pitch = 2.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var config1 = new ModulatorWaveConfig(unit1);
         var config2 = new ModulatorWaveConfig(unit2);
+        var wave1 = new ModulatorWave(config1);
+        var wave2 = new ModulatorWave(config2);
 
-        wave1.Reset(in config1);
-        wave2.Reset(in config2);
+        wave1.Reset();
+        wave2.Reset();
 
         var delta = 0.01;
         var results1 = new float[200];
@@ -105,8 +104,8 @@ public static class ModulatorWaveTest
 
         for (var i = 0; i < 200; i++)
         {
-            results1[i] = wave1.TickAndRender(in config1, delta, -1.0);
-            results2[i] = wave2.TickAndRender(in config2, delta, -1.0);
+            results1[i] = wave1.TickAndRender(delta, -1.0);
+            results2[i] = wave2.TickAndRender(delta, -1.0);
         }
 
         // ピッチが2倍の場合、100サンプル後の値が、ピッチ1倍の200サンプル後の値と近似するはず
@@ -116,16 +115,15 @@ public static class ModulatorWaveTest
     [Fact]
     public static void TickAndRender_フィードバックあり()
     {
-        var waveNoFb = new ModulatorWave();
-        var waveFb = new ModulatorWave();
-
         var unitNoFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = false, Level = 1f };
         var unitFb = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0.3f, Sync = false, Level = 1f };
         var configNoFb = new ModulatorWaveConfig(unitNoFb);
         var configFb = new ModulatorWaveConfig(unitFb);
+        var waveNoFb = new ModulatorWave(configNoFb);
+        var waveFb = new ModulatorWave(configFb);
 
-        waveNoFb.Reset(in configNoFb);
-        waveFb.Reset(in configFb);
+        waveNoFb.Reset();
+        waveFb.Reset();
 
         var delta = 0.01;
         var resultsNoFb = new float[100];
@@ -133,8 +131,8 @@ public static class ModulatorWaveTest
 
         for (var i = 0; i < 100; i++)
         {
-            resultsNoFb[i] = waveNoFb.TickAndRender(in configNoFb, delta, -1.0);
-            resultsFb[i] = waveFb.TickAndRender(in configFb, delta, -1.0);
+            resultsNoFb[i] = waveNoFb.TickAndRender(delta, -1.0);
+            resultsFb[i] = waveFb.TickAndRender(delta, -1.0);
         }
 
         // フィードバックがあると波形が異なるはず
@@ -153,22 +151,22 @@ public static class ModulatorWaveTest
     [Fact]
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
-        var wave = new ModulatorWave();
         var unit = new TestModulatorUnit { Pitch = 1.0, Phase = 0f, Feedback = 0f, Sync = true, Level = 1f };
         var config = new ModulatorWaveConfig(unit);
+        var wave = new ModulatorWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         var delta = 0.01;
         // まず位相を進める（syncPhase < 0 なのでシンクしない）
         for (var i = 0; i < 50; i++)
         {
-            wave.TickAndRender(in config, delta, -1.0);
+            wave.TickAndRender(delta, -1.0);
         }
 
         // シンクを発火させる（syncPhase >= 0）
-        var resultBeforeSync = wave.TickAndRender(in config, delta, 0.0);
-        var resultAfterSync = wave.TickAndRender(in config, delta, -1.0);
+        var resultBeforeSync = wave.TickAndRender(delta, 0.0);
+        var resultAfterSync = wave.TickAndRender(delta, -1.0);
 
         // シンク後は位相がリセットされているため、波形が変化する可能性が高い
         // ただし、厳密な検証は難しいので、範囲チェックのみ

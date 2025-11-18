@@ -7,11 +7,12 @@ public static class ProcessorTest
     [Fact]
     public static void OnActive_アクティブ化するとIsActiveがtrueになる()
     {
-        var processor = new Processor();
+        var model = new TsumikiModel();
+        var processor = new Processor(model, 44100);
 
         Assert.False(processor.IsActive);
 
-        processor.OnActive(true, new TsumikiModel(), 44100);
+        processor.OnActive(true);
 
         Assert.True(processor.IsActive);
     }
@@ -19,26 +20,20 @@ public static class ProcessorTest
     [Fact]
     public static void OnActive_非アクティブ化するとIsActiveがfalseになる()
     {
-        var processor = new Processor();
+        var model = new TsumikiModel();
+        var processor = new Processor(model, 44100);
 
-        processor.OnActive(true, new TsumikiModel(), 44100);
+        processor.OnActive(true);
         Assert.True(processor.IsActive);
 
-        processor.OnActive(false, new TsumikiModel(), 44100);
+        processor.OnActive(false);
         Assert.False(processor.IsActive);
     }
 
     [Fact]
     public static void ProcessMain_適切なパラメータを入力すれば音が出力される()
     {
-        var processor = new Processor();
         var model = new TsumikiModel();
-
-        // プロセッサをアクティブ化
-        processor.OnActive(true, new TsumikiModel(), 44100);
-
-        // サンプルレートとパラメータを設定
-        const double sampleRate = 44100.0;
 
         // モデルパラメータを設定（デフォルト値から一部変更）
         model.Master = 0.5f;
@@ -50,8 +45,15 @@ public static class ProcessorTest
 
         Assert.Equal(0.5f, model.Master);
 
+        // サンプルレートとパラメータを設定
+        const double sampleRate = 44100.0;
+        var processor = new Processor(model, sampleRate);
+
+        // プロセッサをアクティブ化
+        processor.OnActive(true);
+
         // Recalculateを呼び出してパラメータを反映
-        processor.Recalculate(model, sampleRate);
+        processor.Recalculate();
 
         // ノートオンを予約（ピッチ60 = C4, ベロシティ0.8）
         var noteOn = new MidiNote(0, 60, 0.8f, 1);
@@ -64,7 +66,7 @@ public static class ProcessorTest
         var rightOutput = new float[sampleCount];
 
         // 音声処理を実行
-        processor.ProcessMain(model, sampleRate, sampleCount, leftOutput, rightOutput);
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
 
         // 出力に音が含まれているか確認（0以外の値が存在する）
         var maxLevel = 0f;
@@ -80,13 +82,14 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_ノートオンなしでは音が出力されない()
     {
-        var processor = new Processor();
         var model = new TsumikiModel();
 
-        processor.OnActive(true, new TsumikiModel(), 44100);
-
         const double sampleRate = 44100.0;
-        processor.Recalculate(model, sampleRate);
+        var processor = new Processor(model, sampleRate);
+
+        processor.OnActive(true);
+
+        processor.Recalculate();
 
         // ノートオンを予約せずに処理
 
@@ -94,7 +97,7 @@ public static class ProcessorTest
         var leftOutput = new float[sampleCount];
         var rightOutput = new float[sampleCount];
 
-        processor.ProcessMain(model, sampleRate, sampleCount, leftOutput, rightOutput);
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
 
         // 出力がすべて0であることを確認
         for (var i = 0; i < sampleCount; i++)
@@ -108,14 +111,15 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_複数ノートで音が出力される()
     {
-        var processor = new Processor();
         var model = new TsumikiModel();
-
-        processor.OnActive(true, new TsumikiModel(), 44100);
+        model.Master = 0.5f;
 
         const double sampleRate = 44100.0;
-        model.Master = 0.5f;
-        processor.Recalculate(model, sampleRate);
+        var processor = new Processor(model, sampleRate);
+
+        processor.OnActive(true);
+
+        processor.Recalculate();
 
         // 複数のノートオンを予約
         var note1 = new MidiNote(0, 60, 0.8f, 1);
@@ -131,7 +135,7 @@ public static class ProcessorTest
         var leftOutput = new float[sampleCount];
         var rightOutput = new float[sampleCount];
 
-        processor.ProcessMain(model, sampleRate, sampleCount, leftOutput, rightOutput);
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
 
         // 音が出力されることを確認
         var hasNonZeroOutput = false;
@@ -150,15 +154,16 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_ノートオフ後はエンベロープが減衰する()
     {
-        var processor = new Processor();
         var model = new TsumikiModel();
-
-        processor.OnActive(true, new TsumikiModel(), 44100);
-
-        const double sampleRate = 44100.0;
         model.Master = 0.5f;
         model.Input.Stack = 1;
-        processor.Recalculate(model, sampleRate);
+
+        const double sampleRate = 44100.0;
+        var processor = new Processor(model, sampleRate);
+
+        processor.OnActive(true);
+
+        processor.Recalculate();
 
         // ノートオン
         var noteOn = new MidiNote(0, 60, 0.8f, 1);
@@ -168,7 +173,7 @@ public static class ProcessorTest
         const int sampleCount = 256;
         var leftOutput1 = new float[sampleCount];
         var rightOutput1 = new float[sampleCount];
-        processor.ProcessMain(model, sampleRate, sampleCount, leftOutput1, rightOutput1);
+        processor.ProcessMain(sampleCount, leftOutput1, rightOutput1);
 
         // 音が出ていることを確認
         var hasNonZero1 = leftOutput1.Any(x => x != 0f);
@@ -181,7 +186,7 @@ public static class ProcessorTest
         // 2回目のバッチを処理（ノートオフ後、エンベロープがリリース段階）
         var leftOutput2 = new float[sampleCount];
         var rightOutput2 = new float[sampleCount];
-        processor.ProcessMain(model, sampleRate, sampleCount, leftOutput2, rightOutput2);
+        processor.ProcessMain(sampleCount, leftOutput2, rightOutput2);
 
         // まだ音が出ている（リリース中）
         var hasNonZero2 = leftOutput2.Any(x => x != 0f);
@@ -193,7 +198,7 @@ public static class ProcessorTest
         var rightOutput3 = new float[sampleCount];
         for (var i = 0; i < 100; i++)
         {
-            processor.ProcessMain(model, sampleRate, sampleCount, leftOutput3, rightOutput3);
+            processor.ProcessMain(sampleCount, leftOutput3, rightOutput3);
         }
 
         // 最終的には無音になる

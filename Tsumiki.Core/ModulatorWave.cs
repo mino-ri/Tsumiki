@@ -3,43 +3,56 @@ using Tsumiki.Metadata;
 namespace Tsumiki.Core;
 
 [EventTiming]
-[method: EventTiming]
-internal readonly struct ModulatorWaveConfig(IModulatorUnit unit)
+[method: InitTiming]
+internal sealed class ModulatorWaveConfig(IModulatorUnit unit)
 {
-    public readonly double Pitch = unit.Pitch;
-    public readonly float Phase = unit.Phase;
-    public readonly float Feedback = unit.Feedback;
-    public readonly bool Sync = unit.Sync;
-    public readonly float Level = unit.Level;
+    private readonly IModulatorUnit _unit = unit;
+    public double Pitch = unit.Pitch;
+    public float Phase = unit.Phase;
+    public float Feedback = unit.Feedback;
+    public bool Sync = unit.Sync;
+    public float Level = unit.Level;
+
+    [EventTiming]
+    public void Recalculate()
+    {
+        Pitch = _unit.Pitch;
+        Phase = _unit.Phase;
+        Feedback = _unit.Feedback;
+        Sync = _unit.Sync;
+        Level = _unit.Level;
+    }
 }
 
 [AudioTiming]
-internal struct ModulatorWave
+[method: InitTiming]
+internal struct ModulatorWave(ModulatorWaveConfig config)
 {
+    private readonly ModulatorWaveConfig _config = config;
     double _phase;
     double _output;
 
     [EventTiming]
-    public void Reset(in ModulatorWaveConfig config)
+    public void Reset()
     {
-        _phase = config.Phase;
+        _phase = _config.Phase;
         _output = 0;
     }
 
     [AudioTiming]
-    public float TickAndRender(in ModulatorWaveConfig config, double delta, double syncPhase)
+    public float TickAndRender(double delta, double syncPhase)
     {
-        if (config.Sync && syncPhase >= 0)
+        if (_config.Sync && syncPhase >= 0)
         {
-            _phase = delta * config.Pitch + config.Phase;
+            _phase = delta * _config.Pitch + _config.Phase;
         }
 
-        var actualPhase = _phase + config.Feedback * _output;
+        var actualPhase = _phase + _config.Feedback * _output;
         actualPhase -= (int)actualPhase;
         _output = MathT.Sin((float)actualPhase);
-        _phase += delta * config.Pitch;
+        _phase += delta * _config.Pitch;
         _phase -= (int)_phase;
 
-        return (float)_output * config.Level;
+        return (float)_output * _config.Level;
     }
 }

@@ -97,14 +97,14 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
     private static IPropertySymbol[] GetUnitProperties(INamedTypeSymbol typeSymbol)
     {
-        return [.. typeSymbol.GetMembers()
+        return [.. typeSymbol.AllInterfaces.SelectMany(s => s.GetMembers()).Concat(typeSymbol.GetMembers())
             .OfType<IPropertySymbol>()
             .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "VstUnitAttribute"))];
     }
 
     private static IPropertySymbol[] GetParameterProperties(INamedTypeSymbol typeSymbol)
     {
-        return [.. typeSymbol.GetMembers()
+        return [.. typeSymbol.AllInterfaces.SelectMany(s => s.GetMembers()).Concat(typeSymbol.GetMembers())
             .OfType<IPropertySymbol>()
             .Where(p => p.GetAttributes().Any(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name)))];
     }

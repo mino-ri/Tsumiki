@@ -23,21 +23,21 @@ public static class CarrierWaveTest
     [Fact]
     public static void Reset_位相がリセットされる()
     {
-        var wave = new CarrierWave();
         var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0.25f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
 
         // 事前に位相を進めておく
         for (var i = 0; i < 100; i++)
         {
-            wave.TickAndRender(in config, 0.01, -1.0, 0f);
+            wave.TickAndRender(0.01, -1.0, 0f);
         }
 
         // リセット実行
-        wave.Reset(in config);
+        wave.Reset();
 
         // リセット後の最初の出力を確認（位相が初期化されている）
-        var result = wave.TickAndRender(in config, 0.01, -1.0, 0f);
+        var result = wave.TickAndRender(0.01, -1.0, 0f);
         // Phase = 0.25f で開始し、そこから波形を計算するので、範囲内の値になる
         Assert.InRange(result, -1.5f, 1.5f);
     }
@@ -45,15 +45,15 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_出力値が範囲内()
     {
-        var wave = new CarrierWave();
         var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         for (var i = 0; i < 1000; i++)
         {
-            var result = wave.TickAndRender(in config, 0.01, -1.0, 0f);
+            var result = wave.TickAndRender(0.01, -1.0, 0f);
             // Level = 1.0f なので、出力は -1f ~ 1f の範囲内に収まるはず
             Assert.InRange(result, -1f, 1f);
         }
@@ -62,17 +62,17 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_位相が進む()
     {
-        var wave = new CarrierWave();
         // ShapeY = 0 で純粋な三角波を生成
         var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         var results = new float[100];
         for (var i = 0; i < 100; i++)
         {
-            results[i] = wave.TickAndRender(in config, 0.01, -1.0, 0f);
+            results[i] = wave.TickAndRender(0.01, -1.0, 0f);
         }
 
         // 位相が進むので、出力が周期的に変化するはず
@@ -92,16 +92,15 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ピッチが2倍だと周期が半分()
     {
-        var wave1 = new CarrierWave();
-        var wave2 = new CarrierWave();
-
         var unit1 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unit2 = new TestCarrierUnit { Pitch = 2.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config1 = new CarrierWaveConfig(unit1);
         var config2 = new CarrierWaveConfig(unit2);
+        var wave1 = new CarrierWave(config1);
+        var wave2 = new CarrierWave(config2);
 
-        wave1.Reset(in config1);
-        wave2.Reset(in config2);
+        wave1.Reset();
+        wave2.Reset();
 
         var delta = 0.01;
         var results1 = new float[200];
@@ -109,8 +108,8 @@ public static class CarrierWaveTest
 
         for (var i = 0; i < 200; i++)
         {
-            results1[i] = wave1.TickAndRender(in config1, delta, -1.0, 0f);
-            results2[i] = wave2.TickAndRender(in config2, delta, -1.0, 0f);
+            results1[i] = wave1.TickAndRender(delta, -1.0, 0f);
+            results2[i] = wave2.TickAndRender(delta, -1.0, 0f);
         }
 
         // ピッチが2倍の場合、100サンプル後の値が、ピッチ1倍の200サンプル後の値と近似するはず
@@ -120,22 +119,22 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
-        var wave = new CarrierWave();
         var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
         var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
 
-        wave.Reset(in config);
+        wave.Reset();
 
         var delta = 0.01;
         // まず位相を進める（syncPhase < 0 なのでシンクしない）
         for (var i = 0; i < 50; i++)
         {
-            wave.TickAndRender(in config, delta, -1.0, 0f);
+            wave.TickAndRender(delta, -1.0, 0f);
         }
 
         // シンクを発火させる（syncPhase >= 0）
-        var resultBeforeSync = wave.TickAndRender(in config, delta, 0.0, 0f);
-        var resultAfterSync = wave.TickAndRender(in config, delta, -1.0, 0f);
+        var resultBeforeSync = wave.TickAndRender(delta, 0.0, 0f);
+        var resultAfterSync = wave.TickAndRender(delta, -1.0, 0f);
 
         // シンク後は位相がリセットされているため、波形が変化する可能性が高い
         // ただし、厳密な検証は難しいので、範囲チェックのみ
@@ -146,15 +145,14 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_FM変調が効く()
     {
-        var waveNoFm = new CarrierWave();
-        var waveFm = new CarrierWave();
-
         // ShapeY = 0 で純粋な三角波を生成
         var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
+        var waveNoFm = new CarrierWave(config);
+        var waveFm = new CarrierWave(config);
 
-        waveNoFm.Reset(in config);
-        waveFm.Reset(in config);
+        waveNoFm.Reset();
+        waveFm.Reset();
 
         var delta = 0.01;
         var resultsNoFm = new float[100];
@@ -162,8 +160,8 @@ public static class CarrierWaveTest
 
         for (var i = 0; i < 100; i++)
         {
-            resultsNoFm[i] = waveNoFm.TickAndRender(in config, delta, -1.0, 0f);
-            resultsFm[i] = waveFm.TickAndRender(in config, delta, -1.0, 0.5f); // FM 変調あり
+            resultsNoFm[i] = waveNoFm.TickAndRender(delta, -1.0, 0f);
+            resultsFm[i] = waveFm.TickAndRender(delta, -1.0, 0.5f); // FM 変調あり
         }
 
         // FM変調があると波形が異なるはず
@@ -182,10 +180,6 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ShapeYで波形が変わる()
     {
-        var waveNeutral = new CarrierWave();
-        var wavePositive = new CarrierWave();
-        var waveNegative = new CarrierWave();
-
         var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
         var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
@@ -194,9 +188,13 @@ public static class CarrierWaveTest
         var configPositive = new CarrierWaveConfig(unitPositive);
         var configNegative = new CarrierWaveConfig(unitNegative);
 
-        waveNeutral.Reset(in configNeutral);
-        wavePositive.Reset(in configPositive);
-        waveNegative.Reset(in configNegative);
+        var waveNeutral = new CarrierWave(configNeutral);
+        var wavePositive = new CarrierWave(configPositive);
+        var waveNegative = new CarrierWave(configNegative);
+
+        waveNeutral.Reset();
+        wavePositive.Reset();
+        waveNegative.Reset();
 
         var delta = 0.01;
         var resultsNeutral = new float[100];
@@ -205,9 +203,9 @@ public static class CarrierWaveTest
 
         for (var i = 0; i < 100; i++)
         {
-            resultsNeutral[i] = waveNeutral.TickAndRender(in configNeutral, delta, -1.0, 0f);
-            resultsPositive[i] = wavePositive.TickAndRender(in configPositive, delta, -1.0, 0f);
-            resultsNegative[i] = waveNegative.TickAndRender(in configNegative, delta, -1.0, 0f);
+            resultsNeutral[i] = waveNeutral.TickAndRender(delta, -1.0, 0f);
+            resultsPositive[i] = wavePositive.TickAndRender(delta, -1.0, 0f);
+            resultsNegative[i] = waveNegative.TickAndRender(delta, -1.0, 0f);
         }
 
         // ShapeYが異なると波形が異なるはず
@@ -233,9 +231,6 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ShapeXで波形が変わる()
     {
-        var waveNeutral = new CarrierWave();
-        var wavePositive = new CarrierWave();
-
         // ShapeY = 0 で純粋な三角波を生成
         var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
@@ -243,8 +238,11 @@ public static class CarrierWaveTest
         var configNeutral = new CarrierWaveConfig(unitNeutral);
         var configPositive = new CarrierWaveConfig(unitPositive);
 
-        waveNeutral.Reset(in configNeutral);
-        wavePositive.Reset(in configPositive);
+        var waveNeutral = new CarrierWave(configNeutral);
+        var wavePositive = new CarrierWave(configPositive);
+
+        waveNeutral.Reset();
+        wavePositive.Reset();
 
         var delta = 0.01;
         var resultsNeutral = new float[100];
@@ -252,8 +250,8 @@ public static class CarrierWaveTest
 
         for (var i = 0; i < 100; i++)
         {
-            resultsNeutral[i] = waveNeutral.TickAndRender(in configNeutral, delta, -1.0, 0f);
-            resultsPositive[i] = wavePositive.TickAndRender(in configPositive, delta, -1.0, 0f);
+            resultsNeutral[i] = waveNeutral.TickAndRender(delta, -1.0, 0f);
+            resultsPositive[i] = wavePositive.TickAndRender(delta, -1.0, 0f);
         }
 
         // ShapeXが異なると波形が異なるはず
@@ -273,17 +271,17 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_Levelで出力が変わる()
     {
-        var waveHalf = new CarrierWave();
-        var waveFull = new CarrierWave();
-
         var unitHalf = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitFull = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
 
         var configHalf = new CarrierWaveConfig(unitHalf);
         var configFull = new CarrierWaveConfig(unitFull);
 
-        waveHalf.Reset(in configHalf);
-        waveFull.Reset(in configFull);
+        var waveHalf = new CarrierWave(configHalf);
+        var waveFull = new CarrierWave(configFull);
+
+        waveHalf.Reset();
+        waveFull.Reset();
 
         var delta = 0.01;
         var resultsHalf = new float[100];
@@ -291,8 +289,8 @@ public static class CarrierWaveTest
 
         for (var i = 0; i < 100; i++)
         {
-            resultsHalf[i] = waveHalf.TickAndRender(in configHalf, delta, -1.0, 0f);
-            resultsFull[i] = waveFull.TickAndRender(in configFull, delta, -1.0, 0f);
+            resultsHalf[i] = waveHalf.TickAndRender(delta, -1.0, 0f);
+            resultsFull[i] = waveFull.TickAndRender(delta, -1.0, 0f);
         }
 
         // Level=0.5 の出力が Level=1.0 の約半分になっているか確認
