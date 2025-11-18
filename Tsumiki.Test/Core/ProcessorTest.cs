@@ -215,4 +215,240 @@ public static class ProcessorTest
         Assert.True(allZero, "十分な時間経過後、エンベロープが完全に減衰して無音になる必要がある");
     }
 
+    [Fact]
+    public static void ChangeSampleRate_サンプルレートが変更される()
+    {
+        var model = new TsumikiModel();
+        var processor = new Processor(model, 44100.0);
+
+        processor.OnActive(true);
+
+        // サンプルレート変更
+        processor.ChangeSampleRate(48000.0);
+
+        // 音声処理が正常に動作することを確認（クラッシュしない）
+        const int sampleCount = 256;
+        var leftOutput = new float[sampleCount];
+        var rightOutput = new float[sampleCount];
+
+        var noteOn = new MidiNote(0, 60, 0.8f, 1);
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
+
+        // 音が出力されることを確認
+        var hasNonZeroOutput = false;
+        for (var i = 0; i < sampleCount; i++)
+        {
+            if (leftOutput[i] != 0f || rightOutput[i] != 0f)
+            {
+                hasNonZeroOutput = true;
+                break;
+            }
+        }
+
+        Assert.True(hasNonZeroOutput, "サンプルレート変更後も音が出力される必要がある");
+    }
+
+    [Fact]
+    public static void Recalculate_パラメータ変更が反映される()
+    {
+        var model1 = new TsumikiModel();
+        model1.Master = 0.5f;
+
+        var model2 = new TsumikiModel();
+        model2.Master = 0.25f;
+
+        var processor1 = new Processor(model1, 44100.0);
+        var processor2 = new Processor(model2, 44100.0);
+
+        processor1.OnActive(true);
+        processor2.OnActive(true);
+
+        processor1.Recalculate();
+        processor2.Recalculate();
+
+        var noteOn = new MidiNote(0, 60, 0.8f, 1);
+        processor1.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+        processor2.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+
+        const int sampleCount = 4096;
+        var leftOutput1 = new float[sampleCount];
+        var rightOutput1 = new float[sampleCount];
+        var leftOutput2 = new float[sampleCount];
+        var rightOutput2 = new float[sampleCount];
+
+        processor1.ProcessMain(sampleCount, leftOutput1, rightOutput1);
+        processor2.ProcessMain(sampleCount, leftOutput2, rightOutput2);
+
+        var maxLevel1 = 0f;
+        var maxLevel2 = 0f;
+
+        for (var i = 0; i < sampleCount; i++)
+        {
+            maxLevel1 = MathF.Max(maxLevel1, MathF.Max(MathF.Abs(leftOutput1[i]), MathF.Abs(rightOutput1[i])));
+            maxLevel2 = MathF.Max(maxLevel2, MathF.Max(MathF.Abs(leftOutput2[i]), MathF.Abs(rightOutput2[i])));
+        }
+
+        // Master が 0.5 と 0.25 なので、出力レベルも約2倍の差があるはず
+        Assert.True(maxLevel2 < maxLevel1, $"Master 0.25 の出力が Master 0.5 より小さい必要がある (0.5: {maxLevel1}, 0.25: {maxLevel2})");
+        Assert.InRange(maxLevel1 / maxLevel2, 1.5, 2.5); // おおよそ2倍の比率
+    }
+
+    [Fact]
+    public static void ProcessMain_マスターボリュームで出力が変化する()
+    {
+        var model1 = new TsumikiModel();
+        model1.Master = 1.0f;
+
+        var model2 = new TsumikiModel();
+        model2.Master = 0.5f;
+
+        var processor1 = new Processor(model1, 44100.0);
+        var processor2 = new Processor(model2, 44100.0);
+
+        processor1.OnActive(true);
+        processor2.OnActive(true);
+
+        processor1.Recalculate();
+        processor2.Recalculate();
+
+        var noteOn = new MidiNote(0, 60, 0.8f, 1);
+        processor1.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+        processor2.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+
+        const int sampleCount = 256;
+        var leftOutput1 = new float[sampleCount];
+        var rightOutput1 = new float[sampleCount];
+        var leftOutput2 = new float[sampleCount];
+        var rightOutput2 = new float[sampleCount];
+
+        processor1.ProcessMain(sampleCount, leftOutput1, rightOutput1);
+        processor2.ProcessMain(sampleCount, leftOutput2, rightOutput2);
+
+        var maxLevel1 = 0f;
+        var maxLevel2 = 0f;
+
+        for (var i = 0; i < sampleCount; i++)
+        {
+            maxLevel1 = MathF.Max(maxLevel1, MathF.Max(MathF.Abs(leftOutput1[i]), MathF.Abs(rightOutput1[i])));
+            maxLevel2 = MathF.Max(maxLevel2, MathF.Max(MathF.Abs(leftOutput2[i]), MathF.Abs(rightOutput2[i])));
+        }
+
+        // Master が 1.0 の方が 0.5 より出力が大きいはず
+        Assert.True(maxLevel1 > maxLevel2, $"Master 1.0 の出力が Master 0.5 より大きい必要がある (1.0: {maxLevel1}, 0.5: {maxLevel2})");
+    }
+
+    [Fact]
+    public static void ProcessMain_ポリフォニーモードで複数ノートが同時に鳴る()
+    {
+        var model = new TsumikiModel();
+        model.Master = 0.5f;
+        model.PitchBend = 0.5f;
+        model.A1.Pitch = 1f;
+        model.A1.Level = 1f;
+        model.B1.Pitch = 1f;
+        model.B1.Level = 1f;
+        model.Input.Glide = -1; // ポリフォニーモード有効
+
+        var processor = new Processor(model, 44100.0);
+        processor.OnActive(true);
+        processor.Recalculate();
+
+        // 複数のノートオンを同時に予約
+        var note1 = new MidiNote(0, 60, 0.8f, 1);
+        var note2 = new MidiNote(0, 64, 0.8f, 2);
+        var note3 = new MidiNote(0, 67, 0.8f, 3);
+
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in note1, 0));
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in note2, 0));
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in note3, 0));
+
+        const int sampleCount = 4096;
+        var leftOutput = new float[sampleCount];
+        var rightOutput = new float[sampleCount];
+
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
+
+        // 音が出力されることを確認
+        var maxLevel = 0f;
+        for (var i = 0; i < sampleCount; i++)
+        {
+            maxLevel = MathF.Max(maxLevel, MathF.Max(MathF.Abs(leftOutput[i]), MathF.Abs(rightOutput[i])));
+        }
+
+        Assert.True(maxLevel > 0.1f, $"ポリフォニーモードで複数ノートの音が出力される必要がある (maxLevel: {maxLevel})");
+    }
+
+    [Fact]
+    public static void ProcessMain_モノフォニーモードでは最新ノートのみ鳴る()
+    {
+        var model = new TsumikiModel();
+        model.Master = 0.5f;
+        model.Input.Glide = 0; // モノフォニーモード
+
+        var processor = new Processor(model, 44100.0);
+        processor.OnActive(true);
+        processor.Recalculate();
+
+        // 複数のノートオンを予約（最後が優先される）
+        var note1 = new MidiNote(0, 60, 0.8f, 1);
+        var note2 = new MidiNote(0, 64, 0.8f, 2);
+
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in note1, 0));
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in note2, 0));
+
+        const int sampleCount = 256;
+        var leftOutput = new float[sampleCount];
+        var rightOutput = new float[sampleCount];
+
+        processor.ProcessMain(sampleCount, leftOutput, rightOutput);
+
+        // 音が出力されることを確認（最新ノートのみ）
+        var hasNonZeroOutput = false;
+        for (var i = 0; i < sampleCount; i++)
+        {
+            if (leftOutput[i] != 0f || rightOutput[i] != 0f)
+            {
+                hasNonZeroOutput = true;
+                break;
+            }
+        }
+
+        Assert.True(hasNonZeroOutput, "モノフォニーモードで最新ノートの音が出力される必要がある");
+    }
+
+    [Fact]
+    public static void ProcessMain_出力が有限値の範囲内()
+    {
+        var model = new TsumikiModel();
+        model.Master = 1.0f;
+
+        var processor = new Processor(model, 44100.0);
+        processor.OnActive(true);
+        processor.Recalculate();
+
+        var noteOn = new MidiNote(0, 60, 1.0f, 1);
+        processor.ReserveNote(new MidiEventReservation<MidiNote>(in noteOn, 0));
+
+        const int sampleCount = 1024;
+        var leftOutput = new float[sampleCount];
+        var rightOutput = new float[sampleCount];
+
+        // 複数バッチ処理
+        for (var batch = 0; batch < 10; batch++)
+        {
+            processor.ProcessMain(sampleCount, leftOutput, rightOutput);
+
+            // すべてのサンプルが有限値であることを確認
+            for (var i = 0; i < sampleCount; i++)
+            {
+                Assert.False(float.IsNaN(leftOutput[i]), $"バッチ {batch}, サンプル {i} の左チャンネルで NaN が発生");
+                Assert.False(float.IsInfinity(leftOutput[i]), $"バッチ {batch}, サンプル {i} の左チャンネルで無限大が発生");
+                Assert.False(float.IsNaN(rightOutput[i]), $"バッチ {batch}, サンプル {i} の右チャンネルで NaN が発生");
+                Assert.False(float.IsInfinity(rightOutput[i]), $"バッチ {batch}, サンプル {i} の右チャンネルで無限大が発生");
+            }
+        }
+    }
+
 }

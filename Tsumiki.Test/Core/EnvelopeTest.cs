@@ -236,4 +236,210 @@ public static class EnvelopeTest
         Assert.True(config1.ReleaseRate > config2.ReleaseRate);
         Assert.True(config2.ReleaseRate > config3.ReleaseRate);
     }
+
+    [Fact]
+    public static void EnvelopeConfig_Recalculate_サンプルレート変更で再計算される()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+
+        var oldAttackDelta = config.AttackDelta;
+        var oldDecayRate = config.DecayRate;
+        var oldReleaseRate = config.ReleaseRate;
+
+        // サンプルレートを変更して再計算
+        config.Recalculate(48000.0);
+
+        // レートが変わることを確認（サンプルレートが変わると計算結果も変わる）
+        Assert.NotEqual(oldAttackDelta, config.AttackDelta);
+        Assert.NotEqual(oldDecayRate, config.DecayRate);
+        Assert.NotEqual(oldReleaseRate, config.ReleaseRate);
+    }
+
+    [Fact]
+    public static void EnvelopeConfig_Recalculate_パラメータ変更で再計算される()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+
+        var oldAttackDelta = config.AttackDelta;
+        var oldDecayRate = config.DecayRate;
+        var oldSustainLevel = config.SustainLevel;
+
+        // パラメータを変更
+        unit.Attack = 60;
+        unit.Decay = 60;
+        unit.Sustain = 0.7f;
+        unit.Release = 60;
+
+        config.Recalculate(44100.0);
+
+        // 変更が反映されることを確認
+        Assert.NotEqual(oldAttackDelta, config.AttackDelta);
+        Assert.NotEqual(oldDecayRate, config.DecayRate);
+        Assert.NotEqual(oldSustainLevel, config.SustainLevel);
+        Assert.InRange(config.SustainLevel, 0.69, 0.71);
+    }
+
+    [Fact]
+    public static void Envelope_Restart_減衰をリセットする()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 10, Decay = 10, Sustain = 0.5f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+        var envelope = new Envelope(config);
+
+        // アタックからディケイまで進める
+        for (var i = 0; i < 2000; i++)
+        {
+            envelope.TickAndRender(true);
+        }
+
+        // Restart を呼ぶ
+        envelope.Restart();
+
+        // 再度ノートオンすると、アタックフェーズから開始される
+        var result = envelope.TickAndRender(true);
+        Assert.True(result < 1f); // まだ最大値に達していない
+    }
+
+    [Fact]
+    public static void Envelope_Reset_完全に初期状態に戻る()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+        var envelope = new Envelope(config);
+
+        // アタック状態まで進める
+        for (var i = 0; i < 100; i++)
+        {
+            envelope.TickAndRender(true);
+        }
+
+        // Reset を呼ぶ
+        envelope.Reset();
+
+        // ノートオフ状態で呼んでも 0 が返る（完全にリセットされている）
+        var result = envelope.TickAndRender(false);
+        Assert.Equal(0f, result);
+    }
+
+    [Fact]
+    public static void TickAndRender_Attack値が小さいほど速く最大値に達する()
+    {
+        var unitSlow = new TestEnvelopeUnit { Attack = 60, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unitFast = new TestEnvelopeUnit { Attack = 10, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var configSlow = new EnvelopeConfig(unitSlow, 44100.0);
+        var configFast = new EnvelopeConfig(unitFast, 44100.0);
+        var envelopeSlow = new Envelope(configSlow);
+        var envelopeFast = new Envelope(configFast);
+
+        // Attack値が小さい方が速く最大値に達する
+        var slowIterations = 0;
+        var fastIterations = 0;
+
+        for (var i = 1; i <= 50000; i++)
+        {
+            var resultSlow = envelopeSlow.TickAndRender(true);
+            if (slowIterations == 0 && resultSlow >= 0.99f)
+            {
+                slowIterations = i;
+            }
+
+            var resultFast = envelopeFast.TickAndRender(true);
+            if (fastIterations == 0 && resultFast >= 0.99f)
+            {
+                fastIterations = i;
+            }
+
+            if (slowIterations > 0 && fastIterations > 0)
+                break;
+        }
+
+        Assert.True(fastIterations > 0, "Fast envelope should reach max");
+        Assert.True(slowIterations > 0, "Slow envelope should reach max");
+        Assert.True(fastIterations < slowIterations, $"Attack値が小さい方が速く最大値に達する (fast: {fastIterations}, slow: {slowIterations})");
+    }
+
+    [Fact]
+    public static void TickAndRender_Release値が小さいほど速く0に達する()
+    {
+        var unitSlow = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 60 };
+        var unitFast = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 10 };
+        var configSlow = new EnvelopeConfig(unitSlow, 44100.0);
+        var configFast = new EnvelopeConfig(unitFast, 44100.0);
+        var envelopeSlow = new Envelope(configSlow);
+        var envelopeFast = new Envelope(configFast);
+
+        // アタック状態まで進める
+        for (var i = 0; i < 2000; i++)
+        {
+            envelopeSlow.TickAndRender(true);
+            envelopeFast.TickAndRender(true);
+        }
+
+        // Release値が小さい方が速く0に達する
+        var slowIterations = 0;
+        var fastIterations = 0;
+
+        for (var i = 0; i < 100000; i++)
+        {
+            var resultSlow = envelopeSlow.TickAndRender(false);
+            if (slowIterations == 0 && resultSlow <= 0.01f)
+            {
+                slowIterations = i;
+            }
+
+            var resultFast = envelopeFast.TickAndRender(false);
+            if (fastIterations == 0 && resultFast <= 0.01f)
+            {
+                fastIterations = i;
+            }
+
+            if (slowIterations > 0 && fastIterations > 0)
+                break;
+        }
+
+        Assert.True(fastIterations < slowIterations, $"Release値が小さい方が速く0に達する (fast: {fastIterations}, slow: {slowIterations})");
+    }
+
+    [Fact]
+    public static void TickAndRender_Sustain0でディケイ後は無音()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+        var envelope = new Envelope(config);
+
+        // アタックとディケイを完了させる
+        for (var i = 0; i < 5000; i++)
+        {
+            envelope.TickAndRender(true);
+        }
+
+        // サステインレベルが 0 なので出力は 0
+        var result = envelope.TickAndRender(true);
+        Assert.InRange(result, 0f, 0.01f);
+    }
+
+    [Fact]
+    public static void TickAndRender_Sustain1でディケイなし()
+    {
+        var unit = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 1f, Release = 40 };
+        var config = new EnvelopeConfig(unit, 44100.0);
+        var envelope = new Envelope(config);
+
+        // アタック完了まで進める
+        for (var i = 0; i < 1000; i++)
+        {
+            var result = envelope.TickAndRender(true);
+            if (result >= 1f)
+                break;
+        }
+
+        // サステインが 1 なのでディケイせず、1 のまま
+        for (var i = 0; i < 1000; i++)
+        {
+            var result = envelope.TickAndRender(true);
+            Assert.Equal(1f, result);
+        }
+    }
 }

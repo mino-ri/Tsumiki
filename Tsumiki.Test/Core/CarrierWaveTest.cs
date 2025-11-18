@@ -361,4 +361,265 @@ public static class CarrierWaveTest
         Assert.Equal(1f, config.TriFactor);
         Assert.Equal(0.5f, config.SinFactor);
     }
+
+    [Fact]
+    public static void CarrierWaveConfig_Recalculate_ShapeX変更で再計算される()
+    {
+        var unit = new TestCarrierUnit
+        {
+            Pitch = 1.0,
+            Phase = 0f,
+            Level = 1.0f,
+            ShapeX = 0f,
+            ShapeY = 0f,
+            Sync = false
+        };
+        var config = new CarrierWaveConfig(unit);
+
+        var oldUpSlope = config.UpSlope;
+        var oldDownSlope = config.DownSlope;
+        var oldUpEnd = config.UpEnd;
+        var oldDownStart = config.DownStart;
+
+        // ShapeX を変更して再計算
+        unit.ShapeX = 0.5f;
+        config.Recalculate();
+
+        // Shape関連の値が変わることを確認
+        Assert.NotEqual(oldUpSlope, config.UpSlope);
+        Assert.NotEqual(oldDownSlope, config.DownSlope);
+        Assert.NotEqual(oldUpEnd, config.UpEnd);
+        Assert.NotEqual(oldDownStart, config.DownStart);
+    }
+
+    [Fact]
+    public static void CarrierWaveConfig_Recalculate_ShapeY変更で再計算される()
+    {
+        var unit = new TestCarrierUnit
+        {
+            Pitch = 1.0,
+            Phase = 0f,
+            Level = 1.0f,
+            ShapeX = 0f,
+            ShapeY = -0.5f, // 負の値から開始
+            Sync = false
+        };
+        var config = new CarrierWaveConfig(unit);
+
+        var oldTriFactor = config.TriFactor;
+        var oldSinFactor = config.SinFactor;
+
+        // ShapeY を正の値に変更して再計算
+        unit.ShapeY = 0.7f;
+        config.Recalculate();
+
+        // TriFactor と SinFactor が変わることを確認
+        Assert.NotEqual(oldTriFactor, config.TriFactor);
+        Assert.NotEqual(oldSinFactor, config.SinFactor);
+        Assert.Equal(2.0f, config.TriFactor);
+        Assert.Equal(0.0f, config.SinFactor);
+    }
+
+    [Fact]
+    public static void CarrierWaveConfig_Recalculate_Shape変更なしでは形状パラメータは変わらない()
+    {
+        var unit = new TestCarrierUnit
+        {
+            Pitch = 1.0,
+            Phase = 0f,
+            Level = 1.0f,
+            ShapeX = 0.3f,
+            ShapeY = -0.4f,
+            Sync = false
+        };
+        var config = new CarrierWaveConfig(unit);
+
+        var oldTriFactor = config.TriFactor;
+        var oldSinFactor = config.SinFactor;
+        var oldUpSlope = config.UpSlope;
+        var oldDownSlope = config.DownSlope;
+
+        // Pitch や Level のみ変更して再計算
+        unit.Pitch = 2.0;
+        unit.Level = 0.5f;
+        config.Recalculate();
+
+        // Pitch と Level は更新されるが、Shape関連は変わらない
+        Assert.Equal(2.0, config.Pitch);
+        Assert.Equal(0.5f, config.Level);
+        Assert.Equal(oldTriFactor, config.TriFactor);
+        Assert.Equal(oldSinFactor, config.SinFactor);
+        Assert.Equal(oldUpSlope, config.UpSlope);
+        Assert.Equal(oldDownSlope, config.DownSlope);
+    }
+
+    [Fact]
+    public static void CarrierWaveConfig_Recalculate_パラメータ変更が反映される()
+    {
+        var unit = new TestCarrierUnit
+        {
+            Pitch = 1.0,
+            Phase = 0f,
+            Level = 1.0f,
+            ShapeX = 0f,
+            ShapeY = 0f,
+            Sync = false
+        };
+        var config = new CarrierWaveConfig(unit);
+
+        // 複数のパラメータを変更
+        unit.Pitch = 3.5;
+        unit.Phase = 0.25f;
+        unit.Level = 0.7f;
+        unit.Sync = true;
+
+        config.Recalculate();
+
+        // 変更が反映されることを確認
+        Assert.Equal(3.5, config.Pitch);
+        Assert.Equal(0.25f, config.Phase);
+        Assert.Equal(0.7f, config.Level);
+        Assert.True(config.Sync);
+    }
+
+    [Fact]
+    public static void TickAndRender_Level0で無音()
+    {
+        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
+
+        wave.Reset();
+
+        // Level が 0 なので、全てのサンプルが 0 になるはず
+        for (var i = 0; i < 100; i++)
+        {
+            var result = wave.TickAndRender(0.01, -1.0, 0f);
+            Assert.Equal(0f, result);
+        }
+    }
+
+    [Fact]
+    public static void TickAndRender_Pitch0で位相が進まない()
+    {
+        var unit = new TestCarrierUnit { Pitch = 0.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var config = new CarrierWaveConfig(unit);
+        var wave = new CarrierWave(config);
+
+        wave.Reset();
+
+        var results = new float[100];
+        for (var i = 0; i < 100; i++)
+        {
+            results[i] = wave.TickAndRender(0.01, -1.0, 0f);
+        }
+
+        // Pitch が 0 なので、位相が進まず、全て同じ値になるはず
+        for (var i = 1; i < results.Length; i++)
+        {
+            Assert.Equal(results[0], results[i]);
+        }
+    }
+
+    [Fact]
+    public static void TickAndRender_ShapeXの境界値()
+    {
+        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = -1f, ShapeY = 0f, Sync = false };
+        var unitZero = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
+
+        var configNegative = new CarrierWaveConfig(unitNegative);
+        var configZero = new CarrierWaveConfig(unitZero);
+        var configPositive = new CarrierWaveConfig(unitPositive);
+
+        var waveNegative = new CarrierWave(configNegative);
+        var waveZero = new CarrierWave(configZero);
+        var wavePositive = new CarrierWave(configPositive);
+
+        waveNegative.Reset();
+        waveZero.Reset();
+        wavePositive.Reset();
+
+        // 全ての境界値で出力が有限範囲内であることを確認
+        for (var i = 0; i < 100; i++)
+        {
+            var resultNegative = waveNegative.TickAndRender(0.01, -1.0, 0f);
+            var resultZero = waveZero.TickAndRender(0.01, -1.0, 0f);
+            var resultPositive = wavePositive.TickAndRender(0.01, -1.0, 0f);
+
+            Assert.InRange(resultNegative, -1.5f, 1.5f);
+            Assert.InRange(resultZero, -1.5f, 1.5f);
+            Assert.InRange(resultPositive, -1.5f, 1.5f);
+        }
+    }
+
+    [Fact]
+    public static void TickAndRender_ShapeYの境界値()
+    {
+        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = -1f, Sync = false };
+        var unitZero = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
+
+        var configNegative = new CarrierWaveConfig(unitNegative);
+        var configZero = new CarrierWaveConfig(unitZero);
+        var configPositive = new CarrierWaveConfig(unitPositive);
+
+        var waveNegative = new CarrierWave(configNegative);
+        var waveZero = new CarrierWave(configZero);
+        var wavePositive = new CarrierWave(configPositive);
+
+        waveNegative.Reset();
+        waveZero.Reset();
+        wavePositive.Reset();
+
+        // 全ての境界値で出力が有限範囲内であることを確認
+        for (var i = 0; i < 100; i++)
+        {
+            var resultNegative = waveNegative.TickAndRender(0.01, -1.0, 0f);
+            var resultZero = waveZero.TickAndRender(0.01, -1.0, 0f);
+            var resultPositive = wavePositive.TickAndRender(0.01, -1.0, 0f);
+
+            Assert.InRange(resultNegative, -1.5f, 1.5f);
+            Assert.InRange(resultZero, -1.5f, 1.5f);
+            Assert.InRange(resultPositive, -1.5f, 1.5f);
+        }
+    }
+
+    [Fact]
+    public static void TickAndRender_計算された形状パラメータが出力に影響する()
+    {
+        // ShapeX と ShapeY を変えることで UpSlope, DownSlope, TriFactor, SinFactor が変わり、
+        // それが実際の波形出力に反映されることを確認
+        var unit1 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
+        var unit2 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
+
+        var config1 = new CarrierWaveConfig(unit1);
+        var config2 = new CarrierWaveConfig(unit2);
+
+        var wave1 = new CarrierWave(config1);
+        var wave2 = new CarrierWave(config2);
+
+        wave1.Reset();
+        wave2.Reset();
+
+        // 計算された形状パラメータが異なることを確認
+        Assert.NotEqual(config1.UpSlope, config2.UpSlope);
+        Assert.NotEqual(config1.DownSlope, config2.DownSlope);
+        Assert.NotEqual(config1.TriFactor, config2.TriFactor);
+        Assert.NotEqual(config1.SinFactor, config2.SinFactor);
+
+        // 波形が異なることを確認
+        var different = false;
+        for (var i = 0; i < 100; i++)
+        {
+            var result1 = wave1.TickAndRender(0.01, -1.0, 0f);
+            var result2 = wave2.TickAndRender(0.01, -1.0, 0f);
+            if (MathF.Abs(result1 - result2) > 0.01f)
+            {
+                different = true;
+                break;
+            }
+        }
+        Assert.True(different, "形状パラメータが異なるのに波形が同じ");
+    }
 }
