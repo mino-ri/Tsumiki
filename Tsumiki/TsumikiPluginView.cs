@@ -10,10 +10,10 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
     private readonly TsumikiModel _model = model;
     private IAudioPluginFrame? _frame;
     private ITsumikiCanvas? _canvas;
-    private const int MinWidth = 564;
-    private const int MinHeight = 120;
+    private const int MinWidth = 960;
+    private const int MinHeight = 640;
     private const int MaxWidth = 1920;
-    private const int MaxHeight = 1080;
+    private const int MaxHeight = 1280;
 
     public ViewRectangle Size
     {
@@ -24,7 +24,7 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         }
 
         private set;
-    } = new(0, 0, 564, 120);
+    } = new(0, 0, MinWidth, MinHeight);
 
     public bool IsPlatformTypeSupported(AudioPluginViewPlatform platform)
     {
@@ -134,5 +134,5 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         return false;
     }
 
-    private static Rect ToTsumikiViewSize(ViewRectangle rect) => new(rect.Left, rect.Right, rect.Top, rect.Bottom);
+    private static Rect ToTsumikiViewSize(ViewRectangle rect) => new(rect.Left, rect.Top, rect.Right, rect.Bottom);
 }

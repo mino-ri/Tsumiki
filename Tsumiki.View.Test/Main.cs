@@ -1,22 +1,21 @@
 using Tsumiki.View;
 using Tsumiki.View.Win;
 
-var rect = new Rect(0, 800, 0, 600);
+var rect = new Rect(0, 0, 960, 640);
 using var form = new Form
 {
     Text = "Tsumiki",
-    Width = rect.Width,
-    Height = rect.Height,
-    MinimumSize = new Size(400, 300),
+    ClientSize = new Size(rect.Width, rect.Height),
     MinimizeBox = false,
     MaximizeBox = false,
 };
+form.MinimumSize = new Size(form.Width, form.Height);
 
 WinTsumikiCanvas? canvas = null;
 form.Resize += (_, e) =>
 {
     var clientRect = form.ClientRectangle;
-    var newRect = new Rect(0, clientRect.Width, 0, clientRect.Height);
+    var newRect = new Rect(0, 0, clientRect.Width, clientRect.Height);
     canvas?.Resize(newRect);
 };
 
