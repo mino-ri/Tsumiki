@@ -8,6 +8,7 @@ namespace Tsumiki.View.Win;
 
 internal sealed class Renderer : IDisposable
 {
+    private const int syncInterval = 2;
     private readonly Graphics _graphics;
     private readonly IResourceTexture _sourceTexture;
     private readonly Vertex[] _vertices;
@@ -20,7 +21,7 @@ internal sealed class Renderer : IDisposable
 
     public Renderer(nint hwnd, int width, int height)
     {
-        _graphics = new Graphics(hwnd, width, height, true, 60, 2);
+        _graphics = new Graphics(hwnd, width, height, true, 60, syncInterval);
         _vertices =
         [
             new Vertex(-256f, -256f, 0.5f, 1f, Color.White, new Vector2(0f, 0f)),
@@ -78,7 +79,7 @@ internal sealed class Renderer : IDisposable
             });
             _vertexBuffer.Write(_vertices);
             _graphics.DrawIndexed(6);
-            _graphics.Present();
+            _graphics.SwapChain.TryPresent(syncInterval, PresentFlags.None);
         }
         catch (Exception ex)
         {
