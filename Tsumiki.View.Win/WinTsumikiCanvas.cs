@@ -24,8 +24,15 @@ public sealed partial class WinTsumikiCanvas : ITsumikiCanvas
 
     public void Resize(Rect rect)
     {
-        WinInterop.ResizeWindow(_hwnd, rect);
-        _renderer.Resize(rect.Width, rect.Height);
+        var normalizedByWidth = new Rect(rect.Left, rect.Top,
+            rect.Left + rect.Width / 3 * 3, rect.Top + rect.Width / 3 * 2);
+        var normalizedByHeight = new Rect(rect.Left, rect.Top,
+            rect.Left + rect.Height / 2 * 3, rect.Top + rect.Height / 2 * 2);
+        var normalized = normalizedByWidth.Width < normalizedByHeight.Width
+            ? normalizedByWidth
+            : normalizedByHeight;
+        WinInterop.ResizeWindow(_hwnd, normalized);
+        _renderer.Resize(normalized.Width, normalized.Height);
     }
 
     private bool _isDisposed;

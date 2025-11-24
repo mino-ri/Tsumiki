@@ -8,18 +8,19 @@ using var form = new Form
     ClientSize = new Size(rect.Width, rect.Height),
     MinimizeBox = false,
     MaximizeBox = false,
+    BackColor = Color.FromArgb(80, 69, 48),
 };
 form.MinimumSize = new Size(form.Width, form.Height);
 
 WinTsumikiCanvas? canvas = null;
-form.Resize += (_, e) =>
+form.Resize += (_, _) =>
 {
-    var clientRect = form.ClientRectangle;
-    var newRect = new Rect(0, 0, clientRect.Width, clientRect.Height);
+    var clientSize = form.ClientSize;
+    var newRect = new Rect(0, 0, clientSize.Width, clientSize.Height);
     canvas?.Resize(newRect);
 };
 
-form.Shown += (_, e) =>
+form.Shown += (_, _) =>
 {
     canvas = WinTsumikiCanvas.Create(form.Handle, rect);
 };
