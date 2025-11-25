@@ -29,7 +29,7 @@ public enum VstParameterFlags
     IsHidden = 16
 }
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 public sealed class VstModelAttribute(string modelName, Type definitionType) : Attribute()
 {
     public Type DefinitionType => definitionType;

@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 
 namespace Tsumiki.SourceGenerator;
@@ -69,14 +70,13 @@ public class VstModelSourceGenerator : IIncrementalGenerator
 
         var sourceBuilder = new StringBuilder();
         sourceBuilder.AppendLine("using NPlug;");
+        sourceBuilder.AppendLine("using Tsumiki.View;");
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine($"namespace {classSymbol.ContainingNamespace.ToDisplayString()};");
         sourceBuilder.AppendLine();
 
         // Generate unit classes
-        var unitProperties = GetUnitProperties(definitionType);
-
-        foreach (var unitProperty in unitProperties)
+        foreach (var unitProperty in GetUnitProperties(definitionType))
         {
             GenerateUnitClass(sourceBuilder, unitProperty, 0);
         }
@@ -88,8 +88,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             interfaceType: definitionType,
             parameterIdOffset: 0,
             baseClassConstructor: $"base(\"{modelInfo.ModelName}\", DefaultProgramListBuilder)",
-            includeByPassParameter: true,
-            unitProperties: unitProperties);
+            includeByPassParameter: true);
 
         var sourceText = SourceText.From(sourceBuilder.ToString(), Encoding.UTF8);
         context.AddSource($"{classSymbol.Name}.g.cs", sourceText);
@@ -115,9 +114,9 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         INamedTypeSymbol interfaceType,
         int parameterIdOffset,
         string? baseClassConstructor,
-        bool includeByPassParameter,
-        IEnumerable<IPropertySymbol> unitProperties)
+        bool includeByPassParameter)
     {
+        var unitProperties = GetUnitProperties(interfaceType);
         var parameterProperties = GetParameterProperties(interfaceType);
 
         // Determine base class
@@ -129,14 +128,14 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         foreach (var property in parameterProperties)
         {
             var paramType = GetParameterFieldType(property);
-            sourceBuilder.AppendLine($"    private readonly {paramType} _{ToCamelCase(property.Name)};");
+            sourceBuilder.AppendLine($"    public {paramType} {property.Name}Parameter {{ get; }}");
         }
 
         // Generate fields for units
         foreach (var unitProperty in unitProperties)
         {
             var unitClassName = GetUnitClassName(unitProperty);
-            sourceBuilder.AppendLine($"    private readonly {unitClassName} _{ToCamelCase(unitProperty.Name)};");
+            sourceBuilder.AppendLine($"    public {unitClassName} {unitProperty.Name} {{ get; }}");
         }
 
         sourceBuilder.AppendLine();
@@ -150,7 +149,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         // Generate interface implementations for units
         foreach (var unitProperty in unitProperties)
         {
-            sourceBuilder.AppendLine($"    public {unitProperty.Type.ToDisplayString()} {unitProperty.Name} => _{ToCamelCase(unitProperty.Name)};");
+            sourceBuilder.AppendLine($"    {unitProperty.Type.ToDisplayString()} {interfaceType.ToDisplayString()}.{unitProperty.Name} => {unitProperty.Name};");
         }
 
         sourceBuilder.AppendLine();
@@ -171,14 +170,72 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         foreach (var unitProperty in unitProperties)
         {
             var unitClassName = GetUnitClassName(unitProperty);
-            sourceBuilder.AppendLine($"        _{ToCamelCase(unitProperty.Name)} = AddUnit(new {unitClassName}());");
+            sourceBuilder.AppendLine($"        {unitProperty.Name} = AddUnit(new {unitClassName}());");
         }
 
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    partial void AddUserParameters();");
-        sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("}");
+        sourceBuilder.AppendLine();
+
+        GenerateViewModelImplementation(sourceBuilder, className, interfaceType);
+    }
+
+    private static void GenerateViewModelImplementation(StringBuilder sourceBuilder, string className, INamedTypeSymbol interfaceType)
+    {
+        // Determine base class
+        sourceBuilder.AppendLine($"public partial class {GetViewModelName(className)}({className} unit) : {GetViewInterfaceName(interfaceType)}");
+        sourceBuilder.AppendLine("{");
+
+        foreach (var property in GetParameterProperties(interfaceType))
+        {
+            GenerateViewModelProperty(sourceBuilder, property);
+        }
+
+        sourceBuilder.AppendLine();
+        foreach (var unitProperty in GetUnitProperties(interfaceType))
+        {
+            var viewModelInterfaceName = GetViewInterfaceName(unitProperty.Type);
+            var viewModelClassName = GetViewModelName(GetUnitClassName(unitProperty));
+            sourceBuilder.AppendLine($"    public {viewModelInterfaceName} {unitProperty.Name} {{ get; }} = new {viewModelClassName}(unit.{unitProperty.Name});");
+        }
+
+        sourceBuilder.AppendLine("}");
+    }
+
+    private static void GenerateViewModelProperty(StringBuilder sourceBuilder, IPropertySymbol property)
+    {
+        var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
+        var returnType = property.Type.ToDisplayString();
+        var interfaceType = attribute.AttributeClass?.Name switch
+        {
+            "VstRangeParameterAttribute" => $"IViewParameter<{returnType}>",
+            _ => $"IViewParameter<{returnType}>",
+        };
+        var initialization = (attribute.AttributeClass?.Name, returnType) switch
+        {
+            ("VstRangeParameterAttribute", "double") => $"new DoubleRangeViewParameter(unit.{property.Name}Parameter)",
+            ("VstRangeParameterAttribute", "int") => $"new Int32RangeViewParameter(unit.{property.Name}Parameter)",
+            ("VstRangeParameterAttribute", "float") => $"new FloatRangeViewParameter(unit.{property.Name}Parameter)",
+            ("VstRangeParameterAttribute", _) => $"new {property.Type.Name}RangeViewParameter(unit.{property.Name}Parameter)",
+            ("VstBoolParameterAttribute", _) => $"new BoolViewParameter(unit.{property.Name}Parameter)",
+            ("VstStringListParameterAttribute", _) => $"new EnumViewParameter<{returnType}>(unit.{property.Name}Parameter)",
+            (_, "float") => $"new FloatViewParameter(unit.{property.Name}Parameter)",
+            _ => $"new ViewParameter(unit.{property.Name}Parameter)",
+        };
+
+        sourceBuilder.AppendLine($"    public {interfaceType} {property.Name} {{ get; }} = {initialization};");
+    }
+
+    private static string GetViewModelName(string className)
+    {
+        return className.Replace("Model", "ViewModel").Replace("Unit", "ViewModel");
+    }
+
+    private static string GetViewInterfaceName(ITypeSymbol interfaceType)
+    {
+        return interfaceType.Name.Replace("Model", "ViewModel").Replace("Unit", "ViewModel");
     }
 
     private static void GenerateUnitClass(StringBuilder sourceBuilder, IPropertySymbol unitProperty, int idOffset)
@@ -195,9 +252,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var unitName = unitProperty.Name;
 
         // Generate unit classes
-        var unitProperties = GetUnitProperties(unitType);
-
-        foreach (var innerProperty in unitProperties)
+        foreach (var innerProperty in GetUnitProperties(unitType))
         {
             GenerateUnitClass(sourceBuilder, innerProperty, parameterIdOffset);
         }
@@ -208,8 +263,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             interfaceType: unitType,
             parameterIdOffset: parameterIdOffset,
             baseClassConstructor: $"base(\"{unitName}\", id: {unitId})",
-            includeByPassParameter: false,
-            unitProperties: unitProperties);
+            includeByPassParameter: false);
 
         sourceBuilder.AppendLine();
     }
@@ -229,7 +283,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
     {
         var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
 
-        var fieldName = $"_{ToCamelCase(property.Name)}";
+        var fieldName = $"{property.Name}Parameter";
         var returnType = property.Type.ToDisplayString();
         var valueGetter = attribute.AttributeClass?.Name switch
         {
@@ -266,11 +320,8 @@ public class VstModelSourceGenerator : IIncrementalGenerator
     {
         var attribute = property.GetAttributes().First(a => a.AttributeClass is not null && ParameterAttributeNameToAudioName.ContainsKey(a.AttributeClass.Name));
 
-        var fieldName = $"_{ToCamelCase(property.Name)}";
-        var id = (int)attribute.ConstructorArguments[0].Value! + parameterIdOffset;
         var parameterClassName = ParameterAttributeNameToAudioName[attribute.AttributeClass!.Name];
-        
-        sourceBuilder.Append($"        {fieldName} = AddParameter(new {parameterClassName}(\"{property.Name}\"");
+        sourceBuilder.Append($"        {property.Name}Parameter = AddParameter(new {parameterClassName}(\"{property.Name}\"");
 
         for (var i = 0; i < attribute.AttributeConstructor!.Parameters.Length; i++)
         {

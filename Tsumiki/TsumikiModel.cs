@@ -7,12 +7,6 @@ namespace Tsumiki;
 [VstModel("Tsumiki", typeof(ITsumikiModel))]
 public partial class TsumikiModel
 {
-    public AudioParameter PitchBendParameter => _pitchBend;
-
-    public AudioParameter WheelParameter => _wheel;
-
-    public AudioParameter AfterTouchParameter => _afterTouch;
-
     private static readonly AudioProgramListBuilder<TsumikiModel> DefaultProgramListBuilder = CreateAudioProgramListBuilder();
 
     private static AudioProgramListBuilder<TsumikiModel> CreateAudioProgramListBuilder()
