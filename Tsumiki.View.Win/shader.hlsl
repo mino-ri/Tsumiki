@@ -1,6 +1,7 @@
 cbuffer cbWorldTransform : register(b0)
 {
-    matrix WorldViewProj;
+    float4 Scale;
+    float4 Location;
 };
 
 struct VS_INPUT
@@ -24,7 +25,7 @@ PS_INPUT VS(VS_INPUT input)
 {
     PS_INPUT output;
 
-    output.Pos = mul(input.Pos, WorldViewProj);
+    output.Pos = input.Pos * Scale + Location;
     output.Col = input.Col;
     output.Tex = input.Tex;
 
@@ -33,16 +34,16 @@ PS_INPUT VS(VS_INPUT input)
 
 float4 PS(PS_INPUT input) : SV_TARGET
 {
-    float2 texDx = ddx(input.Tex) / 3.0;
-    float2 texDy = ddy(input.Tex) / 3.0;
-    float4 texColor;
-    for (int x = -1; x <= 1; x++)
-    {
-        for (int y = -1; y <= 1; y++)
-        {
-            texColor += renderTexture.Sample(samplerState, input.Tex + texDx * x + texDy * y);
-        }
-    }
-    texColor /= 9;
+    float2 texDx = ddx(input.Tex) / 8.0;
+    float2 texDy = ddy(input.Tex) / 8.0;
+    float4 texColor = renderTexture.Sample(samplerState, input.Tex - texDx * 3 - texDy * 3)
+                    + renderTexture.Sample(samplerState, input.Tex - texDx * 1 - texDy * 1)
+                    + renderTexture.Sample(samplerState, input.Tex - texDx * 1 + texDy * 3)
+                    + renderTexture.Sample(samplerState, input.Tex - texDx * 3 + texDy * 1)
+                    + renderTexture.Sample(samplerState, input.Tex + texDx * 1 - texDy * 3)
+                    + renderTexture.Sample(samplerState, input.Tex + texDx * 3 - texDy * 1)
+                    + renderTexture.Sample(samplerState, input.Tex + texDx * 1 + texDy * 1)
+                    + renderTexture.Sample(samplerState, input.Tex + texDx * 3 + texDy * 3);
+    texColor /= 8;
     return input.Col * texColor;
 }

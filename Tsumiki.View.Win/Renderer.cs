@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 using IndirectX;
 using IndirectX.D3D11;
 using IndirectX.Dxgi;
@@ -8,6 +9,13 @@ namespace Tsumiki.View.Win;
 
 internal sealed class Renderer : IDisposable
 {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ConstantBuffer
+    {
+        public Vector4 Scale;
+        public Vector4 Location;
+    }
+
     private const int syncInterval = 2;
     private readonly Graphics _graphics;
     private readonly IResourceTexture _sourceTexture;
@@ -15,13 +23,16 @@ internal sealed class Renderer : IDisposable
     private readonly ushort[] _indices;
     private readonly ArrayBuffer<Vertex> _vertexBuffer;
     private (int width, int height)? _changedSize;
-    private int _count;
 
     public static WindowMessage Message { get; set; }
 
     public Renderer(nint hwnd, int width, int height)
     {
-        _graphics = new Graphics(hwnd, width, height, true, 60, syncInterval);
+        _graphics = new Graphics(hwnd, width, height,
+            windowed: true,
+            refreshRate: 60,
+            syncInterval: syncInterval,
+            useZBuffer: false);
         _vertices =
         [
             new Vertex(0f, 0f, 0.5f, 1f, Color.White, new Vector2(0f, 0f)),
@@ -40,13 +51,17 @@ internal sealed class Renderer : IDisposable
             new InputElementDesc { SemanticName = "TEXCOORD", Format = Format.R32G32Float, AlignedByteOffset = 32 });
 
         _vertexBuffer = _graphics.RegisterVertexBuffer<Vertex>(0, 4);
-        _graphics.RegisterConstantBuffer<Matrix4>(0, ShaderStages.VertexShader).WriteByRef(
-            new Matrix4(2f, 0f, 0f, 0f, 0f, -2f, 0f, 0f, 0f, 0f, 1f, 0f, -1f, 1f, 0f, 1f));
+        _graphics.RegisterConstantBuffer<ConstantBuffer>(0, ShaderStages.VertexShader).WriteByRef(
+            new ConstantBuffer
+            {
+                Scale = new Vector4(2f, -2f, 1f, 1f),
+                Location = new Vector4(-1f, 1f, 0f, 0f),
+            });
 
         _graphics.RegisterIndexBuffer(6)
                 .Write(_indices);
 
-        _sourceTexture = Resources.ImageResource.LoadBack(_graphics);
+        _sourceTexture = Resources.ImageResource.LoadMain(_graphics);
         _graphics.SetTexture(0, _sourceTexture);
         _graphics.SetBorderSampler(0);
         using var alphaBlendState = _graphics.CreateAlphaBlendState();
@@ -64,8 +79,7 @@ internal sealed class Renderer : IDisposable
                 _graphics.Resize(width, height);
             }
 
-            _count++;
-            _graphics.Clear(new Color(0xFF504530));
+            _graphics.ClearRenderTarget(new Color(0xFF504530));
             _vertexBuffer.Write(_vertices);
             _graphics.DrawIndexed(6);
             _graphics.SwapChain.TryPresent(syncInterval, PresentFlags.None);

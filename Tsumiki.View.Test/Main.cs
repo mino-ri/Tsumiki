@@ -11,6 +11,7 @@ using var form = new Form
     BackColor = Color.FromArgb(80, 69, 48),
 };
 form.MinimumSize = new Size(form.Width, form.Height);
+form.MaximumSize = new Size(form.Width + rect.Width, form.Height + rect.Height);
 
 WinTsumikiCanvas? canvas = null;
 form.Resize += (_, _) =>
