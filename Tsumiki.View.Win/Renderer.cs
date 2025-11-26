@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using IndirectX;
@@ -7,7 +8,7 @@ using IndirectX.Helper;
 
 namespace Tsumiki.View.Win;
 
-internal sealed class Renderer : IDisposable
+internal sealed class Renderer : IDisposable, IDrawingContext
 {
     [StructLayout(LayoutKind.Sequential)]
     private struct ConstantBuffer
@@ -16,41 +17,35 @@ internal sealed class Renderer : IDisposable
         public Vector4 Location;
     }
 
-    private const int syncInterval = 2;
+    private const int SyncInterval = 2;
+    private readonly Color _background = new(0xFF504530);
+    private readonly ConcurrentQueue<IVisual> _visuals = new();
+    private readonly Queue<IVisual> _prevVisuals = new();
     private readonly Graphics _graphics;
+    private readonly IVisual _rootVisual;
     private readonly IResourceTexture _sourceTexture;
-    private readonly Vertex[] _vertices;
-    private readonly ushort[] _indices;
     private readonly ArrayBuffer<Vertex> _vertexBuffer;
     private (int width, int height)? _changedSize;
 
-    public static WindowMessage Message { get; set; }
-
-    public Renderer(nint hwnd, int width, int height)
+    public Renderer(nint hwnd, int width, int height, IVisual rootVisual)
     {
         _graphics = new Graphics(hwnd, width, height,
             windowed: true,
             refreshRate: 60,
-            syncInterval: syncInterval,
+            syncInterval: SyncInterval,
             useZBuffer: false);
-        _vertices =
-        [
-            new Vertex(0f, 0f, 0.5f, 1f, Color.White, new Vector2(0f, 0f)),
-            new Vertex(1f, 0f, 0.5f, 1f, Color.White, new Vector2(0.75f, 0f)),
-            new Vertex(0f, 1f, 0.5f, 1f, Color.White, new Vector2(0f, 1f)),
-            new Vertex(1f, 1f, 0.5f, 1f, Color.White, new Vector2(0.75f, 1f)),
-        ];
-
-        _indices = [0, 1, 2, 2, 1, 3];
 
         _graphics.SetVertexShader(ShaderSource.LoadVertexShader);
         _graphics.SetPixelShader(ShaderSource.LoadPixelShader);
         _graphics.SetInputLayout(ShaderSource.LoadInputLayout,
             new InputElementDesc { SemanticName = "POSITION", Format = Format.R32G32B32A32Float },
-            new InputElementDesc { SemanticName = "COLOR", Format = Format.R32G32B32A32Float, AlignedByteOffset = 16 },
-            new InputElementDesc { SemanticName = "TEXCOORD", Format = Format.R32G32Float, AlignedByteOffset = 32 });
+            new InputElementDesc { SemanticName = "TEXCOORD", Format = Format.R32G32Float, AlignedByteOffset = 16 });
 
         _vertexBuffer = _graphics.RegisterVertexBuffer<Vertex>(0, 4);
+        _vertexBuffer.Buffer[0] = new Vertex(0f, 0f, 0.5f, 1f, new Vector2(0f, 0f));
+        _vertexBuffer.Buffer[1] = new Vertex(1f, 0f, 0.5f, 1f, new Vector2(0.75f, 0f));
+        _vertexBuffer.Buffer[2] = new Vertex(0f, 1f, 0.5f, 1f, new Vector2(0f, 1f));
+        _vertexBuffer.Buffer[3] = new Vertex(1f, 1f, 0.5f, 1f, new Vector2(0.75f, 1f));
         _graphics.RegisterConstantBuffer<ConstantBuffer>(0, ShaderStages.VertexShader).WriteByRef(
             new ConstantBuffer
             {
@@ -58,14 +53,15 @@ internal sealed class Renderer : IDisposable
                 Location = new Vector4(-1f, 1f, 0f, 0f),
             });
 
-        _graphics.RegisterIndexBuffer(6)
-                .Write(_indices);
-
         _sourceTexture = Resources.ImageResource.LoadMain(_graphics);
         _graphics.SetTexture(0, _sourceTexture);
         _graphics.SetBorderSampler(0);
         using var alphaBlendState = _graphics.CreateAlphaBlendState();
         _graphics.SetBlendState(alphaBlendState);
+        _graphics.Context.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
+        _rootVisual = rootVisual;
+        _visuals.Enqueue(_rootVisual);
+        Clear();
     }
 
     public void Frame()
@@ -77,12 +73,22 @@ internal sealed class Renderer : IDisposable
                 var (width, height) = _changedSize.Value;
                 _changedSize = null;
                 _graphics.Resize(width, height);
+                _visuals.Enqueue(_rootVisual);
+                Clear();
             }
 
-            _graphics.ClearRenderTarget(new Color(0xFF504530));
-            _vertexBuffer.Write(_vertices);
-            _graphics.DrawIndexed(6);
-            _graphics.SwapChain.TryPresent(syncInterval, PresentFlags.None);
+            while (_prevVisuals.TryDequeue(out var visual))
+            {
+                visual.Render(this);
+            }
+
+            while (_visuals.TryDequeue(out var visual))
+            {
+                visual.Render(this);
+                _prevVisuals.Enqueue(visual);
+            }
+
+            _graphics.SwapChain.TryPresent(SyncInterval, PresentFlags.None);
         }
         catch (Exception ex)
         {
@@ -93,6 +99,38 @@ internal sealed class Renderer : IDisposable
     public void Resize(int width, int height)
     {
         _changedSize = (width, height);
+    }
+
+    internal void RegisterVisual(IVisual visual)
+    {
+        _visuals.Enqueue(visual);
+    }
+
+    public void Clear()
+    {
+        _graphics.ClearRenderTarget(_background);
+    }
+
+    public void DrawImage(in RectF clientRange, in RectF imageRange)
+    {
+        _vertexBuffer.Buffer[0].Vector.X = clientRange.Left;
+        _vertexBuffer.Buffer[0].Vector.Y = clientRange.Top;
+        _vertexBuffer.Buffer[0].Texture.X = imageRange.Left;
+        _vertexBuffer.Buffer[0].Texture.Y = imageRange.Top;
+        _vertexBuffer.Buffer[1].Vector.X = clientRange.Right;
+        _vertexBuffer.Buffer[1].Vector.Y = clientRange.Top;
+        _vertexBuffer.Buffer[1].Texture.X = imageRange.Right;
+        _vertexBuffer.Buffer[1].Texture.Y = imageRange.Top;
+        _vertexBuffer.Buffer[2].Vector.X = clientRange.Left;
+        _vertexBuffer.Buffer[2].Vector.Y = clientRange.Bottom;
+        _vertexBuffer.Buffer[2].Texture.X = imageRange.Left;
+        _vertexBuffer.Buffer[2].Texture.Y = imageRange.Bottom;
+        _vertexBuffer.Buffer[3].Vector.X = clientRange.Right;
+        _vertexBuffer.Buffer[3].Vector.Y = clientRange.Bottom;
+        _vertexBuffer.Buffer[3].Texture.X = imageRange.Right;
+        _vertexBuffer.Buffer[3].Texture.Y = imageRange.Bottom;
+        _vertexBuffer.Flush();
+        _graphics.Draw(4);
     }
 
     public void Dispose() => _graphics.Dispose();

@@ -7,7 +7,7 @@ namespace Tsumiki;
 
 public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
 {
-    private readonly TsumikiModel _model = model;
+    private readonly TsumikiPage _page = new(new TsumikiViewModel(model));
     private IAudioPluginFrame? _frame;
     private ITsumikiCanvas? _canvas;
     private const int MinWidth = 960;
@@ -37,7 +37,7 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         TsumikiLogger.WriteAccess([parent, (int)type]);
         try
         {
-            _canvas = WinTsumikiCanvas.Create(parent, ToTsumikiViewSize(Size));
+            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page);
         }
         catch (Exception ex)
         {
@@ -58,10 +58,20 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         var requestedHeight = rect.Bottom - rect.Top;
         var adjustedWidth = Math.Clamp(requestedWidth, MinWidth, MaxWidth);
         var adjustedHeight = Math.Clamp(requestedHeight, MinHeight, MaxHeight);
+        // ウィンドウを小さくしようとしているか
+        var currentSize = Size;
+        var currentWidth = currentSize.Right - currentSize.Left;
+        var currentHeight = currentSize.Bottom - currentSize.Top;
+        var isSmaller = currentWidth <= adjustedWidth && currentHeight <= adjustedHeight;
+        var baseSize = isSmaller
+            ? Math.Min(adjustedWidth / 3, adjustedHeight / 2)
+            : Math.Max((int)Math.Ceiling(adjustedWidth / 3.0), (int)Math.Ceiling(adjustedHeight / 2.0));
+        var actualWidth = baseSize * 3;
+        var actualHeight = baseSize * 2;
 
-        if (adjustedWidth != requestedWidth || adjustedHeight != requestedHeight)
+        if (actualWidth != requestedWidth || actualHeight != requestedHeight)
         {
-            rect = new ViewRectangle(rect.Left, rect.Top, rect.Left + adjustedWidth, rect.Top + adjustedHeight);
+            rect = new ViewRectangle(rect.Left, rect.Top, rect.Left + actualWidth, rect.Top + actualHeight);
             return false;
         }
 
@@ -90,16 +100,19 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
     public void OnKeyDown(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
+        _page.OnKeyDown(key, keyCode, modifiers);
     }
 
     public void OnKeyUp(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
+        _page.OnKeyUp(key, keyCode, modifiers);
     }
 
     public void OnWheel(float distance)
     {
         TsumikiLogger.WriteAccess([distance]);
+        _page.OnWheel(distance);
     }
 
     public void Removed()

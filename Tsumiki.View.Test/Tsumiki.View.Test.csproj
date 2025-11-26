@@ -9,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tsumiki.View.Win\Tsumiki.View.Win.csproj" />
-    <ProjectReference Include="..\Tsumiki.View\Tsumiki.View.csproj" />
+    <ProjectReference Include="..\Tsumiki\Tsumiki.csproj" />
   </ItemGroup>
 
 </Project>

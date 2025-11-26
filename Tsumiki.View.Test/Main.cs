@@ -1,3 +1,4 @@
+using Tsumiki;
 using Tsumiki.View;
 using Tsumiki.View.Win;
 
@@ -13,17 +14,24 @@ using var form = new Form
 form.MinimumSize = new Size(form.Width, form.Height);
 form.MaximumSize = new Size(form.Width + rect.Width, form.Height + rect.Height);
 
-WinTsumikiCanvas? canvas = null;
-form.Resize += (_, _) =>
+ITsumikiCanvas? canvas = null;
+try
 {
-    var clientSize = form.ClientSize;
-    var newRect = new Rect(0, 0, clientSize.Width, clientSize.Height);
-    canvas?.Resize(newRect);
-};
+    form.Resize += (_, _) =>
+    {
+        var clientSize = form.ClientSize;
+        var newRect = new Rect(0, 0, clientSize.Width, clientSize.Height);
+        canvas?.Resize(newRect);
+    };
 
-form.Shown += (_, _) =>
+    form.Shown += (_, _) =>
+    {
+        canvas = TsumikiCanvas.Create(form.Handle, rect, new TsumikiPage(new TsumikiViewModel(new TsumikiModel())));
+    };
+
+    Application.Run(form);
+}
+finally
 {
-    canvas = WinTsumikiCanvas.Create(form.Handle, rect);
-};
-
-Application.Run(form);
+    canvas?.Dispose();
+}

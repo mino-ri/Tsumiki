@@ -7,6 +7,17 @@ internal static unsafe partial class WinInterop
 {
     private const string ClassName = "TsumikiPlugin";
     private static bool _classRegistered = false;
+    private static readonly Dictionary<nint, TsumikiCanvas> ActiveCanvases = [];
+
+    public static void AddCanvas(nint hwnd, TsumikiCanvas canvas)
+    {
+        ActiveCanvases[hwnd] = canvas;
+    }
+
+    public static void RemoveCanvas(nint hwnd)
+    {
+        ActiveCanvases.Remove(hwnd);
+    }
 
     public static void RegisterClass()
     {
@@ -99,18 +110,51 @@ internal static unsafe partial class WinInterop
     [LibraryImport("user32.dll")]
     private static partial nint DefWindowProcW(nint hWnd, WindowMessage uMsg, nint wParam, nint lParam);
 
+    private static (short x, short y) GetCoordinates(nint lParam)
+    {
+        var x = (short)(ushort)((uint)lParam & 0xffffu);
+        var y = (short)(ushort)(((uint)lParam >> 16) & 0xffffu);
+        return (x, y);
+    }
+
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
     private static nint WndProc(nint hWnd, WindowMessage message, nint wParam, nint lParam)
     {
+        TsumikiCanvas? canvas;
         switch (message)
         {
             // 子ウィンドウでは、Destroy に呼応して PostQuitMessage を送ってはいけない
 
             case WindowMessage.MouseMove:
+                if (ActiveCanvases.TryGetValue(hWnd, out canvas))
+                {
+                    var (x, y) = GetCoordinates(lParam);
+                    canvas.OnMouseMove(x, y);
+                }
+                return DefWindowProcW(hWnd, message, wParam, lParam);
+
             case WindowMessage.LeftButtonDown:
+                if (ActiveCanvases.TryGetValue(hWnd, out canvas))
+                {
+                    var (x, y) = GetCoordinates(lParam);
+                    canvas.OnLeftButtonDown(x, y);
+                }
+                return DefWindowProcW(hWnd, message, wParam, lParam);
+
             case WindowMessage.LeftButtonUp:
+                if (ActiveCanvases.TryGetValue(hWnd, out canvas))
+                {
+                    var (x, y) = GetCoordinates(lParam);
+                    canvas.OnLeftButtonUp(x, y);
+                }
+                return DefWindowProcW(hWnd, message, wParam, lParam);
+
             case WindowMessage.LeftButtonDoubleClick:
-                Renderer.Message = message;
+                if (ActiveCanvases.TryGetValue(hWnd, out canvas))
+                {
+                    var (x, y) = GetCoordinates(lParam);
+                    canvas.OnLeftButtonDoubleClick(x, y);
+                }
                 return DefWindowProcW(hWnd, message, wParam, lParam);
 
             default:

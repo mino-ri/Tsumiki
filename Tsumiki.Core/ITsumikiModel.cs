@@ -98,7 +98,7 @@ public interface ICarrierUnit : IEnvelopeUnit
 
 public interface IModulatorUnit : IEnvelopeUnit
 {
-    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(4, 0.0, 1.0, 0.0)]
     float Level { get; set; }
 
     [VstRangeParameter(5, 0.0, 20.0, 1.0)]
@@ -107,7 +107,7 @@ public interface IModulatorUnit : IEnvelopeUnit
     [VstBoolParameter(6, false)]
     bool Sync { get; set; }
 
-    [VstRangeParameter(7, 0.0, 1.0, 0.0)]
+    [VstRangeParameter(7, -0.5, 0.5, 0.0)]
     float Phase { get; set; }
 
     [VstRangeParameter(8, 0.0, 1.0, 0.0)]
