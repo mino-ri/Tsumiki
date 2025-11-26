@@ -14,22 +14,44 @@ internal static class MathT
         return MathF.Abs((a - MathF.Round(a)) * 4f) - 1f;
     }
 
+    /*
+     次のような式で、パラメータ b を使って三角波から滑らかに正弦波に変化するような関数が作れる。
+     f(x) = (1 + (π/2 - 1)b)x + b{ -π³/(2³ * 3!)x³ + π⁵/(2⁵ * 5!)x⁵ - π⁷/(2⁷ * 7!)x⁷ }
+     もとの式における係数を a₁, a₃, a₅, a₇ とすると、
+     f(x) = x + b(a₁x - a₃x³ + a₅x⁵ - a₇x⁷ )
+     f(x) = x{ 1 + b(a₁ - a₃x² + a₅x⁴ - a₇x⁶) }
+     f(x) = x{ 1 + b(a₁ + x²(-a₃ + a₅x² - a₇x⁴) }
+     f(x) = x{ 1 + b(a₁ + x²(-a₃ + x²(a₅ - a₇x²)) }
+     次数の逆順に並べて、
+     f(x) = ((((- a₇x² + a₅) * x² - a₃) * x² + a₁) * b + 1) * x
+     */
 
-    /// <summary>-0.5～0.5の範囲で表される三角波から、sin関数に近似する値を返します。</summary>
+    private static readonly float A1 = (float)(Math.PI / 2.0);
+    private static readonly float A1b = (float)(Math.PI / 2.0 - 1.0);
+    private static readonly float A3 = (float)(Math.Pow(Math.PI, 3.0) / (8.0 * 6.0));
+    private static readonly float A5 = (float)(Math.Pow(Math.PI, 5.0) / (32.0 * 120.0));
+    private static readonly float A7 = (float)(Math.Pow(Math.PI, 7.0) / (128.0 * 5040.0));
+
+    public static float TriToSin2(float tri, float b)
+    {
+        if (b <= 0f) return tri;
+        var tri2 = tri * tri;
+        return (b * (((-A7 * tri2 + A5) * tri2 - A3) * tri2 + A1b) + 1f) * tri;
+    }
+
+    /// <summary>-1～1の範囲で表される三角波から、sin関数に近似する値を返します。</summary>
     [AudioTiming]
     public static float TriToSin(float tri)
     {
         var tri2 = tri * tri;
-        return (((tri2 * -0.540347f + 2.53566f) * tri2 - 5.16651f) * tri2 + 3.14159f) * tri;
+        return (((-A7 * tri2 + A5) * tri2 - A3) * tri2 + A1) * tri;
     }
 
     /// <summary>0～1 で表される位相から、sin関数に近似する値を返します。</summary>
     [AudioTiming]
     public static float Sin(float x)
     {
-        var a = x - 0.75f;
-        var tri = MathF.Abs((a - MathF.Round(a)) * 2f) - 0.5f;
-        return TriToSin(tri);
+        return TriToSin(Tri(x));
     }
 
     [AudioTiming]

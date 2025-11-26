@@ -33,7 +33,7 @@ public static class MathTTest
     public static void TriToSin_範囲チェック()
     {
         // -0.5～0.5の範囲で三角波を入力
-        for (var i = -5; i <= 5; i++)
+        for (var i = -10; i <= 10; i++)
         {
             var tri = i * 0.1f;
             var result = MathT.TriToSin(tri);
@@ -49,9 +49,7 @@ public static class MathTTest
         for (var i = 0; i < 8; i++)
         {
             var phase = i / 8f;
-            // MathT.Sin の内部実装: a = x - 0.75, tri = abs((a - round(a)) * 2) - 0.5
-            var a = phase - 0.75f;
-            var tri = MathF.Abs((a - MathF.Round(a)) * 2f) - 0.5f;
+            var tri = MathT.Tri(phase);
             var approx = MathT.TriToSin(tri);
             var expected = MathF.Sin(phase * 2f * MathF.PI);
             Assert.InRange(MathF.Abs(approx - expected), 0f, 0.02f);

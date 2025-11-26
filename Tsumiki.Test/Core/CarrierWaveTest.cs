@@ -10,7 +10,6 @@ public static class CarrierWaveTest
         public float Level { get; set; }
         public double Pitch { get; set; }
         public bool Sync { get; set; }
-        public float Phase { get; set; }
         public float ShapeX { get; set; }
         public float ShapeY { get; set; }
         public float Pan { get; set; }
@@ -23,7 +22,7 @@ public static class CarrierWaveTest
     [Fact]
     public static void Reset_位相がリセットされる()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0.25f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -45,7 +44,7 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_出力値が範囲内()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -63,7 +62,7 @@ public static class CarrierWaveTest
     public static void TickAndRender_位相が進む()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -92,8 +91,8 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ピッチが2倍だと周期が半分()
     {
-        var unit1 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unit2 = new TestCarrierUnit { Pitch = 2.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit2 = new TestCarrierUnit { Pitch = 2.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config1 = new CarrierWaveConfig(unit1);
         var config2 = new CarrierWaveConfig(unit2);
         var wave1 = new CarrierWave(config1);
@@ -119,7 +118,7 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -146,7 +145,7 @@ public static class CarrierWaveTest
     public static void TickAndRender_FM変調が効く()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var waveNoFm = new CarrierWave(config);
         var waveFm = new CarrierWave(config);
@@ -180,9 +179,9 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ShapeYで波形が変わる()
     {
-        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
+        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
+        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
 
         var configNeutral = new CarrierWaveConfig(unitNeutral);
         var configPositive = new CarrierWaveConfig(unitPositive);
@@ -232,8 +231,8 @@ public static class CarrierWaveTest
     public static void TickAndRender_ShapeXで波形が変わる()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
+        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
 
         var configNeutral = new CarrierWaveConfig(unitNeutral);
         var configPositive = new CarrierWaveConfig(unitPositive);
@@ -271,8 +270,8 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_Levelで出力が変わる()
     {
-        var unitHalf = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitFull = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitHalf = new TestCarrierUnit { Pitch = 1.0, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitFull = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
 
         var configHalf = new CarrierWaveConfig(unitHalf);
         var configFull = new CarrierWaveConfig(unitFull);
@@ -307,7 +306,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 2.5,
-            Phase = 0.3f,
             Level = 0.8f,
             ShapeX = 0.2f,
             ShapeY = -0.4f,
@@ -317,7 +315,6 @@ public static class CarrierWaveTest
         var config = new CarrierWaveConfig(unit);
 
         Assert.Equal(2.5, config.Pitch);
-        Assert.Equal(0.3f, config.Phase);
         Assert.Equal(0.8f, config.Level);
         Assert.True(config.Sync);
     }
@@ -328,7 +325,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0f,
             ShapeY = 0.5f,
@@ -337,9 +333,8 @@ public static class CarrierWaveTest
 
         var config = new CarrierWaveConfig(unit);
 
-        // ShapeY が正の値の場合、三角波 → 矩形波の変化
-        Assert.Equal(2.0f, config.TriFactor);
-        Assert.Equal(0.0f, config.SinFactor);
+        // ShapeY が正の値の場合、矩形波 → 三角波の変化
+        Assert.Equal(1.0f, config.SinFactor);
     }
 
     [Fact]
@@ -348,18 +343,16 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0f,
-            ShapeY = -0.5f,
+            ShapeY = -0.75f,
             Sync = false
         };
 
         var config = new CarrierWaveConfig(unit);
 
         // ShapeY が負の値の場合、三角波 → サイン波の変化
-        Assert.Equal(1f, config.TriFactor);
-        Assert.Equal(0.5f, config.SinFactor);
+        Assert.Equal(0.25f, config.SinFactor);
     }
 
     [Fact]
@@ -368,7 +361,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0f,
             ShapeY = 0f,
@@ -398,7 +390,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0f,
             ShapeY = -0.5f, // 負の値から開始
@@ -406,7 +397,6 @@ public static class CarrierWaveTest
         };
         var config = new CarrierWaveConfig(unit);
 
-        var oldTriFactor = config.TriFactor;
         var oldSinFactor = config.SinFactor;
 
         // ShapeY を正の値に変更して再計算
@@ -414,10 +404,8 @@ public static class CarrierWaveTest
         config.Recalculate();
 
         // TriFactor と SinFactor が変わることを確認
-        Assert.NotEqual(oldTriFactor, config.TriFactor);
         Assert.NotEqual(oldSinFactor, config.SinFactor);
-        Assert.Equal(2.0f, config.TriFactor);
-        Assert.Equal(0.0f, config.SinFactor);
+        Assert.Equal(1f, config.SinFactor);
     }
 
     [Fact]
@@ -426,7 +414,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0.3f,
             ShapeY = -0.4f,
@@ -434,7 +421,6 @@ public static class CarrierWaveTest
         };
         var config = new CarrierWaveConfig(unit);
 
-        var oldTriFactor = config.TriFactor;
         var oldSinFactor = config.SinFactor;
         var oldUpSlope = config.UpSlope;
         var oldDownSlope = config.DownSlope;
@@ -447,7 +433,6 @@ public static class CarrierWaveTest
         // Pitch と Level は更新されるが、Shape関連は変わらない
         Assert.Equal(2.0, config.Pitch);
         Assert.Equal(0.5f, config.Level);
-        Assert.Equal(oldTriFactor, config.TriFactor);
         Assert.Equal(oldSinFactor, config.SinFactor);
         Assert.Equal(oldUpSlope, config.UpSlope);
         Assert.Equal(oldDownSlope, config.DownSlope);
@@ -459,7 +444,6 @@ public static class CarrierWaveTest
         var unit = new TestCarrierUnit
         {
             Pitch = 1.0,
-            Phase = 0f,
             Level = 1.0f,
             ShapeX = 0f,
             ShapeY = 0f,
@@ -469,7 +453,6 @@ public static class CarrierWaveTest
 
         // 複数のパラメータを変更
         unit.Pitch = 3.5;
-        unit.Phase = 0.25f;
         unit.Level = 0.7f;
         unit.Sync = true;
 
@@ -477,7 +460,6 @@ public static class CarrierWaveTest
 
         // 変更が反映されることを確認
         Assert.Equal(3.5, config.Pitch);
-        Assert.Equal(0.25f, config.Phase);
         Assert.Equal(0.7f, config.Level);
         Assert.True(config.Sync);
     }
@@ -485,7 +467,7 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_Level0で無音()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -502,7 +484,7 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_Pitch0で位相が進まない()
     {
-        var unit = new TestCarrierUnit { Pitch = 0.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new TestCarrierUnit { Pitch = 0.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new CarrierWaveConfig(unit);
         var wave = new CarrierWave(config);
 
@@ -524,9 +506,9 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ShapeXの境界値()
     {
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = -1f, ShapeY = 0f, Sync = false };
-        var unitZero = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
+        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -1f, ShapeY = 0f, Sync = false };
+        var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
 
         var configNegative = new CarrierWaveConfig(unitNegative);
         var configZero = new CarrierWaveConfig(unitZero);
@@ -556,9 +538,9 @@ public static class CarrierWaveTest
     [Fact]
     public static void TickAndRender_ShapeYの境界値()
     {
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = -1f, Sync = false };
-        var unitZero = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
+        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -1f, Sync = false };
+        var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
 
         var configNegative = new CarrierWaveConfig(unitNegative);
         var configZero = new CarrierWaveConfig(unitZero);
@@ -590,8 +572,8 @@ public static class CarrierWaveTest
     {
         // ShapeX と ShapeY を変えることで UpSlope, DownSlope, TriFactor, SinFactor が変わり、
         // それが実際の波形出力に反映されることを確認
-        var unit1 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
-        var unit2 = new TestCarrierUnit { Pitch = 1.0, Phase = 0f, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
+        var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
+        var unit2 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
 
         var config1 = new CarrierWaveConfig(unit1);
         var config2 = new CarrierWaveConfig(unit2);
@@ -605,7 +587,6 @@ public static class CarrierWaveTest
         // 計算された形状パラメータが異なることを確認
         Assert.NotEqual(config1.UpSlope, config2.UpSlope);
         Assert.NotEqual(config1.DownSlope, config2.DownSlope);
-        Assert.NotEqual(config1.TriFactor, config2.TriFactor);
         Assert.NotEqual(config1.SinFactor, config2.SinFactor);
 
         // 波形が異なることを確認

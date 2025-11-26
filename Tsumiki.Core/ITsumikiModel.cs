@@ -86,16 +86,13 @@ public interface ICarrierUnit : IEnvelopeUnit
     [VstBoolParameter(6, false)]
     bool Sync { get; set; }
 
-    [VstRangeParameter(7, 0.0, 1.0, 0.0)]
-    float Phase { get; set; }
-
-    [VstRangeParameter(8, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(7, -1.0, 1.0, 0.0)]
     float ShapeX { get; set; }
 
-    [VstRangeParameter(9, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(8, -1.0, 1.0, 0.0)]
     float ShapeY { get; set; }
 
-    [VstRangeParameter(10, -1.0, 1.0, 0.0)]
+    [VstRangeParameter(9, -1.0, 1.0, 0.0)]
     float Pan { get; set; }
 }
 

@@ -9,13 +9,11 @@ internal sealed class CarrierWaveConfig
     private float _shapeX;
     private float _shapeY;
     // ShapeX は上昇フェーズと下降フェーズのバランスを変える
-    // ShapeY が正の値なら、三角波 → 矩形波の変化
-    // ShapeY が負の値なら、三角波 → サイン波の変化
+    // ShapeY が正の値なら、サイン波 → 矩形波の変化
+    // ShapeY が負の値なら、サイン波 → 三角波の変化
     public double Pitch;
-    public float Phase;
     public bool Sync;
     public float Level;
-    public float TriFactor;
     public float SinFactor;
     public float UpSlope;
     public float DownSlope;
@@ -36,7 +34,6 @@ internal sealed class CarrierWaveConfig
     public void Recalculate()
     {
         Pitch = _unit.Pitch;
-        Phase = _unit.Phase;
         Sync = _unit.Sync;
         Level = _unit.Level;
 
@@ -44,11 +41,10 @@ internal sealed class CarrierWaveConfig
         {
             _shapeX = _unit.ShapeX;
             _shapeY = _unit.ShapeY;
-            TriFactor = _shapeY > 0f ? 2f : (1f + _shapeY) * 2f;
-            SinFactor = _shapeY > 0f ? 0f : -_shapeY;
+            SinFactor = _shapeY > 0f ? 1f : 1f + _shapeY;
             var flatness = _shapeY > 0f ? 1f - _shapeY : 1f;
-            UpSlope = 1f / flatness / (0.5f + _shapeX * 0.5f);
-            DownSlope = 1f / flatness / (0.5f - _shapeX * 0.5f);
+            UpSlope = 2f / flatness / (0.5f + _shapeX * 0.5f);
+            DownSlope = 2f / flatness / (0.5f - _shapeX * 0.5f);
             UpEnd = (0.25f + _shapeX * 0.25f) * flatness;
             DownStart = 0.5f - (0.25f - _shapeX * 0.25f) * flatness;
         }
@@ -65,7 +61,7 @@ internal struct CarrierWave(CarrierWaveConfig config)
     [EventTiming]
     public void Reset()
     {
-        _phase = _config.Phase;
+        _phase = 0f;
     }
 
     [AudioTiming]
@@ -73,7 +69,7 @@ internal struct CarrierWave(CarrierWaveConfig config)
     {
         if (_config.Sync && syncPhase >= 0)
         {
-            _phase = delta * _config.Pitch + _config.Phase;
+            _phase = delta * _config.Pitch;
         }
 
         var dActualPhase = _phase + fm;
@@ -84,18 +80,10 @@ internal struct CarrierWave(CarrierWaveConfig config)
         var output =
             absPhase < _config.UpEnd ? actualPhase * _config.UpSlope
             : absPhase > _config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * _config.DownSlope
-            : actualPhase >= 0f ? 0.5f : -0.5f;
+            : actualPhase >= 0f ? 1f : -1f;
 
-        if (!float.IsFinite(output))
-        {
-            output = float.IsNaN(output)
-                ? 0f : float.IsPositive(output)
-                ? 0.5f : -0.5f;
-        }
-
-        output = _config.SinFactor > 0f
-            ? output * _config.TriFactor + MathT.TriToSin(output) * _config.SinFactor
-            : output * _config.TriFactor;
+        output = float.IsNaN(output) ? 0f : Math.Clamp(output, -1f, 1f);
+        output = MathT.TriToSin2(output, _config.SinFactor);
 
         _phase += delta * _config.Pitch;
         _phase -= (int)_phase;

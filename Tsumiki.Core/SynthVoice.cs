@@ -30,7 +30,7 @@ internal struct SynthVoice(GliderConfig glideConfig)
     public float PolyPressure;
     public double Pitch;
     public double Delta;
-    private double _targetDelta;
+    private double _targetPitch;
     private double _targetVelocity;
     private LowPassFilterD _pitchGlider;
     private LowPassFilterD _velocityGlider;
@@ -40,7 +40,8 @@ internal struct SynthVoice(GliderConfig glideConfig)
     {
         if (_glideConfig.Enable)
         {
-            Delta = _pitchGlider.TickAndRender(in _glideConfig.Filter, _targetDelta);
+            Pitch = _pitchGlider.TickAndRender(in _glideConfig.Filter, _targetPitch);
+            Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
             Velocity = (float)_velocityGlider.TickAndRender(in _glideConfig.Filter, _targetVelocity);
         }
 
@@ -48,15 +49,15 @@ internal struct SynthVoice(GliderConfig glideConfig)
         {
             var oldState = State;
             State = VoiceState.Active;
-            Pitch = midi.Note.Pitch + pitchBend;
-            _targetDelta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
+            _targetPitch = midi.Note.Pitch + pitchBend;
             _targetVelocity = midi.Note.Velocity;
             if (!_glideConfig.Enable || oldState != VoiceState.Active)
             {
-                Delta = _targetDelta;
+                Pitch = _targetPitch;
+                Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
                 Velocity = (float)_targetVelocity;
                 // EVENT CALL
-                _pitchGlider.Reset(_targetDelta);
+                _pitchGlider.Reset(_targetPitch);
                 // EVENT CALL
                 _velocityGlider.Reset(_targetVelocity);
             }
