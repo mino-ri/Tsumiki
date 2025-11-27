@@ -110,6 +110,13 @@ internal static unsafe partial class WinInterop
     [LibraryImport("user32.dll")]
     private static partial nint DefWindowProcW(nint hWnd, WindowMessage uMsg, nint wParam, nint lParam);
 
+    [LibraryImport("user32.dll")]
+    private static partial nint SetCapture(nint hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ReleaseCapture();
+
     private static (short x, short y) GetCoordinates(nint lParam)
     {
         var x = (short)(ushort)((uint)lParam & 0xffffu);
@@ -134,6 +141,7 @@ internal static unsafe partial class WinInterop
                 return DefWindowProcW(hWnd, message, wParam, lParam);
 
             case WindowMessage.LeftButtonDown:
+                SetCapture(hWnd);
                 if (ActiveCanvases.TryGetValue(hWnd, out canvas))
                 {
                     var (x, y) = GetCoordinates(lParam);
@@ -142,6 +150,7 @@ internal static unsafe partial class WinInterop
                 return DefWindowProcW(hWnd, message, wParam, lParam);
 
             case WindowMessage.LeftButtonUp:
+                ReleaseCapture();
                 if (ActiveCanvases.TryGetValue(hWnd, out canvas))
                 {
                     var (x, y) = GetCoordinates(lParam);

@@ -10,6 +10,7 @@ public interface IViewParameter<T>
 {
     public T Value { get; set; }
     public T DefaultValue { get; }
+    public int Id { get; }
 }
 
 public interface IRangeViewParameter<T> : IViewParameter<T>

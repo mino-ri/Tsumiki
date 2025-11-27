@@ -7,24 +7,14 @@ namespace Tsumiki;
 
 public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
 {
-    private readonly TsumikiPage _page = new(new TsumikiViewModel(model));
-    private IAudioPluginFrame? _frame;
+    private TsumikiPage? _page;
     private ITsumikiCanvas? _canvas;
     private const int MinWidth = 960;
     private const int MinHeight = 640;
     private const int MaxWidth = 1920;
     private const int MaxHeight = 1280;
 
-    public ViewRectangle Size
-    {
-        get
-        {
-            TsumikiLogger.WriteAccess([]);
-            return field;
-        }
-
-        private set;
-    } = new(0, 0, MinWidth, MinHeight);
+    public ViewRectangle Size { get; private set; } = new(0, 0, MinWidth, MinHeight);
 
     public bool IsPlatformTypeSupported(AudioPluginViewPlatform platform)
     {
@@ -37,7 +27,7 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         TsumikiLogger.WriteAccess([parent, (int)type]);
         try
         {
-            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page);
+            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page ??= TsumikiPage.Create(new TsumikiViewModel(model)));
         }
         catch (Exception ex)
         {
@@ -83,8 +73,10 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         try
         {
             TsumikiLogger.WriteAccess([newSize.Left, newSize.Right, newSize.Top, newSize.Bottom]);
-            Size = newSize;
-            _canvas?.Resize(ToTsumikiViewSize(newSize));
+            var baseSize = Math.Min((newSize.Right - newSize.Left) / 3, (newSize.Bottom - newSize.Top) / 2);
+            var actualNewSize = new ViewRectangle(newSize.Left, newSize.Top, newSize.Left + baseSize * 3, newSize.Top + baseSize * 2);
+            Size = actualNewSize;
+            _canvas?.Resize(ToTsumikiViewSize(actualNewSize));
         }
         catch (Exception ex)
         {
@@ -100,19 +92,19 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
     public void OnKeyDown(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
-        _page.OnKeyDown(key, keyCode, modifiers);
+        _page?.OnKeyDown((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers);
     }
 
     public void OnKeyUp(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
-        _page.OnKeyUp(key, keyCode, modifiers);
+        _page?.OnKeyUp((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers);
     }
 
     public void OnWheel(float distance)
     {
         TsumikiLogger.WriteAccess([distance]);
-        _page.OnWheel(distance);
+        _page?.OnWheel(distance);
     }
 
     public void Removed()
@@ -122,6 +114,7 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         {
             _canvas?.Dispose();
             _canvas = null;
+            _page = null;
         }
         catch (Exception ex)
         {
@@ -137,12 +130,17 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
     public void SetFrame(IAudioPluginFrame frame)
     {
         TsumikiLogger.WriteAccess([]);
-        _frame = frame;
     }
 
     public bool TryFindParameter(int xPos, int yPos, out AudioParameterId parameterId)
     {
         TsumikiLogger.WriteAccess([xPos, yPos]);
+        if (_page is not null && _page.TryFindParameter(xPos, yPos, out var id))
+        {
+            parameterId = id;
+            return true;
+        }
+
         parameterId = default;
         return false;
     }

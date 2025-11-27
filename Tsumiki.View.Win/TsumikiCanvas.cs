@@ -26,6 +26,7 @@ public sealed partial class TsumikiCanvas : ITsumikiCanvas
         _width = width;
         _height = height;
         _control = page;
+        _control.RenderRequested += _renderer.RegisterVisual;
         WinInterop.AddCanvas(hwnd, this);
     }
 
@@ -44,27 +45,22 @@ public sealed partial class TsumikiCanvas : ITsumikiCanvas
         _renderer.Resize(normalized.Width, normalized.Height);
     }
 
-    public void DrawVisual(IVisual visual)
-    {
-        _renderer.RegisterVisual(visual);
-    }
-
-    public void OnMouseMove(short x, short y)
+    internal void OnMouseMove(short x, short y)
     {
         _control.OnMouseMove((float)x / _width, (float)y / _height);
     }
 
-    public void OnLeftButtonDown(short x, short y)
+    internal void OnLeftButtonDown(short x, short y)
     {
         _control.OnLeftButtonDown((float)x / _width, (float)y / _height);
     }
 
-    public void OnLeftButtonUp(short x, short y)
+    internal void OnLeftButtonUp(short x, short y)
     {
         _control.OnLeftButtonUp((float)x / _width, (float)y / _height);
     }
 
-    public void OnLeftButtonDoubleClick(short x, short y)
+    internal void OnLeftButtonDoubleClick(short x, short y)
     {
         _control.OnLeftButtonDoubleClick((float)x / _width, (float)y / _height);
     }
@@ -77,6 +73,7 @@ public sealed partial class TsumikiCanvas : ITsumikiCanvas
             if (disposing)
             {
                 // マネージドリソースの解放
+                _control.RenderRequested -= _renderer.RegisterVisual;
             }
 
             _renderLoop.Stop();
