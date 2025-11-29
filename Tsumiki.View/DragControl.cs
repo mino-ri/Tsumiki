@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Tsumiki.View;
 
 internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF control, RectF texture)

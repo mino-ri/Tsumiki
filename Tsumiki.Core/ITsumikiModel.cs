@@ -131,10 +131,10 @@ public interface IDelayUnit
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
     float Mix { get; set; }
 
-    [VstRangeParameter(1, 2, 500, 250, StepCount = 498, Units = "ms")]
+    [VstRangeParameter(1, 2, 514, 250, StepCount = 512, Units = "ms")]
     int Delay { get; set; }
 
-    [VstRangeParameter(2, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(2, 0.0, 1.0, 0.5)]
     float Feedback { get; set; }
 
     [VstBoolParameter(3, false)]

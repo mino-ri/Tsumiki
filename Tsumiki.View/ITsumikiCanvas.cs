@@ -28,6 +28,9 @@ public readonly record struct SizeF(float Width, float Height)
 
     public static SizeF operator -(SizeF a, SizeF b)
         => new(a.Width - b.Width, a.Height - b.Height);
+
+    public static SizeF operator *(SizeF a, float b)
+        => new(a.Width * b, a.Height * b);
 }
 
 public readonly record struct RectF(float Left, float Top, float Right, float Bottom)

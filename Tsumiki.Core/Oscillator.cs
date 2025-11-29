@@ -10,8 +10,8 @@ internal struct StackedOscillator(StackConfig stackConfig, OscillatorConfig oscC
     private readonly StackConfig _stackConfig = stackConfig;
     private readonly OscillatorConfig _oscConfig = oscConfig;
     private Stacked<ResetPulse> _pulses;
-    private Stacked<CarrierWave> _carriers = new(new(oscConfig.CarrierWave));
-    private Stacked<ModulatorWave> _modulators = new(new(oscConfig.ModulatorWave));
+    private Stacked<CarrierWave> _carriers = new(new CarrierWave(oscConfig.CarrierWave));
+    private Stacked<ModulatorWave> _modulators = new(new ModulatorWave(oscConfig.ModulatorWave));
     private Envelope _envelope1 = new(oscConfig.Envelope1);
     private Envelope _envelope2 = new(oscConfig.Envelope2);
 

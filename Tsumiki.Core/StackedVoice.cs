@@ -7,15 +7,26 @@ namespace Tsumiki.Core;
 /// </summary>
 [System.Runtime.CompilerServices.InlineArray(MathT.MaxStackCount)]
 internal struct Stacked<T>
-    where T : struct
 {
     private T _item;
 
+#pragma warning disable CS8618
     public Stacked(T init)
+#pragma warning restore CS8618
     {
         for (var i = 0; i < MathT.MaxStackCount; i++)
         {
             this[i] = init;
+        }
+    }
+
+#pragma warning disable CS8618
+    public Stacked(Func<T> init)
+#pragma warning restore CS8618
+    {
+        for (var i = 0; i < MathT.MaxStackCount; i++)
+        {
+            this[i] = init();
         }
     }
 }
@@ -27,7 +38,7 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
     public readonly DelayConfig Delay = new(model.Delay, sampleRate);
     public StackConfig Stack = new(model.Input);
     public GliderConfig Glide = new(model.Input, sampleRate);
-    public ResonantLowPassFilterConfig Filter = new(model.Filter, sampleRate);
+    public Stacked<ResonantLowPassFilterConfig> Filter = new(() => new(model.Filter, sampleRate));
     public OscillatorConfig OscillatorA = new(model.A1, model.A2, sampleRate);
     public OscillatorConfig OscillatorB = new(model.B1, model.B2, sampleRate);
     public float Master = model.Master;
@@ -42,7 +53,8 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
         Delay.Recalculate(sampleRate);
         Stack.Recalculate();
         Glide.Recalculate(sampleRate);
-        Filter.Recalculate(sampleRate);
+        for (var i = 0; i <= MathT.MaxStackCount; i++)
+            Filter[i].Recalculate(sampleRate);
         OscillatorA.Recalculate(sampleRate);
         OscillatorB.Recalculate(sampleRate);
 
@@ -206,14 +218,14 @@ internal struct TickData(double sampleRate, float filterMix)
 
 /// <summary>スタック機能を適用した後の音声出力器。</summary>
 [EventTiming]
-internal struct StackedVoice(ConfigSet config)
+internal struct StackedVoice(ConfigSet config, ResonantLowPassFilterConfig filterConfig)
 {
     private readonly ConfigSet _config = config;
     public SynthVoice SynthVoice = new(config.Glide);
     public StackedOscillator OscillatorA = new(config.Stack, config.OscillatorA);
     public StackedOscillator OscillatorB = new(config.Stack, config.OscillatorB);
-    public ResonantLowPassFilter LeftFilter = new(config.Filter);
-    public ResonantLowPassFilter RightFilter = new(config.Filter);
+    public ResonantLowPassFilter LeftFilter = new(filterConfig);
+    public ResonantLowPassFilter RightFilter = new(filterConfig);
 
     [AudioTiming]
     public (float left, float right) TickAndRender(in MidiVoice midi)
@@ -229,7 +241,7 @@ internal struct StackedVoice(ConfigSet config)
                 RestartNote();
                 break;
             case VoiceEvent.PitchChanged:
-                _config.Filter.RecalculatePitch(SynthVoice.Pitch);
+                filterConfig.RecalculatePitch(SynthVoice.Pitch);
                 break;
         }
 
@@ -264,7 +276,7 @@ internal struct StackedVoice(ConfigSet config)
     {
         OscillatorA.StartNote();
         OscillatorB.StartNote();
-        _config.Filter.RecalculatePitch(SynthVoice.Pitch);
+        filterConfig.RecalculatePitch(SynthVoice.Pitch);
         LeftFilter.Reset();
         RightFilter.Reset();
     }
@@ -274,6 +286,6 @@ internal struct StackedVoice(ConfigSet config)
     {
         OscillatorA.RestartNote();
         OscillatorB.RestartNote();
-        _config.Filter.RecalculatePitch(SynthVoice.Pitch);
+        filterConfig.RecalculatePitch(SynthVoice.Pitch);
     }
 }

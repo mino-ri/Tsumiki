@@ -32,10 +32,9 @@ public class Processor
         {
             _container = new MidiVoiceContainer(MaxVoices);
             _voices = GC.AllocateArray<StackedVoice>(MaxVoices, true);
-            _voices[0] = new(_config);
-            for (var i = 1; i < MaxVoices; i++)
+            for (var i = 0; i < MaxVoices; i++)
             {
-                _voices[i] = _voices[0];
+                _voices[i] = new(_config, _config.Filter[i]);
             }
             Recalculate();
         }
