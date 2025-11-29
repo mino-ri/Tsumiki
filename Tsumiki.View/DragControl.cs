@@ -2,22 +2,14 @@ using System.Runtime.CompilerServices;
 
 namespace Tsumiki.View;
 
-internal abstract class DragControl<T> : Control<IRangeViewParameter<T>>
+internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF control, RectF texture)
+    : Control<IRangeViewParameter<T>>(data, control)
 {
-    private readonly int _stepCount;
+    private readonly int _stepCount = data.StepCount == 0 ? 128 : data.StepCount;
     private double _dragStartValue;
-    private double _lastValue;
-    private RectF _textureRect;
-    private RectF _controlRect;
-
-    public DragControl(IRangeViewParameter<T> data, RectF control, RectF texture)
-         : base(data, control)
-    {
-        _stepCount = data.StepCount == 0 ? 128 : data.StepCount;
-        _textureRect = texture;
-        // 初期値を正常範囲外とすることで、再計算を強制する
-        _lastValue = -1f;
-    }
+    private double _lastValue = -1f;
+    private RectF _textureRect = texture;
+    private RectF _controlRect = control;
 
     protected abstract void RecalculateRect(double value, ref RectF controlRect, ref RectF textureRect);
 

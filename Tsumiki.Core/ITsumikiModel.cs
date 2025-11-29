@@ -53,16 +53,16 @@ public enum StackMode
 
 public interface IInputUnit
 {
-    [VstRangeParameter(0, 0, 24, 12, StepCount = 24)]
+    [VstRangeParameter(0, 0, 12, 12, StepCount = 12)]
     int Bend { get; set; }
 
-    [VstRangeParameter(1, -1, 100, 0, StepCount = 101)] // , Flags = VstParameterFlags.IsWrapAround
+    [VstRangeParameter(1, -1, 100, 0, StepCount = 101)]
     int Glide { get; set; }
 
-    [VstRangeParameter(2, -6, 6, 0, StepCount = 12)]
+    [VstRangeParameter(2, -8, 8, 0, StepCount = 16)]
     int Octave { get; set; }
 
-    [VstRangeParameter(3, 1, MathT.MaxStackCount, 1, StepCount = 6)] // , Flags = VstParameterFlags.IsWrapAround
+    [VstRangeParameter(3, 1, MathT.MaxStackCount, 1, StepCount = 6)]
     int Stack { get; set; }
 
     [VstStringListParameter(4, typeof(StackMode))]
