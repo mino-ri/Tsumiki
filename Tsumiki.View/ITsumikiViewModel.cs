@@ -6,15 +6,22 @@ namespace Tsumiki.View;
 [VstModel("Tsumiki", typeof(ITsumikiModel))]
 public partial interface ITsumikiViewModel;
 
-public interface IViewParameter<T>
+public interface IViewParameter
+{
+    public double NormalizedValue { get; set; }
+    public double DefaultNormalizedValue { get; }
+    public int Id { get; }
+    public void BeginEdit();
+    public void EndEdit();
+}
+
+public interface IViewParameter<T> : IViewParameter
 {
     public T Value { get; set; }
     public T DefaultValue { get; }
-    public int Id { get; }
 }
 
 public interface IRangeViewParameter<T> : IViewParameter<T>
-    where T : IComparable<T>
 {
     public T MinValue { get; }
     public T MaxValue { get; }

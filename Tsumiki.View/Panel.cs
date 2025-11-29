@@ -2,11 +2,13 @@ using System.Collections;
 
 namespace Tsumiki.View;
 
-public class Panel<TData>(TData data, RectF rect) : Control<TData>(data, rect), IEnumerable<Control>
+public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
 {
     private readonly List<Control> _controls = [];
 
     private Control[] Children => field ??= [.. _controls];
+
+    internal virtual void RequestRender(Control control) => Parent?.RequestRender(control);
 
     internal override Control FindControl(PointF point)
     {
@@ -14,11 +16,19 @@ public class Panel<TData>(TData data, RectF rect) : Control<TData>(data, rect), 
         {
             if (control.Rect.Contains(point))
             {
-                return control.FindControl(point + control.Rect.Location);
+                return control.FindControl(point - control.Rect.Location);
             }
         }
 
         return this;
+    }
+
+    public override void OnParameterChanged(int parameterId)
+    {
+        foreach (var control in Children)
+        {
+            control.OnParameterChanged(parameterId);
+        }
     }
 
     internal override bool TryFindParameter(PointF point, out int parameterId)

@@ -5,7 +5,7 @@ using Tsumiki.View.Win;
 
 namespace Tsumiki;
 
-public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
+public class TsumikiPluginView(TsumikiModel model, TsumikiController controller) : IAudioPluginView
 {
     private TsumikiPage? _page;
     private ITsumikiCanvas? _canvas;
@@ -27,7 +27,7 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
         TsumikiLogger.WriteAccess([parent, (int)type]);
         try
         {
-            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page ??= TsumikiPage.Create(new TsumikiViewModel(model)));
+            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page ??= TsumikiPage.Create(new TsumikiViewModel(model, controller)));
         }
         catch (Exception ex)
         {
@@ -130,6 +130,11 @@ public class TsumikiPluginView(TsumikiModel model) : IAudioPluginView
     public void SetFrame(IAudioPluginFrame frame)
     {
         TsumikiLogger.WriteAccess([]);
+    }
+
+    public void OnParameterChanged(AudioParameterId parameterId)
+    {
+        _page?.OnParameterChanged(parameterId.Value);
     }
 
     public bool TryFindParameter(int xPos, int yPos, out AudioParameterId parameterId)

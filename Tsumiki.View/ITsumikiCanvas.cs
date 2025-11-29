@@ -21,11 +21,21 @@ public readonly record struct PointF(float X, float Y)
         => new(a.X - b.X, a.Y - b.Y);
 }
 
+public readonly record struct SizeF(float Width, float Height)
+{
+    public static SizeF operator +(SizeF a, SizeF b)
+        => new(a.Width + b.Width, a.Height + b.Height);
+
+    public static SizeF operator -(SizeF a, SizeF b)
+        => new(a.Width - b.Width, a.Height - b.Height);
+}
+
 public readonly record struct RectF(float Left, float Top, float Right, float Bottom)
 {
     public readonly float Width => Right - Left;
     public readonly float Height => Bottom - Top;
     public readonly PointF Location => new(Left, Top);
+    public readonly SizeF Size => new(Width, Height);
 
     public bool Contains(PointF point)
         => Contains(point.X, point.Y);
@@ -51,6 +61,7 @@ public interface IControl : IVisual
     void OnLeftButtonDown(float x, float y);
     void OnLeftButtonUp(float x, float y);
     void OnLeftButtonDoubleClick(float x, float y);
+    void OnParameterChanged(int parameterId);
     bool TryFindParameter(float x, float y, out int parameterId);
 }
 

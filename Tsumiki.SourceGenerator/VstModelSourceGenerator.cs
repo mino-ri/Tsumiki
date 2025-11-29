@@ -69,6 +69,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var definitionType = modelInfo.DefinitionType;
 
         var sourceBuilder = new StringBuilder();
+        sourceBuilder.AppendLine("#nullable enable");
         sourceBuilder.AppendLine("using NPlug;");
         sourceBuilder.AppendLine("using Tsumiki.View;");
         sourceBuilder.AppendLine();
@@ -185,7 +186,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
     private static void GenerateViewModelImplementation(StringBuilder sourceBuilder, string className, INamedTypeSymbol interfaceType)
     {
         // Determine base class
-        sourceBuilder.AppendLine($"public partial class {GetViewModelName(className)}({className} unit) : {GetViewInterfaceName(interfaceType)}");
+        sourceBuilder.AppendLine($"public partial class {GetViewModelName(className)}({className} unit, TsumikiController? controller) : {GetViewInterfaceName(interfaceType)}");
         sourceBuilder.AppendLine("{");
 
         foreach (var property in GetParameterProperties(interfaceType))
@@ -198,7 +199,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         {
             var viewModelInterfaceName = GetViewInterfaceName(unitProperty.Type);
             var viewModelClassName = GetViewModelName(GetUnitClassName(unitProperty));
-            sourceBuilder.AppendLine($"    public {viewModelInterfaceName} {unitProperty.Name} {{ get; }} = new {viewModelClassName}(unit.{unitProperty.Name});");
+            sourceBuilder.AppendLine($"    public {viewModelInterfaceName} {unitProperty.Name} {{ get; }} = new {viewModelClassName}(unit.{unitProperty.Name}, controller);");
         }
 
         sourceBuilder.AppendLine("}");
@@ -210,19 +211,19 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var returnType = property.Type.ToDisplayString();
         var interfaceType = attribute.AttributeClass?.Name switch
         {
-            "VstRangeParameterAttribute" => $"IViewParameter<{returnType}>",
+            "VstRangeParameterAttribute" => $"IRangeViewParameter<{returnType}>",
             _ => $"IViewParameter<{returnType}>",
         };
         var initialization = (attribute.AttributeClass?.Name, returnType) switch
         {
-            ("VstRangeParameterAttribute", "double") => $"new DoubleRangeViewParameter(unit.{property.Name}Parameter)",
-            ("VstRangeParameterAttribute", "int") => $"new Int32RangeViewParameter(unit.{property.Name}Parameter)",
-            ("VstRangeParameterAttribute", "float") => $"new FloatRangeViewParameter(unit.{property.Name}Parameter)",
-            ("VstRangeParameterAttribute", _) => $"new {property.Type.Name}RangeViewParameter(unit.{property.Name}Parameter)",
-            ("VstBoolParameterAttribute", _) => $"new BoolViewParameter(unit.{property.Name}Parameter)",
-            ("VstStringListParameterAttribute", _) => $"new EnumViewParameter<{returnType}>(unit.{property.Name}Parameter)",
-            (_, "float") => $"new FloatViewParameter(unit.{property.Name}Parameter)",
-            _ => $"new ViewParameter(unit.{property.Name}Parameter)",
+            ("VstRangeParameterAttribute", "double") => $"new DoubleRangeViewParameter(unit.{property.Name}Parameter, controller)",
+            ("VstRangeParameterAttribute", "int") => $"new Int32RangeViewParameter(unit.{property.Name}Parameter, controller)",
+            ("VstRangeParameterAttribute", "float") => $"new FloatRangeViewParameter(unit.{property.Name}Parameter, controller)",
+            ("VstRangeParameterAttribute", _) => $"new {property.Type.Name}RangeViewParameter(unit.{property.Name}Parameter, controller)",
+            ("VstBoolParameterAttribute", _) => $"new BoolViewParameter(unit.{property.Name}Parameter, controller)",
+            ("VstStringListParameterAttribute", _) => $"new EnumViewParameter<{returnType}>(unit.{property.Name}Parameter, controller)",
+            (_, "float") => $"new FloatViewParameter(unit.{property.Name}Parameter, controller)",
+            _ => $"new ViewParameter(unit.{property.Name}Parameter, controller)",
         };
 
         sourceBuilder.AppendLine($"    public {interfaceType} {property.Name} {{ get; }} = {initialization};");

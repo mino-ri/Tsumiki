@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Tsumiki.View;
 
 public abstract class Control(RectF rect) : IVisual
@@ -6,7 +8,7 @@ public abstract class Control(RectF rect) : IVisual
     private RectF _globalRect = rect;
     private RectF _textureRect = ControlToTexture(in rect);
 
-    public Control? Parent { get; private set; }
+    public Panel? Parent { get; private set; }
     /// <summary>親コントロール内での位置。</summary>
     public ref readonly RectF Rect => ref _rect;
 
@@ -29,12 +31,9 @@ public abstract class Control(RectF rect) : IVisual
 
     internal virtual void OnWheel(float distance) { }
 
-    internal void RequestRender() => RequestRender(this);
+    internal void RequestRender() => Parent?.RequestRender(this);
 
-    internal virtual void RequestRender(Control control)
-    {
-        Parent?.RequestRender(control);
-    }
+    public abstract void OnParameterChanged(int parameterId);
 
     internal abstract bool TryFindParameter(PointF point, out int parameterId);
 
@@ -44,7 +43,7 @@ public abstract class Control(RectF rect) : IVisual
         RenderCore(context);
     }
 
-    internal void SetParent(Control parent)
+    internal void SetParent(Panel parent)
     {
         _globalRect = Rect + parent.GlobalRect.Location;
         _textureRect = ControlToTexture(in _globalRect);
@@ -59,6 +58,27 @@ public abstract class Control(RectF rect) : IVisual
     {
         // 背景は描画範囲とアスペクト比が違い、右側25%にコントロール群が配置されている
         return new(controlRect.Left * 0.75f, controlRect.Top, controlRect.Right * 0.75f, controlRect.Bottom);
+    }
+
+    protected static SizeF TextureToControl(in SizeF textureSize)
+    {
+        return new(textureSize.Width / 0.75f, textureSize.Height);
+    }
+
+    const float PixelControlWidth = 1920f;
+    const float PixelControlHeight = 1280f;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static RectF PixelToControl(int x, int y, int width, int height)
+    {
+        return new RectF(x / PixelControlWidth, y / PixelControlHeight, (x + width) / PixelControlWidth, (y + height) / PixelControlHeight);
+    }
+
+    const float PixelTextureWidth = 2560f;
+    const float PixelTextureHeight = 1280f;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static RectF PixelToTexture(int x, int y, int width, int height)
+    {
+        return new RectF(x / PixelTextureWidth, y / PixelTextureHeight, (x + width) / PixelTextureWidth, (y + height) / PixelTextureHeight);
     }
 }
 

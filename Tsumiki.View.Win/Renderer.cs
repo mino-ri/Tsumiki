@@ -20,6 +20,7 @@ internal sealed class Renderer : IDisposable, IDrawingContext
     private const int SyncInterval = 2;
     private readonly Color _background = new(0xFF504530);
     private readonly ConcurrentQueue<IVisual> _visuals = new();
+    private readonly HashSet<IVisual> _renderedVisuals = [];
     private readonly Queue<IVisual> _prevVisuals = new();
     private readonly Graphics _graphics;
     private readonly IVisual _rootVisual;
@@ -73,6 +74,7 @@ internal sealed class Renderer : IDisposable, IDrawingContext
                 var (width, height) = _changedSize.Value;
                 _changedSize = null;
                 _graphics.Resize(width, height);
+                _visuals.Clear();
                 _visuals.Enqueue(_rootVisual);
                 Clear();
             }
@@ -82,10 +84,14 @@ internal sealed class Renderer : IDisposable, IDrawingContext
                 visual.Render(this);
             }
 
+            _renderedVisuals.Clear();
             while (_visuals.TryDequeue(out var visual))
             {
-                visual.Render(this);
-                _prevVisuals.Enqueue(visual);
+                if (_renderedVisuals.Add(visual))
+                {
+                    visual.Render(this);
+                    _prevVisuals.Enqueue(visual);
+                }
             }
 
             _graphics.SwapChain.TryPresent(SyncInterval, PresentFlags.None);

@@ -71,7 +71,7 @@ public interface IInputUnit
     [VstRangeParameter(5, 0, 100, 10, StepCount = 100, Units = "cent")]
     int StackDetune { get; set; }
 
-    [VstRangeParameter(6, 0.0, 1.0, 0.0)]
+    [VstRangeParameter(6, -1.0, 1.0, 0.0)]
     float StackStereo { get; set; }
 }
 

@@ -18,11 +18,12 @@ public class TsumikiController : AudioController<TsumikiModel>
 
     protected override IAudioPluginView? CreateView()
     {
-        return _view ??= new TsumikiPluginView(Model);
+        return _view ??= new TsumikiPluginView(Model, this);
     }
 
     protected override void OnParameterValueChanged(AudioParameter parameter, bool parameterValueChangedFromHost)
     {
         base.OnParameterValueChanged(parameter, parameterValueChangedFromHost);
+        _view?.OnParameterChanged(parameter.Id.Value);
     }
 }

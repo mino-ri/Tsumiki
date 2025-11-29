@@ -1,6 +1,6 @@
 namespace Tsumiki.View;
 
-public partial class TsumikiPage(ITsumikiViewModel data) : Panel<ITsumikiViewModel>(data, new RectF(0f, 0f, 1f, 1f)), IControl
+public partial class TsumikiPage() : Panel(new RectF(0f, 0f, 1f, 1f)), IControl
 {
     private PointF _mouseDownPoint;
     private Control? _hovered;
@@ -49,6 +49,4 @@ public partial class TsumikiPage(ITsumikiViewModel data) : Panel<ITsumikiViewMod
     public bool TryFindParameter(float x, float y, out int parameterId) => TryFindParameter(new PointF(x, y), out parameterId);
 
     internal override void RequestRender(Control control) => RenderRequested?.Invoke(control);
-
-    internal override void RenderCore(IDrawingContext context) { }
 }
