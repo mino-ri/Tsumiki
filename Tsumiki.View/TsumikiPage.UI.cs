@@ -13,6 +13,8 @@ public partial class TsumikiPage
     static readonly RectF DelayCrossSwitcher = PixelToTexture(2290, 0, 90, 90);
     static readonly RectF AttackSlider = PixelToTexture(2080, 1200, 60, 60);
     static readonly RectF ReleaseSlider = PixelToTexture(2140, 1200, 60, 60);
+    static readonly RectF PitchDigit = PixelToTexture(1930, 360, 105, 90);
+    static readonly RectF PitchDecimal = PixelToTexture(1930, 630, 25, 30);
 
     static readonly RectF Attack = PixelToTexture(2230, 1140, 120, 120);
     static readonly RectF Decay = PixelToTexture(2410, 1140, 120, 120);
@@ -56,6 +58,10 @@ public partial class TsumikiPage
     {
         return new(rect)
         {
+            new PitchIntegerControl<double>(carrier.Pitch, PixelToControl(15, 60, 105, 90), PitchDigit, 3, 0, 16),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 160),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(carrier.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new XYControl<float, float>(carrier.ShapeX, carrier.ShapeY, PixelToControl(240, 0, 600, 240), XYControl),
             new HorizontalSlider<float>(carrier.Pan, PixelToControl(1320, 75, 240, 90), HorizontalSlider),
@@ -74,6 +80,10 @@ public partial class TsumikiPage
     {
         return new(rect)
         {
+            new PitchIntegerControl<double>(modulator.Pitch, PixelToControl(15, 60, 105, 90), PitchDigit, 3, 0, 16),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 160),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new XYControl<float, float>(modulator.Phase, modulator.Feedback, PixelToControl(240, 0, 600, 240), XYControl),
             new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),

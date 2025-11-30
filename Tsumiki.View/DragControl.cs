@@ -4,7 +4,7 @@ internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF contro
     : Control<IRangeViewParameter<T>>(data, control)
 {
     private readonly int _stepCount = data.StepCount == 0 ? 128 : data.StepCount;
-    private double _dragStartValue;
+    protected double _dragStartValue;
     private double _lastValue = -1f;
     private RectF _textureRect = texture;
     private RectF _controlRect = control;

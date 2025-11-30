@@ -80,7 +80,7 @@ public interface ICarrierUnit : IEnvelopeUnit
     [VstRangeParameter(4, 0.0, 1.0, 0.5)]
     float Level { get; set; }
 
-    [VstRangeParameter(5, 0.0, 20.0, 1.0)]
+    [VstRangeParameter(5, 0.0, 16.0, 1.0)]
     double Pitch { get; set; }
 
     [VstBoolParameter(6, false)]
@@ -101,7 +101,7 @@ public interface IModulatorUnit : IEnvelopeUnit
     [VstRangeParameter(4, 0.0, 1.0, 0.0)]
     float Level { get; set; }
 
-    [VstRangeParameter(5, 0.0, 20.0, 1.0)]
+    [VstRangeParameter(5, 0.0, 16.0, 1.0)]
     double Pitch { get; set; }
 
     [VstBoolParameter(6, false)]
