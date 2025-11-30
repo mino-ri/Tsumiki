@@ -49,7 +49,7 @@ internal struct ModulatorWave(ModulatorWaveConfig config)
         }
 
         var actualPhase = _phase + _config.Feedback * _output;
-        actualPhase -= (int)actualPhase;
+        actualPhase -= Math.Round(actualPhase);
         _output = MathT.Sin((float)actualPhase);
         _phase += delta * _config.Pitch;
         _phase -= (int)_phase;

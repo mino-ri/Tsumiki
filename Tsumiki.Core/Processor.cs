@@ -4,7 +4,7 @@ namespace Tsumiki.Core;
 
 public class Processor
 {
-    const int MaxVoices = 8;
+    public const int MaxVoices = MathT.MaxVoices;
     private readonly ITsumikiModel _model;
     private readonly ConfigSet _config;
     private double _sampleRate;

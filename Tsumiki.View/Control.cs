@@ -43,13 +43,13 @@ public abstract class Control(RectF rect) : IVisual
         RenderCore(context);
     }
 
-    internal void SetParent(Panel parent)
+    internal virtual void SetParent(Panel parent)
     {
         _globalRect = Rect + parent.GlobalRect.Location;
         _textureRect = ControlToTexture(in _globalRect);
         Parent = parent;
     }
-
+    
     internal virtual Control FindControl(PointF point) => this;
 
     internal abstract void RenderCore(IDrawingContext context);
@@ -65,16 +65,28 @@ public abstract class Control(RectF rect) : IVisual
         return new(textureSize.Width / 0.75f, textureSize.Height);
     }
 
-    const float PixelControlWidth = 1920f;
-    const float PixelControlHeight = 1280f;
+    protected const float PixelControlWidth = 1920f;
+    protected const float PixelControlHeight = 1280f;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static RectF PixelToControl(int x, int y, int width, int height)
     {
         return new RectF(x / PixelControlWidth, y / PixelControlHeight, (x + width) / PixelControlWidth, (y + height) / PixelControlHeight);
     }
 
-    const float PixelTextureWidth = 2560f;
-    const float PixelTextureHeight = 1280f;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static PointF PixelToControl(int x, int y)
+    {
+        return new PointF(x / PixelControlWidth, y / PixelControlHeight);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static SizeF PixelToControlSize(int x, int y)
+    {
+        return new SizeF(x / PixelControlWidth, y / PixelControlHeight);
+    }
+
+    protected const float PixelTextureWidth = 2560f;
+    protected const float PixelTextureHeight = 1280f;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static RectF PixelToTexture(int x, int y, int width, int height)
     {

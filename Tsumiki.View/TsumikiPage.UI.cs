@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace Tsumiki.View;
 
 public partial class TsumikiPage
@@ -9,6 +11,12 @@ public partial class TsumikiPage
     static readonly RectF SyncSwitcher = PixelToTexture(1930, 0, 90, 90);
     static readonly RectF StackTypeSwitcher = PixelToTexture(2110, 0, 90, 90);
     static readonly RectF DelayCrossSwitcher = PixelToTexture(2290, 0, 90, 90);
+    static readonly RectF AttackSlider = PixelToTexture(2080, 1200, 60, 60);
+    static readonly RectF ReleaseSlider = PixelToTexture(2140, 1200, 60, 60);
+
+    static readonly RectF Attack = PixelToTexture(2230, 1140, 120, 120);
+    static readonly RectF Decay = PixelToTexture(2410, 1140, 120, 120);
+    static readonly RectF Under = PixelToTexture(2320, 1230, 30, 30);
 
     public static TsumikiPage Create(ITsumikiViewModel data)
     {
@@ -50,8 +58,15 @@ public partial class TsumikiPage
         {
             new ToggleButton(carrier.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new XYControl<float, float>(carrier.ShapeX, carrier.ShapeY, PixelToControl(240, 0, 600, 240), XYControl),
-            new VerticalSlider<float>(carrier.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
             new HorizontalSlider<float>(carrier.Pan, PixelToControl(1320, 75, 240, 90), HorizontalSlider),
+            new EnvelopePanel(carrier.Attack, carrier.Decay, carrier.Sustain, carrier.Release,
+                PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
+            {
+                new VerticalSlider<float>(carrier.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),
+                new OffsetXYControl<int, float>(carrier.Attack, carrier.Decay, carrier.Sustain, PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
+                new HorizontalSlider<int>(carrier.Attack, PixelToControl(0, 0, 180, 60), AttackSlider),
+                new HorizontalSlider<int>(carrier.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider),
+            },
         };
     }
 
@@ -62,6 +77,14 @@ public partial class TsumikiPage
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new XYControl<float, float>(modulator.Phase, modulator.Feedback, PixelToControl(240, 0, 600, 240), XYControl),
             new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
+            new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release,
+                PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
+            {
+                new VerticalSlider<float>(modulator.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),
+                new OffsetXYControl<int, float>(modulator.Attack, modulator.Decay, modulator.Sustain, PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
+                new HorizontalSlider<int>(modulator.Attack, PixelToControl(0, 0, 180, 60), AttackSlider),
+                new HorizontalSlider<int>(modulator.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider),
+            },
         };
     }
 }

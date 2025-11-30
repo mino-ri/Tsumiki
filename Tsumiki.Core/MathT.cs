@@ -4,6 +4,7 @@ namespace Tsumiki.Core;
 
 internal static class MathT
 {
+    public const int MaxVoices = 8;
     public const int MaxStackCount = 7;
 
     /// <summary>0～1で表される位相から、三角波を返します。</summary>

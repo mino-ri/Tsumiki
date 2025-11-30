@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 
 namespace Tsumiki.View;
@@ -12,8 +13,9 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
 
     internal override Control FindControl(PointF point)
     {
-        foreach (var control in Children)
+        for (var i = Children.Length - 1; i >= 0; i--)
         {
+            var control = Children[i];
             if (control.Rect.Contains(point))
             {
                 return control.FindControl(point - control.Rect.Location);
@@ -33,8 +35,9 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
 
     internal override bool TryFindParameter(PointF point, out int parameterId)
     {
-        foreach (var control in Children)
+        for (var i = Children.Length - 1; i >= 0; i--)
         {
+            var control = Children[i];
             if (control.Rect.Contains(point))
             {
                 return control.TryFindParameter(point - control.Rect.Location, out parameterId);
@@ -50,6 +53,15 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
         foreach (var control in Children)
         {
             control.RenderCore(context);
+        }
+    }
+
+    internal override void SetParent(Panel parent)
+    {
+        base.SetParent(parent);
+        foreach (var control in Children)
+        {
+            control.SetParent(this);
         }
     }
 

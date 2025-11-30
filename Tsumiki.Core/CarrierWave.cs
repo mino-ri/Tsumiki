@@ -74,8 +74,8 @@ internal struct CarrierWave(CarrierWaveConfig config)
 
         var dActualPhase = _phase + fm;
         // 扱いやすさのため、 -0.5～0.5 に正規化する
-        var actualPhase = (float)(dActualPhase - (int)dActualPhase - 0.5f);
-        var absPhase = Math.Abs((float)actualPhase);
+        var actualPhase = (float)(dActualPhase - Math.Round(dActualPhase));
+        var absPhase = Math.Abs(actualPhase);
 
         var output =
             absPhase < _config.UpEnd ? actualPhase * _config.UpSlope

@@ -38,7 +38,8 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
     public readonly DelayConfig Delay = new(model.Delay, sampleRate);
     public StackConfig Stack = new(model.Input);
     public GliderConfig Glide = new(model.Input, sampleRate);
-    public Stacked<ResonantLowPassFilterConfig> Filter = new(() => new(model.Filter, sampleRate));
+    public ResonantLowPassFilterConfig[] Filter =
+        [.. Enumerable.Range(0, MathT.MaxVoices).Select(_ => new ResonantLowPassFilterConfig(model.Filter, sampleRate))];
     public OscillatorConfig OscillatorA = new(model.A1, model.A2, sampleRate);
     public OscillatorConfig OscillatorB = new(model.B1, model.B2, sampleRate);
     public float Master = model.Master;
@@ -53,7 +54,7 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
         Delay.Recalculate(sampleRate);
         Stack.Recalculate();
         Glide.Recalculate(sampleRate);
-        for (var i = 0; i <= MathT.MaxStackCount; i++)
+        for (var i = 0; i < MathT.MaxVoices; i++)
             Filter[i].Recalculate(sampleRate);
         OscillatorA.Recalculate(sampleRate);
         OscillatorB.Recalculate(sampleRate);

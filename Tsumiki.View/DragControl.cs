@@ -19,6 +19,7 @@ internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF contro
         if (newValue == _lastValue) return;
         _lastValue = newValue;
 
+        _controlRect = GlobalRect;
         RecalculateRect(_lastValue, ref _controlRect, ref _textureRect);
     }
 
