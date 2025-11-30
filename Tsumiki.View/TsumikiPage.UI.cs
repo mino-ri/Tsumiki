@@ -85,7 +85,7 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
-            new XYControl<float, float>(modulator.Phase, modulator.Feedback, PixelToControl(240, 0, 600, 240), XYControl),
+            new XYControl<float, float>(modulator.ShapeX, modulator.ShapeY, PixelToControl(240, 0, 600, 240), XYControl),
             new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
             new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)

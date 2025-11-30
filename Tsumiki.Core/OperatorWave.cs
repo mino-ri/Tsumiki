@@ -3,25 +3,24 @@ using Tsumiki.Metadata;
 namespace Tsumiki.Core;
 
 [EventTiming]
-internal sealed class CarrierWaveConfig
+internal sealed class OperatorWaveConfig
 {
-    private readonly ICarrierUnit _unit;
-    private float _shapeX;
-    private float _shapeY;
+    private const float MaxSlope = 48000f;
+    private readonly IOperatorUnit _unit;
     // ShapeX は上昇フェーズと下降フェーズのバランスを変える
     // ShapeY が正の値なら、サイン波 → 矩形波の変化
     // ShapeY が負の値なら、サイン波 → 三角波の変化
+    private float _shapeX;
+    private float _shapeY;
     public double Pitch;
     public bool Sync;
     public float Level;
     public float SinFactor;
     public float UpSlope;
     public float DownSlope;
-    public float UpEnd;
-    public float DownStart;
 
     [InitTiming]
-    public CarrierWaveConfig(ICarrierUnit unit)
+    public OperatorWaveConfig(IOperatorUnit unit)
     {
         _unit = unit;
         // 有効値は -1 ～ 1 なので、初期値として範囲外を設定することで計算を実行させる
@@ -42,20 +41,18 @@ internal sealed class CarrierWaveConfig
             _shapeX = _unit.ShapeX;
             _shapeY = _unit.ShapeY;
             SinFactor = _shapeY > 0f ? 1f : 1f + _shapeY;
-            var flatness = _shapeY > 0f ? 1f - _shapeY : 1f;
-            UpSlope = 2f / flatness / (0.5f + _shapeX * 0.5f);
-            DownSlope = 2f / flatness / (0.5f - _shapeX * 0.5f);
-            UpEnd = (0.25f + _shapeX * 0.25f) * flatness;
-            DownStart = 0.5f - (0.25f - _shapeX * 0.25f) * flatness;
+            var flatness = Math.Min(1f - _shapeY, 1f);
+            UpSlope = Math.Min(MaxSlope, 4f / flatness / (1f + _shapeX));
+            DownSlope = -Math.Min(MaxSlope, 4f / flatness / (1f - _shapeX));
         }
     }
 }
 
 [AudioTiming]
 [method: InitTiming]
-internal struct CarrierWave(CarrierWaveConfig config)
+internal struct OperatorWave(OperatorWaveConfig config)
 {
-    private readonly CarrierWaveConfig _config = config;
+    private readonly OperatorWaveConfig _config = config;
     double _phase;
 
     [EventTiming]
@@ -67,23 +64,17 @@ internal struct CarrierWave(CarrierWaveConfig config)
     [AudioTiming]
     public float TickAndRender(double delta, double syncPhase, float fm)
     {
+        if (_config.Level == 0f) return 0f;
+
         if (_config.Sync && syncPhase >= 0)
         {
             _phase = delta * _config.Pitch;
         }
 
         var dActualPhase = _phase + fm;
-        // 扱いやすさのため、 -0.5～0.5 に正規化する
-        var actualPhase = (float)(dActualPhase - Math.Round(dActualPhase));
-        var absPhase = Math.Abs(actualPhase);
-
-        var output =
-            absPhase < _config.UpEnd ? actualPhase * _config.UpSlope
-            : absPhase > _config.DownStart ? (MathF.Sign(actualPhase) * 0.5f - actualPhase) * _config.DownSlope
-            : actualPhase >= 0f ? 1f : -1f;
-
-        output = float.IsNaN(output) ? 0f : Math.Clamp(output, -1f, 1f);
-        output = MathT.TriToSin2(output, _config.SinFactor);
+        var up = Math.Min(1f, Math.Abs((float)(dActualPhase - Math.Round(dActualPhase)) * _config.UpSlope));
+        var down = (float)(dActualPhase - (int)dActualPhase - 0.5) * _config.DownSlope;
+        var output = MathT.TriToSin2(Math.Clamp(down, -up, up), _config.SinFactor);
 
         _phase += delta * _config.Pitch;
         _phase -= (int)_phase;

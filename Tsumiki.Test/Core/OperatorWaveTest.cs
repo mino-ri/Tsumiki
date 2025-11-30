@@ -2,7 +2,7 @@ using Tsumiki.Core;
 
 namespace Tsumiki.Test.Core;
 
-public static class CarrierWaveTest
+public static class OperatorWaveTest
 {
     /// <summary>テスト用のキャリアユニットのモック</summary>
     private class TestCarrierUnit : ICarrierUnit
@@ -23,8 +23,8 @@ public static class CarrierWaveTest
     public static void Reset_位相がリセットされる()
     {
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         // 事前に位相を進めておく
         for (var i = 0; i < 100; i++)
@@ -45,8 +45,8 @@ public static class CarrierWaveTest
     public static void TickAndRender_出力値が範囲内()
     {
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         wave.Reset();
 
@@ -63,8 +63,8 @@ public static class CarrierWaveTest
     {
         // ShapeY = 0 で純粋な三角波を生成
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         wave.Reset();
 
@@ -93,10 +93,10 @@ public static class CarrierWaveTest
     {
         var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unit2 = new TestCarrierUnit { Pitch = 2.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config1 = new CarrierWaveConfig(unit1);
-        var config2 = new CarrierWaveConfig(unit2);
-        var wave1 = new CarrierWave(config1);
-        var wave2 = new CarrierWave(config2);
+        var config1 = new OperatorWaveConfig(unit1);
+        var config2 = new OperatorWaveConfig(unit2);
+        var wave1 = new OperatorWave(config1);
+        var wave2 = new OperatorWave(config2);
 
         wave1.Reset();
         wave2.Reset();
@@ -119,8 +119,8 @@ public static class CarrierWaveTest
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         wave.Reset();
 
@@ -146,9 +146,9 @@ public static class CarrierWaveTest
     {
         // ShapeY = 0 で純粋な三角波を生成
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var waveNoFm = new CarrierWave(config);
-        var waveFm = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var waveNoFm = new OperatorWave(config);
+        var waveFm = new OperatorWave(config);
 
         waveNoFm.Reset();
         waveFm.Reset();
@@ -183,13 +183,13 @@ public static class CarrierWaveTest
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
         var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
 
-        var configNeutral = new CarrierWaveConfig(unitNeutral);
-        var configPositive = new CarrierWaveConfig(unitPositive);
-        var configNegative = new CarrierWaveConfig(unitNegative);
+        var configNeutral = new OperatorWaveConfig(unitNeutral);
+        var configPositive = new OperatorWaveConfig(unitPositive);
+        var configNegative = new OperatorWaveConfig(unitNegative);
 
-        var waveNeutral = new CarrierWave(configNeutral);
-        var wavePositive = new CarrierWave(configPositive);
-        var waveNegative = new CarrierWave(configNegative);
+        var waveNeutral = new OperatorWave(configNeutral);
+        var wavePositive = new OperatorWave(configPositive);
+        var waveNegative = new OperatorWave(configNegative);
 
         waveNeutral.Reset();
         wavePositive.Reset();
@@ -234,11 +234,11 @@ public static class CarrierWaveTest
         var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
 
-        var configNeutral = new CarrierWaveConfig(unitNeutral);
-        var configPositive = new CarrierWaveConfig(unitPositive);
+        var configNeutral = new OperatorWaveConfig(unitNeutral);
+        var configPositive = new OperatorWaveConfig(unitPositive);
 
-        var waveNeutral = new CarrierWave(configNeutral);
-        var wavePositive = new CarrierWave(configPositive);
+        var waveNeutral = new OperatorWave(configNeutral);
+        var wavePositive = new OperatorWave(configPositive);
 
         waveNeutral.Reset();
         wavePositive.Reset();
@@ -273,11 +273,11 @@ public static class CarrierWaveTest
         var unitHalf = new TestCarrierUnit { Pitch = 1.0, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitFull = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
 
-        var configHalf = new CarrierWaveConfig(unitHalf);
-        var configFull = new CarrierWaveConfig(unitFull);
+        var configHalf = new OperatorWaveConfig(unitHalf);
+        var configFull = new OperatorWaveConfig(unitFull);
 
-        var waveHalf = new CarrierWave(configHalf);
-        var waveFull = new CarrierWave(configFull);
+        var waveHalf = new OperatorWave(configHalf);
+        var waveFull = new OperatorWave(configFull);
 
         waveHalf.Reset();
         waveFull.Reset();
@@ -312,7 +312,7 @@ public static class CarrierWaveTest
             Sync = true
         };
 
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         Assert.Equal(2.5, config.Pitch);
         Assert.Equal(0.8f, config.Level);
@@ -331,7 +331,7 @@ public static class CarrierWaveTest
             Sync = false
         };
 
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         // ShapeY が正の値の場合、矩形波 → 三角波の変化
         Assert.Equal(1.0f, config.SinFactor);
@@ -349,7 +349,7 @@ public static class CarrierWaveTest
             Sync = false
         };
 
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         // ShapeY が負の値の場合、三角波 → サイン波の変化
         Assert.Equal(0.25f, config.SinFactor);
@@ -366,12 +366,10 @@ public static class CarrierWaveTest
             ShapeY = 0f,
             Sync = false
         };
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         var oldUpSlope = config.UpSlope;
         var oldDownSlope = config.DownSlope;
-        var oldUpEnd = config.UpEnd;
-        var oldDownStart = config.DownStart;
 
         // ShapeX を変更して再計算
         unit.ShapeX = 0.5f;
@@ -380,8 +378,6 @@ public static class CarrierWaveTest
         // Shape関連の値が変わることを確認
         Assert.NotEqual(oldUpSlope, config.UpSlope);
         Assert.NotEqual(oldDownSlope, config.DownSlope);
-        Assert.NotEqual(oldUpEnd, config.UpEnd);
-        Assert.NotEqual(oldDownStart, config.DownStart);
     }
 
     [Fact]
@@ -395,7 +391,7 @@ public static class CarrierWaveTest
             ShapeY = -0.5f, // 負の値から開始
             Sync = false
         };
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         var oldSinFactor = config.SinFactor;
 
@@ -419,7 +415,7 @@ public static class CarrierWaveTest
             ShapeY = -0.4f,
             Sync = false
         };
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         var oldSinFactor = config.SinFactor;
         var oldUpSlope = config.UpSlope;
@@ -449,7 +445,7 @@ public static class CarrierWaveTest
             ShapeY = 0f,
             Sync = false
         };
-        var config = new CarrierWaveConfig(unit);
+        var config = new OperatorWaveConfig(unit);
 
         // 複数のパラメータを変更
         unit.Pitch = 3.5;
@@ -468,8 +464,8 @@ public static class CarrierWaveTest
     public static void TickAndRender_Level0で無音()
     {
         var unit = new TestCarrierUnit { Pitch = 1.0, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         wave.Reset();
 
@@ -485,8 +481,8 @@ public static class CarrierWaveTest
     public static void TickAndRender_Pitch0で位相が進まない()
     {
         var unit = new TestCarrierUnit { Pitch = 0.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var config = new CarrierWaveConfig(unit);
-        var wave = new CarrierWave(config);
+        var config = new OperatorWaveConfig(unit);
+        var wave = new OperatorWave(config);
 
         wave.Reset();
 
@@ -510,13 +506,13 @@ public static class CarrierWaveTest
         var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
 
-        var configNegative = new CarrierWaveConfig(unitNegative);
-        var configZero = new CarrierWaveConfig(unitZero);
-        var configPositive = new CarrierWaveConfig(unitPositive);
+        var configNegative = new OperatorWaveConfig(unitNegative);
+        var configZero = new OperatorWaveConfig(unitZero);
+        var configPositive = new OperatorWaveConfig(unitPositive);
 
-        var waveNegative = new CarrierWave(configNegative);
-        var waveZero = new CarrierWave(configZero);
-        var wavePositive = new CarrierWave(configPositive);
+        var waveNegative = new OperatorWave(configNegative);
+        var waveZero = new OperatorWave(configZero);
+        var wavePositive = new OperatorWave(configPositive);
 
         waveNegative.Reset();
         waveZero.Reset();
@@ -542,13 +538,13 @@ public static class CarrierWaveTest
         var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
 
-        var configNegative = new CarrierWaveConfig(unitNegative);
-        var configZero = new CarrierWaveConfig(unitZero);
-        var configPositive = new CarrierWaveConfig(unitPositive);
+        var configNegative = new OperatorWaveConfig(unitNegative);
+        var configZero = new OperatorWaveConfig(unitZero);
+        var configPositive = new OperatorWaveConfig(unitPositive);
 
-        var waveNegative = new CarrierWave(configNegative);
-        var waveZero = new CarrierWave(configZero);
-        var wavePositive = new CarrierWave(configPositive);
+        var waveNegative = new OperatorWave(configNegative);
+        var waveZero = new OperatorWave(configZero);
+        var wavePositive = new OperatorWave(configPositive);
 
         waveNegative.Reset();
         waveZero.Reset();
@@ -575,11 +571,11 @@ public static class CarrierWaveTest
         var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
         var unit2 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
 
-        var config1 = new CarrierWaveConfig(unit1);
-        var config2 = new CarrierWaveConfig(unit2);
+        var config1 = new OperatorWaveConfig(unit1);
+        var config2 = new OperatorWaveConfig(unit2);
 
-        var wave1 = new CarrierWave(config1);
-        var wave2 = new CarrierWave(config2);
+        var wave1 = new OperatorWave(config1);
+        var wave2 = new OperatorWave(config2);
 
         wave1.Reset();
         wave2.Reset();

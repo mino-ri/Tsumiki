@@ -75,9 +75,9 @@ public interface IInputUnit
     float StackStereo { get; set; }
 }
 
-public interface ICarrierUnit : IEnvelopeUnit
+public interface IOperatorUnit : IEnvelopeUnit
 {
-    [VstRangeParameter(4, 0.0, 1.0, 0.5)]
+    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
     float Level { get; set; }
 
     [VstRangeParameter(5, 0.0, 16.0, 1.0)]
@@ -91,28 +91,15 @@ public interface ICarrierUnit : IEnvelopeUnit
 
     [VstRangeParameter(8, -1.0, 1.0, 0.0)]
     float ShapeY { get; set; }
+}
 
+public interface ICarrierUnit : IOperatorUnit
+{
     [VstRangeParameter(9, -1.0, 1.0, 0.0)]
     float Pan { get; set; }
 }
 
-public interface IModulatorUnit : IEnvelopeUnit
-{
-    [VstRangeParameter(4, 0.0, 1.0, 0.0)]
-    float Level { get; set; }
-
-    [VstRangeParameter(5, 0.0, 16.0, 1.0)]
-    double Pitch { get; set; }
-
-    [VstBoolParameter(6, false)]
-    bool Sync { get; set; }
-
-    [VstRangeParameter(7, -0.5, 0.5, 0.0)]
-    float Phase { get; set; }
-
-    [VstRangeParameter(8, 0.0, 1.0, 0.0)]
-    float Feedback { get; set; }
-}
+public interface IModulatorUnit : IOperatorUnit;
 
 public interface IFilterUnit
 {

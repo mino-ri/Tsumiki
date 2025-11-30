@@ -75,8 +75,8 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
 internal sealed class OscillatorConfig(ICarrierUnit carrierUnit, IModulatorUnit modulatorUnit, double sampleRate)
 {
     private readonly ICarrierUnit _carrierUnit = carrierUnit;
-    public CarrierWaveConfig CarrierWave = new(carrierUnit);
-    public ModulatorWaveConfig ModulatorWave = new(modulatorUnit);
+    public OperatorWaveConfig CarrierWave = new(carrierUnit);
+    public OperatorWaveConfig ModulatorWave = new(modulatorUnit);
     public EnvelopeConfig Envelope1 = new(carrierUnit, sampleRate);
     public EnvelopeConfig Envelope2 = new(modulatorUnit, sampleRate);
     public float Pan;
