@@ -37,7 +37,7 @@ internal sealed class Renderer : IDisposable, IDrawingContext
             useZBuffer: false);
 
         _graphics.SetVertexShader(ShaderSource.LoadVertexShader);
-        _graphics.SetPixelShader(ShaderSource.LoadPixelShader);
+        _graphics.SetPixelShader(ShaderSource.LoadImagePixelShader);
         _graphics.SetInputLayout(ShaderSource.LoadInputLayout,
             new InputElementDesc { SemanticName = "POSITION", Format = Format.R32G32B32A32Float },
             new InputElementDesc { SemanticName = "TEXCOORD", Format = Format.R32G32Float, AlignedByteOffset = 16 });

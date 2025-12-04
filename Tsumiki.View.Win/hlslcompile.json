@@ -10,10 +10,10 @@
       "Profile": "vs_5_0"
     },
     {
-      "MethodName": "LoadPixelShader",
+      "MethodName": "LoadImagePixelShader",
       "ShaderName": "PixelShader",
       "SourceFile": "shader.hlsl",
-      "EntryPoint": "PS",
+      "EntryPoint": "PixelImage",
       "Profile": "ps_5_0"
     },
     {
