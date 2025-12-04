@@ -18,6 +18,7 @@ internal sealed class Renderer : IDisposable, IDrawingContext
     }
 
     private const int SyncInterval = 2;
+    private readonly RectF _graphUvRect = new(0f, 1f, 1f, 0f);
     private readonly Color _background = new(0xFF504530);
     private readonly ConcurrentQueue<IVisual> _visuals = new();
     private readonly HashSet<IVisual> _renderedVisuals = [];
@@ -26,6 +27,12 @@ internal sealed class Renderer : IDisposable, IDrawingContext
     private readonly IVisual _rootVisual;
     private readonly IResourceTexture _sourceTexture;
     private readonly ArrayBuffer<Vertex> _vertexBuffer;
+    private readonly ValueBuffer<GraphParameters> _graphBuffer;
+    private readonly ValueBuffer<FmParameters> _fmBuffer;
+    private readonly PixelShader _imagePixelShader;
+    private readonly PixelShader _filterPixelShader;
+    private readonly PixelShader _modulatorPixelShader;
+    private readonly PixelShader _carrierPixelShader;
     private (int width, int height)? _changedSize;
 
     public Renderer(nint hwnd, int width, int height, IVisual rootVisual)
@@ -36,8 +43,12 @@ internal sealed class Renderer : IDisposable, IDrawingContext
             syncInterval: SyncInterval,
             useZBuffer: false);
 
+        _imagePixelShader = ShaderSource.LoadImagePixelShader(_graphics.Device);
+        _filterPixelShader = ShaderSource.LoadFilterPixelShader(_graphics.Device);
+        _modulatorPixelShader = ShaderSource.LoadModulatorPixelShader(_graphics.Device);
+        _carrierPixelShader = ShaderSource.LoadCarrierPixelShader(_graphics.Device);
         _graphics.SetVertexShader(ShaderSource.LoadVertexShader);
-        _graphics.SetPixelShader(ShaderSource.LoadImagePixelShader);
+        _graphics.PixelShader = _imagePixelShader;
         _graphics.SetInputLayout(ShaderSource.LoadInputLayout,
             new InputElementDesc { SemanticName = "POSITION", Format = Format.R32G32B32A32Float },
             new InputElementDesc { SemanticName = "TEXCOORD", Format = Format.R32G32Float, AlignedByteOffset = 16 });
@@ -53,6 +64,8 @@ internal sealed class Renderer : IDisposable, IDrawingContext
                 Scale = new Vector4(2f, -2f, 1f, 1f),
                 Location = new Vector4(-1f, 1f, 0f, 0f),
             });
+        _graphBuffer = _graphics.RegisterConstantBuffer<GraphParameters>(1, ShaderStages.PixelShader);
+        _fmBuffer = _graphics.RegisterConstantBuffer<FmParameters>(2, ShaderStages.PixelShader);
 
         _sourceTexture = Resources.ImageResource.LoadMain(_graphics);
         _graphics.SetTexture(0, _sourceTexture);
@@ -139,5 +152,42 @@ internal sealed class Renderer : IDisposable, IDrawingContext
         _graphics.Draw(4);
     }
 
-    public void Dispose() => _graphics.Dispose();
+    public void DrawFilterGraph(in RectF clientRange, float normalizedCutoff, float resonance)
+    {
+        var dumping = 1f - resonance;
+        _graphBuffer.WriteByRef(new GraphParameters
+        {
+            X = normalizedCutoff,
+            Y = dumping * dumping,
+        });
+        _graphics.PixelShader = _filterPixelShader;
+        DrawImage(in clientRange, in _graphUvRect);
+        _graphics.PixelShader = _imagePixelShader;
+    }
+
+    public void DrawCarrierGraph(in RectF clientRange, in GraphParameters parameters, in FmParameters fmParameters)
+    {
+        _graphBuffer.WriteByRef(in parameters);
+        _fmBuffer.WriteByRef(in fmParameters);
+        _graphics.PixelShader = _carrierPixelShader;
+        DrawImage(in clientRange, in _graphUvRect);
+        _graphics.PixelShader = _imagePixelShader;
+    }
+
+    public void DrawModulatorGraph(in RectF clientRange, in GraphParameters parameters)
+    {
+        _graphBuffer.WriteByRef(in parameters);
+        _graphics.PixelShader = _modulatorPixelShader;
+        DrawImage(in clientRange, in _graphUvRect);
+        _graphics.PixelShader = _imagePixelShader;
+    }
+
+    public void Dispose()
+    {
+        _imagePixelShader.Dispose();
+        _filterPixelShader.Dispose();
+        _modulatorPixelShader.Dispose();
+        _carrierPixelShader.Dispose();
+        _graphics.Dispose();
+    }
 }

@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Tsumiki.View;
 
 public interface ITsumikiCanvas : IDisposable
@@ -77,6 +79,31 @@ public interface IDrawingContext
 {
     void Clear();
     void DrawImage(in RectF clientRange, in RectF imageRange);
+    void DrawFilterGraph(in RectF clientRange, float normalizedCutoff, float resonance);
+    void DrawCarrierGraph(in RectF clientRange, in GraphParameters parameters, in FmParameters fmParameters);
+    void DrawModulatorGraph(in RectF clientRange, in GraphParameters parameters);
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct GraphParameters
+{
+    public float X;
+    public float Y;
+    public float Pitch;
+    public float Period;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct FmParameters
+{
+    public float X;
+    public float Y;
+    public float Pitch;
+    public float Period;
+    public float Level;
+    private readonly float _p0;
+    private readonly float _p1;
+    private readonly float _p2;
 }
 
 public enum VirtualKeyCode : short

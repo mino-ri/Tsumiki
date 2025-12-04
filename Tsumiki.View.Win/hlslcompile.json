@@ -17,6 +17,27 @@
       "Profile": "ps_5_0"
     },
     {
+      "MethodName": "LoadFilterPixelShader",
+      "ShaderName": "PixelShader",
+      "SourceFile": "shader.hlsl",
+      "EntryPoint": "PixelFilter",
+      "Profile": "ps_5_0"
+    },
+    {
+      "MethodName": "LoadCarrierPixelShader",
+      "ShaderName": "PixelShader",
+      "SourceFile": "shader.hlsl",
+      "EntryPoint": "PixelCarrier",
+      "Profile": "ps_5_0"
+    },
+    {
+      "MethodName": "LoadModulatorPixelShader",
+      "ShaderName": "PixelShader",
+      "SourceFile": "shader.hlsl",
+      "EntryPoint": "PixelModulator",
+      "Profile": "ps_5_0"
+    },
+    {
       "MethodName": "LoadInputLayout",
       "ShaderName": "InputLayout",
       "SourceFile": "shader.hlsl",
