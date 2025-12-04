@@ -5,6 +5,7 @@ internal class EnvelopePanel(
     IRangeViewParameter<int> decay,
     IRangeViewParameter<float> sustain,
     IRangeViewParameter<int> release,
+    IViewParameter? level,
     RectF rect,
     RectF envelopControl,
     RectF attackImage,
@@ -22,17 +23,20 @@ internal class EnvelopePanel(
 
     internal override void RenderCore(IDrawingContext context)
     {
-        var envelopControl = _envelopControl + GlobalRect.Location;
-        var releaseLeft = envelopControl.Left + envelopControl.Width / 1.5f;
-        var attackRight = (float)(envelopControl.Left + _envWidth * attack.NormalizedValue);
-        var decayRight = (float)(attackRight + _envWidth * decay.NormalizedValue);
-        var releaseRight = (float)(releaseLeft + _envWidth * release.NormalizedValue);
-        var decayCenter = (float)(envelopControl.Bottom - envelopControl.Height * sustain.NormalizedValue);
+        if (level is null || level.NormalizedValue > 0.0)
+        {
+            var envelopControl = _envelopControl + GlobalRect.Location;
+            var releaseLeft = envelopControl.Left + envelopControl.Width / 1.5f;
+            var attackRight = (float)(envelopControl.Left + _envWidth * attack.NormalizedValue);
+            var decayRight = (float)(attackRight + _envWidth * decay.NormalizedValue);
+            var releaseRight = (float)(releaseLeft + _envWidth * release.NormalizedValue);
+            var decayCenter = (float)(envelopControl.Bottom - envelopControl.Height * sustain.NormalizedValue);
 
-        context.DrawImage(envelopControl with { Right = attackRight }, in attackImage);
-        context.DrawImage(new RectF(attackRight, envelopControl.Top, decayRight, decayCenter), in decayImage);
-        context.DrawImage(new RectF(attackRight, decayCenter, releaseLeft, envelopControl.Bottom), in underImage);
-        context.DrawImage(new RectF(releaseLeft, decayCenter, releaseRight, envelopControl.Bottom), in decayImage);
+            context.DrawImage(envelopControl with { Right = attackRight }, in attackImage);
+            context.DrawImage(new RectF(attackRight, envelopControl.Top, decayRight, decayCenter), in decayImage);
+            context.DrawImage(new RectF(attackRight, decayCenter, releaseLeft, envelopControl.Bottom), in underImage);
+            context.DrawImage(new RectF(releaseLeft, decayCenter, releaseRight, envelopControl.Bottom), in decayImage);
+        }
 
         base.RenderCore(context);
     }

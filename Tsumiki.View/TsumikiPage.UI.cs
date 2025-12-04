@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace Tsumiki.View;
 
 public partial class TsumikiPage
@@ -66,11 +68,11 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(carrier.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new CarrierXYControl(
-                carrier.ShapeX, carrier.ShapeY, carrier.Pitch, carrier.Sync,
+                carrier.ShapeX, carrier.ShapeY, carrier.Pitch, carrier.Sync, carrier.Level,
                 modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
                 PixelToControl(240, 0, 600, 240), XYControl),
             new HorizontalSlider<float>(carrier.Pan, PixelToControl(1320, 75, 240, 90), HorizontalSlider),
-            new EnvelopePanel(carrier.Attack, carrier.Decay, carrier.Sustain, carrier.Release,
+            new EnvelopePanel(carrier.Attack, carrier.Decay, carrier.Sustain, carrier.Release, carrier.Level,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
             {
                 new VerticalSlider<float>(carrier.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),
@@ -90,9 +92,9 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
-            new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, PixelToControl(240, 0, 600, 240), XYControl),
+            new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level, PixelToControl(240, 0, 600, 240), XYControl),
             new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
-            new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release,
+            new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release, modulator.Level,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
             {
                 new VerticalSlider<float>(modulator.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),

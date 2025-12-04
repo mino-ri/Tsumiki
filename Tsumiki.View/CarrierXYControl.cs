@@ -5,6 +5,7 @@ internal class CarrierXYControl : XYControl<float, float>
     private readonly RectF _backgroundRect;
     private readonly IRangeViewParameter<double> _pitch;
     private readonly IViewParameter<bool> _sync;
+    private readonly IViewParameter _level;
     private readonly IRangeViewParameter<float> _fmShapeX;
     private readonly IRangeViewParameter<float> _fmShapeY;
     private readonly IRangeViewParameter<double> _fmPitch;
@@ -16,6 +17,7 @@ internal class CarrierXYControl : XYControl<float, float>
         IRangeViewParameter<float> shapeY,
         IRangeViewParameter<double> pitch,
         IViewParameter<bool> sync,
+        IViewParameter level,
         IRangeViewParameter<float> fmShapeX,
         IRangeViewParameter<float> fmShapeY,
         IRangeViewParameter<double> fmPitch,
@@ -35,6 +37,7 @@ internal class CarrierXYControl : XYControl<float, float>
             origin.Height + motionSize.Height);
         _pitch = pitch;
         _sync = sync;
+        _level = level;
         _fmShapeX = fmShapeX;
         _fmShapeY = fmShapeY;
         _fmPitch = fmPitch;
@@ -47,8 +50,17 @@ internal class CarrierXYControl : XYControl<float, float>
 
     public override void OnParameterChanged(int parameterId)
     {
-        if (parameterId != XData.Id && parameterId != YData.Id && parameterId != _pitch.Id && parameterId != _sync.Id &&
-            parameterId != _fmShapeX.Id && parameterId != _fmShapeY.Id && parameterId != _fmPitch.Id && parameterId != _fmSync.Id && parameterId != _fmLevel.Id) return;
+        if (parameterId != XData.Id &&
+            parameterId != YData.Id &&
+            parameterId != _pitch.Id &&
+            parameterId != _sync.Id &&
+            parameterId != _level.Id &&
+            parameterId != _fmShapeX.Id &&
+            parameterId != _fmShapeY.Id &&
+            parameterId != _fmPitch.Id &&
+            parameterId != _fmSync.Id &&
+            parameterId != _fmLevel.Id)
+            return;
 
         RequestRender();
     }
@@ -56,7 +68,11 @@ internal class CarrierXYControl : XYControl<float, float>
     internal override void RenderCore(IDrawingContext context)
     {
         var fmLevel = _fmLevel.Value;
-        if (fmLevel == 0f)
+        if (_level.NormalizedValue == 0.0)
+        {
+            // NOP
+        }
+        else if (fmLevel == 0f)
         {
             context.DrawModulatorGraph(_backgroundRect + GlobalRect.Location, new GraphParameters
             {
