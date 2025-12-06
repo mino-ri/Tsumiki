@@ -1,10 +1,11 @@
 namespace Tsumiki.View;
 
-public partial class TsumikiPage() : Panel(new RectF(0f, 0f, 1f, 1f)), IControl
+public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f, 1f, 1f)), IControl
 {
     private PointF _mouseDownPoint;
     private Control? _hovered;
     private Control? _mouseCaptured;
+    private TabPageControl? _currentTab;
 
     public event Action<IVisual>? RenderRequested;
 
@@ -43,7 +44,39 @@ public partial class TsumikiPage() : Panel(new RectF(0f, 0f, 1f, 1f)), IControl
 
     public new void OnWheel(float distance)
     {
-        _hovered?.OnWheel(distance);
+        (_mouseCaptured ?? _hovered)?.OnWheel(distance);
+    }
+
+    internal override bool TryFindParameter(PointF point, out int parameterId)
+    {
+        if (_currentTab is { })
+        {
+            return _currentTab.TryFindParameter(point, out parameterId);
+        }
+
+        parameterId = 0;
+        return false;
+    }
+
+    internal override void SetTabPageType(TabPageType tabPageType)
+    {
+        var newTab = Children.FirstOrDefault(c => c.TabPageType == tabPageType);
+        if (newTab is { } && _currentTab != newTab)
+        {
+            _currentTab?.Deactivate();
+            newTab.Activate();
+            _currentTab = newTab;
+        }
+    }
+
+    internal override Control? FindControl(PointF point)
+    {
+        return _currentTab?.FindControl(point);
+    }
+
+    internal override void RenderCore(IDrawingContext context)
+    {
+        _currentTab?.RenderCore(context);
     }
 
     public bool TryFindParameter(float x, float y, out int parameterId) => TryFindParameter(new PointF(x, y), out parameterId);

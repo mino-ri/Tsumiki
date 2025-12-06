@@ -8,7 +8,7 @@ public abstract class Control(RectF rect) : IVisual
     private RectF _globalRect = rect;
     private RectF _textureRect = ControlToTexture(in rect);
 
-    public Panel? Parent { get; private set; }
+    public PanelBase? Parent { get; private set; }
     /// <summary>親コントロール内での位置。</summary>
     public ref readonly RectF Rect => ref _rect;
 
@@ -31,19 +31,23 @@ public abstract class Control(RectF rect) : IVisual
 
     internal virtual void OnWheel(float distance) { }
 
+    internal virtual void OnMouseEnter() { }
+
+    internal virtual void OnMouseLeave() { }
+
     internal void RequestRender() => Parent?.RequestRender(this);
 
     public abstract void OnParameterChanged(int parameterId);
 
     internal abstract bool TryFindParameter(PointF point, out int parameterId);
 
-    public void Render(IDrawingContext context)
+    public virtual void Render(IDrawingContext context)
     {
         context.DrawImage(in _globalRect, in _textureRect);
         RenderCore(context);
     }
 
-    internal virtual void SetParent(Panel parent)
+    internal virtual void SetParent(PanelBase parent)
     {
         _globalRect = Rect + parent.GlobalRect.Location;
         _textureRect = ControlToTexture(in _globalRect);

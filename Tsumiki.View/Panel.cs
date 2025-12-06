@@ -2,13 +2,20 @@ using System.Collections;
 
 namespace Tsumiki.View;
 
-public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
+public abstract class PanelBase(RectF rect) : Control(rect)
 {
-    private readonly List<Control> _controls = [];
-
-    private Control[] Children => field ??= [.. _controls];
-
     internal virtual void RequestRender(Control control) => Parent?.RequestRender(control);
+
+    internal virtual void SetTabPageType(TabPageType tabPageType) => Parent?.SetTabPageType(tabPageType);
+}
+
+public class PanelBase<T>(RectF rect) : PanelBase(rect), IEnumerable<T>
+    where T : Control
+{
+    private readonly List<T> _controls = [];
+
+    public T[] Children => field ??= [.. _controls];
+
 
     internal override Control? FindControl(PointF point)
     {
@@ -55,7 +62,7 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
         }
     }
 
-    internal override void SetParent(Panel parent)
+    internal override void SetParent(PanelBase parent)
     {
         base.SetParent(parent);
         foreach (var control in Children)
@@ -64,13 +71,15 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
         }
     }
 
-    internal void Add(Control control)
+    internal void Add(T control)
     {
         control.SetParent(this);
         _controls.Add(control);
     }
 
-    IEnumerator<Control> IEnumerable<Control>.GetEnumerator() => ((IEnumerable<Control>)_controls).GetEnumerator();
+    IEnumerator<T> IEnumerable<T>.GetEnumerator() => ((IEnumerable<T>)_controls).GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_controls).GetEnumerator();
 }
+
+public class Panel(RectF rect) : PanelBase<Control>(rect);

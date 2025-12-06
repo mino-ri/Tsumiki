@@ -78,6 +78,7 @@ public interface IVisual
 public interface IDrawingContext
 {
     void Clear();
+    void SetResourceImage(TabPageType tabPageType);
     void DrawImage(in RectF clientRange, in RectF imageRange);
     void DrawFilterGraph(in RectF clientRange, float normalizedCutoff, float resonance);
     void DrawCarrierGraph(in RectF clientRange, in GraphParameters parameters, in FmParameters fmParameters);
@@ -197,4 +198,11 @@ public enum KeyModifier : short
     Alternate = 1 << 1,
     Command = 1 << 2,
     Control = 1 << 3,
+}
+
+[Flags]
+public enum TabPageType
+{
+    Main = 0,
+    Modulation = 1,
 }

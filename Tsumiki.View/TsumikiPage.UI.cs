@@ -21,39 +21,52 @@ public partial class TsumikiPage
 
     public static TsumikiPage Create(ITsumikiViewModel data)
     {
-
-        return [
-            Carrier(PixelToControl(120, 80, 1560, 240), data.A1, data.A2),
-            Modulator(PixelToControl(120, 320, 1560, 240), data.A2),
-            Carrier(PixelToControl(120, 560, 1560, 240), data.B1, data.B2),
-            Modulator(PixelToControl(120, 800, 1560, 240), data.B2),
-
-            // Filter
-            new FilterXYControl(data.Filter.Cutoff, data.Filter.Resonance, PixelToControl(120, 1040, 510, 240), XYControl),
-            new VerticalSlider<float>(data.Filter.Mix, PixelToControl(630, 1040, 90, 240), VerticalSlider),
-
-            // Delay
-            new DelayPanel(data.Delay.Delay, data.Delay.Feedback, PixelToControl(840, 1040, 600, 240), PixelToControl(30, 30, 330, 180), DelayBar)
+        TsumikiPage page = [
+            new TabPageControl(TabPageType.Main)
             {
-                new XYControl<int, float>(data.Delay.Delay, data.Delay.Feedback, PixelToControl(0, 0, 390, 240), XYControl),
-                new ToggleButton(data.Delay.Cross, PixelToControl(405, 15, 90, 90), DelayCrossSwitcher),
-                new VerticalSlider<float>(data.Delay.Mix, PixelToControl(510, 0, 90, 240), VerticalSlider),
+                // Tab
+                new TabSwitcher(TabPageType.Modulation, PixelToControl(150, 0, 150, 80), PixelToTexture(2260, 1000, 150, 80)),
+
+                Carrier(PixelToControl(120, 80, 1560, 240), data.A1, data.A2),
+                Modulator(PixelToControl(120, 320, 1560, 240), data.A2),
+                Carrier(PixelToControl(120, 560, 1560, 240), data.B1, data.B2),
+                Modulator(PixelToControl(120, 800, 1560, 240), data.B2),
+
+                // Filter
+                new FilterXYControl(data.Filter.Cutoff, data.Filter.Resonance, PixelToControl(120, 1040, 510, 240), XYControl),
+                new VerticalSlider<float>(data.Filter.Mix, PixelToControl(630, 1040, 90, 240), VerticalSlider),
+
+                // Delay
+                new DelayPanel(data.Delay.Delay, data.Delay.Feedback, PixelToControl(840, 1040, 600, 240), PixelToControl(30, 30, 330, 180), DelayBar)
+                {
+                    new XYControl<int, float>(data.Delay.Delay, data.Delay.Feedback, PixelToControl(0, 0, 390, 240), XYControl),
+                    new ToggleButton(data.Delay.Cross, PixelToControl(405, 15, 90, 90), DelayCrossSwitcher),
+                    new VerticalSlider<float>(data.Delay.Mix, PixelToControl(510, 0, 90, 240), VerticalSlider),
+                },
+
+                // Input
+                new VerticalSwitcher<int>(data.Input.Octave, PixelToControl(1815, 95, 90, 90), NumberSwitcher, 3, 0),
+                new VerticalSwitcher<int>(data.Input.Bend, PixelToControl(1815, 215, 90, 90), NumberSwitcher, 3, 8),
+
+                // Glide
+                new GlideSlider(data.Input.Glide, PixelToControl(1815, 320, 90, 240), VerticalSlider),
+
+                // Stack
+                new VerticalSlider<float>(data.Master, PixelToControl(1575, 1040, 90, 240), VerticalSlider),
+                new ToggleButton(data.Input.StackMode, PixelToControl(1815, 575, 90, 90), StackTypeSwitcher),
+                new VerticalSwitcher<int>(data.Input.Stack, PixelToControl(1815, 695, 90, 90), NumberSwitcher, 3, 9),
+                new VerticalSlider<int>(data.Input.StackDetune, PixelToControl(1815, 800, 90, 240), VerticalSlider),
+                new VerticalSlider<float>(data.Input.StackStereo, PixelToControl(1815, 1040, 90, 240), VerticalSlider),
             },
-
-            // Input
-            new VerticalSwitcher<int>(data.Input.Octave, PixelToControl(1815, 95, 90, 90), NumberSwitcher, 3, 0),
-            new VerticalSwitcher<int>(data.Input.Bend, PixelToControl(1815, 215, 90, 90), NumberSwitcher, 3, 8),
-
-            // Glide
-            new GlideSlider(data.Input.Glide, PixelToControl(1815, 320, 90, 240), VerticalSlider),
-
-            // Stack
-            new VerticalSlider<float>(data.Master, PixelToControl(1575, 1040, 90, 240), VerticalSlider),
-            new ToggleButton(data.Input.StackMode, PixelToControl(1815, 575, 90, 90), StackTypeSwitcher),
-            new VerticalSwitcher<int>(data.Input.Stack, PixelToControl(1815, 695, 90, 90), NumberSwitcher, 3, 9),
-            new VerticalSlider<int>(data.Input.StackDetune, PixelToControl(1815, 800, 90, 240), VerticalSlider),
-            new VerticalSlider<float>(data.Input.StackStereo, PixelToControl(1815, 1040, 90, 240), VerticalSlider),
+            new TabPageControl(TabPageType.Modulation)
+            {
+                // Tab
+                new TabSwitcher(TabPageType.Main, PixelToControl(0, 0, 150, 80), PixelToTexture(2110, 1000, 150, 80)),
+            },
         ];
+        page.SetTabPageType(TabPageType.Main);
+
+        return page;
     }
 
     private static Panel Carrier(RectF rect, ICarrierViewModel carrier, IModulatorViewModel modulator)

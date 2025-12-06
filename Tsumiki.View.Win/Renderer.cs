@@ -25,7 +25,6 @@ internal sealed class Renderer : IDisposable, IDrawingContext
     private readonly Queue<IVisual> _prevVisuals = new();
     private readonly Graphics _graphics;
     private readonly IVisual _rootVisual;
-    private readonly IResourceTexture _sourceTexture;
     private readonly ArrayBuffer<Vertex> _vertexBuffer;
     private readonly ValueBuffer<GraphParameters> _graphBuffer;
     private readonly ValueBuffer<FmParameters> _fmBuffer;
@@ -33,6 +32,8 @@ internal sealed class Renderer : IDisposable, IDrawingContext
     private readonly PixelShader _filterPixelShader;
     private readonly PixelShader _modulatorPixelShader;
     private readonly PixelShader _carrierPixelShader;
+    private TabPageType _currentTabPageType;
+    private IResourceTexture _sourceTexture;
     private (int width, int height)? _changedSize;
 
     public Renderer(nint hwnd, int width, int height, IVisual rootVisual)
@@ -182,12 +183,28 @@ internal sealed class Renderer : IDisposable, IDrawingContext
         _graphics.PixelShader = _imagePixelShader;
     }
 
+    public void SetResourceImage(TabPageType tabPageType)
+    {
+        if (tabPageType == _currentTabPageType) return;
+        _currentTabPageType = tabPageType;
+
+        _sourceTexture.Dispose();
+        _sourceTexture = tabPageType switch
+        {
+            TabPageType.Modulation => Resources.ImageResource.LoadMod(_graphics),
+            _ => Resources.ImageResource.LoadMain(_graphics),
+        };
+
+        _graphics.SetTexture(0, _sourceTexture);
+    }
+
     public void Dispose()
     {
         _imagePixelShader.Dispose();
         _filterPixelShader.Dispose();
         _modulatorPixelShader.Dispose();
         _carrierPixelShader.Dispose();
+        _sourceTexture.Dispose();
         _graphics.Dispose();
     }
 }
