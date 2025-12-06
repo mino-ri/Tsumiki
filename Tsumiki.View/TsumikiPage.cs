@@ -16,7 +16,7 @@ public partial class TsumikiPage() : Panel(new RectF(0f, 0f, 1f, 1f)), IControl
     {
         var point = new PointF(x, y);
         var control = FindControl(point);
-        control.OnLeftButtonDoubleClick(point - control.GlobalRect.Location);
+        control?.OnLeftButtonDoubleClick(point - control.GlobalRect.Location);
     }
 
     public void OnLeftButtonDown(float x, float y)
@@ -24,7 +24,7 @@ public partial class TsumikiPage() : Panel(new RectF(0f, 0f, 1f, 1f)), IControl
         var point = new PointF(x, y);
         _mouseDownPoint = point;
         _mouseCaptured = FindControl(point);
-        _mouseCaptured.OnLeftButtonDown(point - _mouseCaptured.GlobalRect.Location);
+        _mouseCaptured?.OnLeftButtonDown(point - _mouseCaptured.GlobalRect.Location);
     }
 
     public void OnLeftButtonUp(float x, float y)

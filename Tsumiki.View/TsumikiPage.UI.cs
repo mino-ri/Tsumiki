@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace Tsumiki.View;
 
 public partial class TsumikiPage
@@ -11,14 +9,14 @@ public partial class TsumikiPage
     static readonly RectF SyncSwitcher = PixelToTexture(1930, 0, 90, 90);
     static readonly RectF StackTypeSwitcher = PixelToTexture(2110, 0, 90, 90);
     static readonly RectF DelayCrossSwitcher = PixelToTexture(2290, 0, 90, 90);
-    static readonly RectF AttackSlider = PixelToTexture(2080, 1200, 60, 60);
-    static readonly RectF ReleaseSlider = PixelToTexture(2140, 1200, 60, 60);
+    static readonly RectF AttackSlider = PixelToTexture(1990, 1140, 60, 60);
+    static readonly RectF ReleaseSlider = PixelToTexture(2050, 1140, 60, 60);
     static readonly RectF PitchDigit = PixelToTexture(1930, 360, 105, 90);
     static readonly RectF PitchDecimal = PixelToTexture(1930, 630, 25, 30);
 
-    static readonly RectF Attack = PixelToTexture(2230, 1140, 120, 120);
-    static readonly RectF Decay = PixelToTexture(2410, 1140, 120, 120);
-    static readonly RectF Under = PixelToTexture(2320, 1230, 30, 30);
+    static readonly RectF Attack = PixelToTexture(2230, 840, 120, 120);
+    static readonly RectF Decay = PixelToTexture(2410, 840, 120, 120);
+    static readonly RectF Under = PixelToTexture(2320, 930, 30, 30);
     static readonly RectF DelayBar = PixelToTexture(1930, 900, 30, 180);
 
     public static TsumikiPage Create(ITsumikiViewModel data)
@@ -47,7 +45,7 @@ public partial class TsumikiPage
             new VerticalSwitcher<int>(data.Input.Bend, PixelToControl(1815, 215, 90, 90), NumberSwitcher, 3, 8),
 
             // Glide
-            new VerticalSlider<int>(data.Input.Glide, PixelToControl(1815, 320, 90, 240), VerticalSlider),
+            new GlideSlider(data.Input.Glide, PixelToControl(1815, 320, 90, 240), VerticalSlider),
 
             // Stack
             new VerticalSlider<float>(data.Master, PixelToControl(1575, 1040, 90, 240), VerticalSlider),
@@ -76,9 +74,12 @@ public partial class TsumikiPage
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
             {
                 new VerticalSlider<float>(carrier.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),
-                new OffsetXYControl<int, float>(carrier.Attack, carrier.Decay, carrier.Sustain, PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
-                new HorizontalSlider<int>(carrier.Attack, PixelToControl(0, 0, 180, 60), AttackSlider),
-                new HorizontalSlider<int>(carrier.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider),
+                new OffsetXYControl<int, float>(carrier.Attack, carrier.Decay, carrier.Sustain,
+                    PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
+                new HorizontalSlider<int>(carrier.Attack, PixelToControl(0, 0, 180, 60), AttackSlider,
+                    false, PixelControlWidth / 180.0),
+                new HorizontalSlider<int>(carrier.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider,
+                    false, PixelControlWidth / 180.0),
             },
         };
     }
@@ -92,15 +93,19 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
-            new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level, PixelToControl(240, 0, 600, 240), XYControl),
+            new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
+                PixelToControl(240, 0, 600, 240), XYControl),
             new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
             new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release, modulator.Level,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
             {
                 new VerticalSlider<float>(modulator.Level, PixelToControl(390, 0, 90, 240), VerticalSlider),
-                new OffsetXYControl<int, float>(modulator.Attack, modulator.Decay, modulator.Sustain, PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
-                new HorizontalSlider<int>(modulator.Attack, PixelToControl(0, 0, 180, 60), AttackSlider),
-                new HorizontalSlider<int>(modulator.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider),
+                new OffsetXYControl<int, float>(modulator.Attack, modulator.Decay, modulator.Sustain,
+                    PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
+                new HorizontalSlider<int>(modulator.Attack, PixelToControl(0, 0, 180, 60), AttackSlider,
+                    false, PixelControlWidth / 180.0),
+                new HorizontalSlider<int>(modulator.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider,
+                    false, PixelControlWidth / 180.0),
             },
         };
     }

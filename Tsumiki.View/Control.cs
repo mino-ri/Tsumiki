@@ -50,7 +50,7 @@ public abstract class Control(RectF rect) : IVisual
         Parent = parent;
     }
     
-    internal virtual Control FindControl(PointF point) => this;
+    internal virtual Control? FindControl(PointF point) => this;
 
     internal abstract void RenderCore(IDrawingContext context);
 

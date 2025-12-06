@@ -26,7 +26,10 @@ try
 
     form.Shown += (_, _) =>
     {
-        canvas = TsumikiCanvas.Create(form.Handle, rect, TsumikiPage.Create(new TsumikiViewModel(new TsumikiModel(), null)));
+        var model = new TsumikiModel();
+        var page = TsumikiPage.Create(new TsumikiViewModel(model, null));
+        model.ParameterValueChanged += (parameter) => page.OnParameterChanged(parameter.Id.Value);
+        canvas = TsumikiCanvas.Create(form.Handle, rect, page);
     };
 
     Application.Run(form);

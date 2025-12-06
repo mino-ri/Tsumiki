@@ -10,14 +10,14 @@ public class Panel(RectF rect) : Control(rect), IEnumerable<Control>
 
     internal virtual void RequestRender(Control control) => Parent?.RequestRender(control);
 
-    internal override Control FindControl(PointF point)
+    internal override Control? FindControl(PointF point)
     {
         for (var i = Children.Length - 1; i >= 0; i--)
         {
             var control = Children[i];
-            if (control.Rect.Contains(point))
+            if (control.Rect.Contains(point) && control.FindControl(point - control.Rect.Location) is { } target)
             {
-                return control.FindControl(point - control.Rect.Location);
+                return target;
             }
         }
 

@@ -4,12 +4,14 @@ internal class HorizontalSlider<T> : DragControl<T>
 {
     private readonly SizeF _foregroundSize;
     private readonly float _motionWidth;
+    private readonly double _xDragFactor;
 
-    public HorizontalSlider(IRangeViewParameter<T> data, RectF control, RectF texture)
-         : base(data, control, texture)
+    public HorizontalSlider(IRangeViewParameter<T> data, RectF control, RectF texture, bool isHitAllArea = true, double xDragFactor = 6.0)
+         : base(data, control, texture, isHitAllArea)
     {
         _foregroundSize = TextureToControl(texture.Size);
         _motionWidth = control.Width - _foregroundSize.Width;
+        _xDragFactor = xDragFactor;
     }
 
     protected override void RecalculateRect(double value, ref RectF controlRect, ref RectF textureRect)
@@ -22,5 +24,5 @@ internal class HorizontalSlider<T> : DragControl<T>
             GlobalRect.Top + _foregroundSize.Height);
     }
 
-    protected override double GetDragDelta(PointF pointDelta) => pointDelta.X  * 4.0;
+    protected override double GetDragDelta(PointF pointDelta) => pointDelta.X * _xDragFactor;
 }

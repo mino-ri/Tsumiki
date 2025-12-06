@@ -1,9 +1,10 @@
 namespace Tsumiki.View;
 
-internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF control, RectF texture)
+internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF control, RectF texture, bool isHitAllArea = true)
     : Control<IRangeViewParameter<T>>(data, control)
 {
     private readonly int _stepCount = data.StepCount == 0 ? 128 : data.StepCount;
+    private readonly bool _isHitAllArea = isHitAllArea;
     protected double _dragStartValue;
     private double _lastValue = -1f;
     private RectF _textureRect = texture;
@@ -55,6 +56,11 @@ internal abstract class DragControl<T>(IRangeViewParameter<T> data, RectF contro
     {
         Recalculate();
         context.DrawImage(in _controlRect, in _textureRect);
+    }
+
+    internal override Control? FindControl(PointF point)
+    {
+        return _isHitAllArea || _controlRect.Contains(point + GlobalRect.Location) ? base.FindControl(point) : null;
     }
 
     public override void OnParameterChanged(int parameterId)
