@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Tsumiki
 
 ## ソフトウェア概要
