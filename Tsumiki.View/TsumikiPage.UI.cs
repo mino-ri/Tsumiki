@@ -2,22 +2,22 @@ namespace Tsumiki.View;
 
 public partial class TsumikiPage
 {
-    static readonly RectF VerticalSlider = PixelToTexture(1990, 1200, 90, 60);
-    static readonly RectF HorizontalSlider = PixelToTexture(1930, 1110, 60, 90);
-    static readonly RectF XYControl = PixelToTexture(1930, 1200, 60, 60);
-    static readonly RectF NumberSwitcher = PixelToTexture(1930, 90, 90, 90);
-    static readonly RectF SyncSwitcher = PixelToTexture(1930, 0, 90, 90);
-    static readonly RectF StackTypeSwitcher = PixelToTexture(2110, 0, 90, 90);
-    static readonly RectF DelayCrossSwitcher = PixelToTexture(2290, 0, 90, 90);
-    static readonly RectF AttackSlider = PixelToTexture(1990, 1140, 60, 60);
-    static readonly RectF ReleaseSlider = PixelToTexture(2050, 1140, 60, 60);
-    static readonly RectF PitchDigit = PixelToTexture(1930, 360, 105, 90);
-    static readonly RectF PitchDecimal = PixelToTexture(1930, 630, 25, 30);
-
-    static readonly RectF Attack = PixelToTexture(2230, 840, 120, 120);
-    static readonly RectF Decay = PixelToTexture(2410, 840, 120, 120);
-    static readonly RectF Under = PixelToTexture(2320, 930, 30, 30);
-    static readonly RectF DelayBar = PixelToTexture(1930, 900, 30, 180);
+    private static RectF VerticalSlider => PixelToTexture(1990, 1200, 90, 60);
+    private static RectF HorizontalSlider => PixelToTexture(1930, 1110, 60, 90);
+    private static RectF XYControl => PixelToTexture(1930, 1200, 60, 60);
+    private static RectF NumberSwitcher => PixelToTexture(1930, 90, 90, 90);
+    private static RectF SyncSwitcher => PixelToTexture(1930, 0, 90, 90);
+    private static RectF StackTypeSwitcher => PixelToTexture(2110, 0, 90, 90);
+    private static RectF DelayCrossSwitcher => PixelToTexture(2290, 0, 90, 90);
+    private static RectF AttackSlider => PixelToTexture(1990, 1140, 60, 60);
+    private static RectF ReleaseSlider => PixelToTexture(2050, 1140, 60, 60);
+    private static RectF PitchDigit => PixelToTexture(1930, 360, 105, 90);
+    private static RectF PitchDecimal => PixelToTexture(1930, 630, 25, 30);
+    private static RectF LfoSpeedDecimal => PixelToTexture(1930, 180, 25, 30);
+    private static RectF Attack => PixelToTexture(2230, 840, 120, 120);
+    private static RectF Decay => PixelToTexture(2410, 840, 120, 120);
+    private static RectF Under => PixelToTexture(2320, 930, 30, 30);
+    private static RectF DelayBar => PixelToTexture(1930, 900, 30, 180);
 
     public static TsumikiPage Create(ITsumikiViewModel data)
     {
@@ -62,6 +62,21 @@ public partial class TsumikiPage
             {
                 // Tab
                 new TabSwitcher(TabPageType.Main, PixelToControl(0, 0, 150, 80), PixelToTexture(2110, 1000, 150, 80)),
+                Lfo(data.Modulation.Lfo),
+                ModulationEnvelope(data.Modulation.Envelope),
+                ModulationSource(PixelToControl(360, 480, 120, 800), PixelToTexture(1930, 240, 120, 160), data.Modulation.LfoSpeed),
+                ModulationSource(PixelToControl(480, 480, 120, 800), PixelToTexture(1930, 240, 120, 160), data.Modulation.LfoLevel),
+                ModulationSource(PixelToControl(600, 480, 120, 800), PixelToTexture(2080, 240, 120, 160), data.Modulation.APitch),
+                ModulationSource(PixelToControl(720, 480, 120, 800), PixelToTexture(2080, 240, 120, 160), data.Modulation.APan),
+                ModulationSource(PixelToControl(840, 480, 120, 800), PixelToTexture(2080, 240, 120, 160), data.Modulation.A1Level),
+                ModulationSource(PixelToControl(960, 480, 120, 800), PixelToTexture(2230, 240, 120, 160), data.Modulation.A2Level),
+                ModulationSource(PixelToControl(1080, 480, 120, 800), PixelToTexture(1930, 420, 120, 160), data.Modulation.BPitch),
+                ModulationSource(PixelToControl(1200, 480, 120, 800), PixelToTexture(1930, 420, 120, 160), data.Modulation.BPan),
+                ModulationSource(PixelToControl(1320, 480, 120, 800), PixelToTexture(1930, 420, 120, 160), data.Modulation.B1Level),
+                ModulationSource(PixelToControl(1440, 480, 120, 800), PixelToTexture(2080, 420, 120, 160), data.Modulation.B2Level),
+                ModulationSource(PixelToControl(1560, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterCutoff),
+                ModulationSource(PixelToControl(1680, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterResonance),
+                ModulationSource(PixelToControl(1800, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterMix),
             },
         ];
         page.SetTabPageType(TabPageType.Main);
@@ -74,9 +89,9 @@ public partial class TsumikiPage
         return new(rect)
         {
             new PitchIntegerControl<double>(carrier.Pitch, PixelToControl(15, 60, 105, 90), PitchDigit, 3, 0, 16),
-            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 160),
-            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
-            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 16, 160),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 16, 1600),
+            new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16, 16000),
             new ToggleButton(carrier.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new CarrierXYControl(
                 carrier.ShapeX, carrier.ShapeY, carrier.Pitch, carrier.Sync, carrier.Level,
@@ -90,9 +105,9 @@ public partial class TsumikiPage
                 new OffsetXYControl<int, float>(carrier.Attack, carrier.Decay, carrier.Sustain,
                     PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
                 new HorizontalSlider<int>(carrier.Attack, PixelToControl(0, 0, 180, 60), AttackSlider,
-                    false, PixelControlWidth / 180.0),
+                    false, PixelControlWidth / 120.0),
                 new HorizontalSlider<int>(carrier.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider,
-                    false, PixelControlWidth / 180.0),
+                    false, PixelControlWidth / 120.0),
             },
         };
     }
@@ -102,13 +117,12 @@ public partial class TsumikiPage
         return new(rect)
         {
             new PitchIntegerControl<double>(modulator.Pitch, PixelToControl(15, 60, 105, 90), PitchDigit, 3, 0, 16),
-            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 160),
-            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 1600),
-            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16000),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(35, 150, 25, 30), PitchDecimal, 16000, 16, 160),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 160, 1600),
+            new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 1600, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
                 PixelToControl(240, 0, 600, 240), XYControl),
-            new VerticalSlider<float>(modulator.Level, PixelToControl(1230, 0, 90, 240), VerticalSlider),
             new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release, modulator.Level,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
             {
@@ -116,10 +130,53 @@ public partial class TsumikiPage
                 new OffsetXYControl<int, float>(modulator.Attack, modulator.Decay, modulator.Sustain,
                     PixelToControlSize(120, 0), PixelToControl(0, 30, 300, 180), XYControl),
                 new HorizontalSlider<int>(modulator.Attack, PixelToControl(0, 0, 180, 60), AttackSlider,
-                    false, PixelControlWidth / 180.0),
+                    false, PixelControlWidth / 120.0),
                 new HorizontalSlider<int>(modulator.Release, PixelToControl(240, 180, 180, 60), ReleaseSlider,
-                    false, PixelControlWidth / 180.0),
+                    false, PixelControlWidth / 120.0),
             },
+        };
+    }
+
+    private static Panel Lfo(ILfoViewModel lfo)
+    {
+        return new(PixelToControl(120, 80, 840, 240))
+        {
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(0, 75, 60, 60), PixelToTexture(1930, 15, 60, 60), 100000, 100, 10),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 75, 60, 60), PixelToTexture(1930, 105, 60, 60), 100000, 100, 100),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(35, 150, 25, 30), LfoSpeedDecimal, 100000, 100, 1000),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 150, 25, 30), LfoSpeedDecimal, 100000, 1000, 10000),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(85, 150, 25, 30), LfoSpeedDecimal, 100000, 10000, 100000),
+            new ModulatorXYControl(lfo.ShapeX, lfo.ShapeY, null, null, lfo.Level,
+                PixelToControl(150, 0, 600, 240), XYControl),
+            new VerticalSlider<float>(lfo.Level, PixelToControl(750, 0, 90, 240), VerticalSlider),
+        };
+    }
+
+    private static EnvelopePanel ModulationEnvelope(IModulationEnvelopeViewModel env)
+    {
+        return new(env.Attack, env.Decay, env.Sustain, env.Release, env.Level,
+            PixelToControl(1080, 80, 840, 240), PixelToControl(30, 60, 720, 120),
+            PixelToTexture(1930, 840, 240, 120), PixelToTexture(2200, 840, 240, 120), PixelToTexture(2170, 930, 30, 30))
+        {
+            new VerticalSlider<float>(env.Level, PixelToControl(750, 0, 90, 240), VerticalSlider),
+            new OffsetXYControl<int, float>(env.Attack, env.Decay, env.Sustain,
+                PixelToControlSize(240, 0), PixelToControl(0, 30, 540, 180), XYControl),
+            new HorizontalSlider<int>(env.Attack, PixelToControl(0, 0, 300, 60), AttackSlider,
+                false, PixelControlWidth / 240.0),
+            new HorizontalSlider<int>(env.Release, PixelToControl(480, 180, 300, 60), ReleaseSlider,
+                false, PixelControlWidth / 240.0),
+        };
+    }
+
+    private static Panel ModulationSource(RectF control, RectF background, IModulationSourceViewModel source)
+    {
+        return new Panel(control)
+        {
+            new ModulationVerticalSlider(source.Lfo, PixelToControl(0, 0, 120, 160), background, VerticalSlider),
+            new ModulationVerticalSlider(source.Env, PixelToControl(0, 160, 120, 160), background, VerticalSlider),
+            new ModulationVerticalSlider(source.Wheel, PixelToControl(0, 320, 120, 160), background, VerticalSlider),
+            new ModulationVerticalSlider(source.Velocity, PixelToControl(0, 480, 120, 160), background, VerticalSlider),
+            new ModulationVerticalSlider(source.Pressure, PixelToControl(0, 640, 120, 160), background, VerticalSlider),
         };
     }
 }

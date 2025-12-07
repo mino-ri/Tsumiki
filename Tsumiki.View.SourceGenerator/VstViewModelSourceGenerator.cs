@@ -90,7 +90,7 @@ public class VstViewModelSourceGenerator : IIncrementalGenerator
 
         for (var i = 0; i < result.Count; i++)
         {
-            var targetProperties = typeSymbol.AllInterfaces.SelectMany(s => s.GetMembers()).Concat(typeSymbol.GetMembers())
+            var targetProperties = result[i].AllInterfaces.SelectMany(s => s.GetMembers()).Concat(result[i].GetMembers())
                 .OfType<IPropertySymbol>()
                 .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "VstUnitAttribute"));
 

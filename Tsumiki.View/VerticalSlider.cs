@@ -1,28 +1,28 @@
 namespace Tsumiki.View;
 
-internal class GlideSlider : DragControl<int>
+internal class VerticalSlider<T> : DragControl<T>
 {
     private readonly SizeF _foregroundSize;
     private readonly float _motionHeight;
+    private readonly float _motionLeft;
     private readonly double _yDragFactor;
 
-    public GlideSlider(IRangeViewParameter<int> data, RectF control, RectF texture, bool isHitAllArea = true, double yDragFactor = -4.0)
+    public VerticalSlider(IRangeViewParameter<T> data, RectF control, RectF texture, bool isHitAllArea = true, double yDragFactor = -4.0)
          : base(data, control, texture, isHitAllArea)
     {
         _foregroundSize = TextureToControl(texture.Size);
         _motionHeight = control.Height - _foregroundSize.Height;
+        _motionLeft = (control.Width - _foregroundSize.Width) / 2f;
         _yDragFactor = yDragFactor;
     }
 
     protected override void RecalculateRect(double value, ref RectF controlRect, ref RectF textureRect)
     {
-        var glide = (int)Math.Round(value * 101.0) - 1;
-        var viewValue = glide < 0 ? 0 : glide + 28;
-        var foregroundTop = (float)((1.0 - viewValue / 128.0) * _motionHeight);
+        var foregroundTop = (float)((1.0 - value) * _motionHeight);
         controlRect = new RectF(
-            GlobalRect.Left,
+            GlobalRect.Left + _motionLeft,
             GlobalRect.Top + foregroundTop,
-            GlobalRect.Left + _foregroundSize.Width,
+            GlobalRect.Left + _motionLeft + _foregroundSize.Width,
             GlobalRect.Top + _foregroundSize.Height + foregroundTop);
     }
 

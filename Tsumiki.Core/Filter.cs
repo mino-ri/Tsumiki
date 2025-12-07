@@ -118,18 +118,20 @@ internal struct HighPassFilter
 internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampleRate)
 {
     private double _sampleRate = sampleRate;
+    private double _frequencyFactor = 2.0 * MathF.PI / sampleRate;
     private double _pitch = 128.0;
     public float _cutoff = unit.Cutoff;
     public float Damping = 1f - unit.Resonance;
-    public float Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(unit.Cutoff) / sampleRate / 2.0)));
+    public float Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(unit.Cutoff) * 2.0 * MathF.PI / sampleRate));
 
     [EventTiming]
     public void Recalculate(double sampleRate)
     {
         _sampleRate = sampleRate;
         _cutoff = unit.Cutoff;
+        _frequencyFactor = 2.0 * MathF.PI / _sampleRate;
         Damping = 1f - unit.Resonance;
-        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(_cutoff + _pitch) / _sampleRate / 2.0)));
+        Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor));
     }
 
     [AudioTiming]
@@ -138,7 +140,7 @@ internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampl
         if (_pitch == pitch)
             return;
         _pitch = pitch;
-        Alpha = MathF.Min(1f, 2.0f * MathT.Sin((float)(MathT.PitchToFreq(_cutoff + _pitch) / _sampleRate / 2.0)));
+        Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor));
     }
 }
 

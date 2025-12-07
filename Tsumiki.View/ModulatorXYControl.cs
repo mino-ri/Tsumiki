@@ -3,15 +3,15 @@ namespace Tsumiki.View;
 internal class ModulatorXYControl : XYControl<float, float>
 {
     private readonly RectF _backgroundRect;
-    private readonly IRangeViewParameter<double> _pitch;
-    private readonly IViewParameter<bool> _sync;
+    private readonly IRangeViewParameter<double>? _pitch;
+    private readonly IViewParameter<bool>? _sync;
     private readonly IViewParameter _level;
 
     public ModulatorXYControl(
         IRangeViewParameter<float> shapeX,
         IRangeViewParameter<float> shapeY,
-        IRangeViewParameter<double> pitch,
-        IViewParameter<bool> sync,
+        IRangeViewParameter<double>? pitch,
+        IViewParameter<bool>? sync,
         IViewParameter level,
         RectF control,
         RectF texture)
@@ -37,9 +37,9 @@ internal class ModulatorXYControl : XYControl<float, float>
     {
         if (parameterId != XData.Id &&
             parameterId != YData.Id &&
-            parameterId != _pitch.Id &&
-            parameterId != _sync.Id &&
-            parameterId != _level.Id)
+            parameterId != _level.Id &&
+            parameterId != _pitch?.Id &&
+            parameterId != _sync?.Id)
             return;
 
         RequestRender();
@@ -53,8 +53,8 @@ internal class ModulatorXYControl : XYControl<float, float>
             {
                 X = Math.Clamp((float)XData.NormalizedValue, MinX, MaxX),
                 Y = YData.Value,
-                Pitch = (float)(_pitch.Value * 2.0),
-                Period = _sync.Value ? 0.5f : 1f,
+                Pitch = (float)((_pitch?.Value ?? 1.0) * 2.0),
+                Period = (_sync?.Value ?? false) ? 0.5f : 1f,
             });
         }
 

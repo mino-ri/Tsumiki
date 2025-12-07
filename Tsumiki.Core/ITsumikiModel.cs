@@ -36,13 +36,12 @@ public interface ITsumikiModel
 
     [VstUnit(7, 90)]
     IDelayUnit Delay { get; }
-    /*
+
     [VstUnit(8, 100)]
     IModulationUnit Modulation { get; }
 
-    [VstUnit(9, 200)]
-    ITuningUnit Tuning { get; }
-    */
+    // [VstUnit(9, 200)]
+    // ITuningUnit Tuning { get; }
 }
 
 public enum StackMode
@@ -77,7 +76,7 @@ public interface IInputUnit
 
 public interface IOperatorUnit : IEnvelopeUnit
 {
-    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(4, 0.0, 1.0, 0.5)]
     float Level { get; set; }
 
     [VstRangeParameter(5, 0.0, 16.0, 1.0)]
@@ -137,58 +136,67 @@ public interface IDelayUnit
 public interface IModulationUnit
 {
     [VstUnit(11, 0)]
-    IEnvelopeUnit Env { get; }
-
-    [VstUnit(12, 5)]
     ILfoUnit Lfo { get; }
 
-    [VstUnit(13, 10)]
-    IModulationDestinationUnit EnvTo { get; }
+    [VstUnit(12, 5)]
+    IModulationEnvelopeUnit Envelope { get; }
 
-    [VstUnit(14, 20)]
-    IModulationDestinationUnit LfoTo { get; }
+    [VstUnit(14, 15)]
+    IModulationSourceUnit LfoSpeed { get; }
 
-    [VstUnit(15, 30)]
-    IModulationDestinationUnit WheelTo { get; }
+    [VstUnit(15, 20)]
+    IModulationSourceUnit LfoLevel { get; }
 
-    [VstUnit(16, 40)]
-    IModulationDestinationUnit VelocityTo { get; }
+    [VstUnit(16, 25)]
+    IModulationSourceUnit APitch { get; }
 
-    [VstUnit(17, 50)]
-    IModulationDestinationUnit AfterTouchTo { get; }
+    [VstUnit(17, 30)]
+    IModulationSourceUnit APan { get; }
+
+    [VstUnit(18, 35)]
+    IModulationSourceUnit A1Level { get; }
+
+    [VstUnit(19, 40)]
+    IModulationSourceUnit A2Level { get; }
+
+    [VstUnit(20, 45)]
+    IModulationSourceUnit BPitch { get; }
+
+    [VstUnit(21, 50)]
+    IModulationSourceUnit BPan { get; }
+
+    [VstUnit(22, 55)]
+    IModulationSourceUnit B1Level { get; }
+
+    [VstUnit(23, 60)]
+    IModulationSourceUnit B2Level { get; }
+
+    [VstUnit(24, 65)]
+    IModulationSourceUnit FilterCutoff { get; }
+
+    [VstUnit(25, 70)]
+    IModulationSourceUnit FilterResonance { get; }
+
+    [VstUnit(26, 75)]
+    IModulationSourceUnit FilterMix { get; }
 }
 
-public interface IModulationDestinationUnit
+public interface IModulationSourceUnit
 {
-    [VstRangeParameter(0, -12.0, 12.0, 0.0)]
-    double APitch { get; set; }
+    [VstRangeParameter(0, -1.0, 1.0, 0.0)]
+    double Lfo { get; set; }
 
-    [VstRangeParameter(1, 0.0, 1.0, 1.0)]
-    float ALevel { get; set; }
+    [VstRangeParameter(1, -1.0, 1.0, 0.0)]
+    double Env { get; set; }
 
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
-    float APan { get; set; }
+    double Wheel { get; set; }
 
-    [VstRangeParameter(3, -12.0, 12.0, 0.0)]
-    double BPitch { get; set; }
+    [VstRangeParameter(3, -1.0, 1.0, 0.0)]
+    double Velocity { get; set; }
 
-    [VstRangeParameter(4, 0.0, 1.0, 1.0)]
-    float BLevel { get; set; }
-
-    [VstRangeParameter(5, -1.0, 1.0, 0.0)]
-    float BPan { get; set; }
-
-    [VstRangeParameter(6, -64, 64, 0, StepCount = 128)]
-    int FilterCutoff { get; set; }
-
-    [VstRangeParameter(7, 0.0, 0.98, 0.49)]
-    float FilterResonance { get; set; }
-
-    [VstRangeParameter(8, 0.0, 1.0, 1.0)]
-    float LfoLevel { get; set; }
-
-    [VstRangeParameter(9, 0.01, 500.0, 4.0, Units = "Hz")]
-    double LfoSpeed { get; set; }
+    [VstRangeParameter(4, -1.0, 1.0, 0.0)]
+    double Pressure { get; set; }
 }
 
 public interface IEnvelopeUnit
@@ -206,12 +214,18 @@ public interface IEnvelopeUnit
     int Release { get; set; }
 }
 
+public interface IModulationEnvelopeUnit : IEnvelopeUnit
+{
+    [VstRangeParameter(4, 0.0, 1.0, 0.5)]
+    float Level { get; set; }
+}
+
 public interface ILfoUnit
 {
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.01, 500.0, 4.0, Units = "Hz")]
+    [VstRangeParameter(1, 0.0, 100.0, 4.0, Units = "Hz")]
     double Speed { get; set; }
 
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
