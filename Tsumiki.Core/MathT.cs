@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Tsumiki.Metadata;
 
 namespace Tsumiki.Core;
@@ -33,6 +34,7 @@ internal static class MathT
     private static readonly float A5 = (float)(Math.Pow(Math.PI, 5.0) / (32.0 * 120.0));
     private static readonly float A7 = (float)(Math.Pow(Math.PI, 7.0) / (128.0 * 5040.0));
 
+    [AudioTiming]
     public static float TriToSin2(float tri, float b)
     {
         if (b <= 0f) return tri;

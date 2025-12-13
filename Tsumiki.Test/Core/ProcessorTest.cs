@@ -7,7 +7,7 @@ public static class ProcessorTest
     [Fact]
     public static void OnActive_アクティブ化するとIsActiveがtrueになる()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         var processor = new Processor(model, 44100);
 
         Assert.False(processor.IsActive);
@@ -20,7 +20,7 @@ public static class ProcessorTest
     [Fact]
     public static void OnActive_非アクティブ化するとIsActiveがfalseになる()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         var processor = new Processor(model, 44100);
 
         processor.OnActive(true);
@@ -33,7 +33,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_適切なパラメータを入力すれば音が出力される()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
 
         // モデルパラメータを設定（デフォルト値から一部変更）
         model.Master = 0.5f;
@@ -47,13 +47,23 @@ public static class ProcessorTest
 
         // サンプルレートとパラメータを設定
         const double sampleRate = 44100.0;
-        var processor = new Processor(model, sampleRate);
 
-        // プロセッサをアクティブ化
-        processor.OnActive(true);
+        Processor processor;
+        try
+        {
+            processor = new Processor(model, sampleRate);
+            
+             // プロセッサをアクティブ化
+            processor.OnActive(true);
 
-        // Recalculateを呼び出してパラメータを反映
-        processor.Recalculate();
+            // Recalculateを呼び出してパラメータを反映
+            processor.Recalculate();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"EXCEPTION: {ex}");
+            throw;
+        }
 
         // ノートオンを予約（ピッチ60 = C4, ベロシティ0.8）
         var noteOn = new MidiNote(0, 60, 0.8f, 1);
@@ -82,7 +92,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_ノートオンなしでは音が出力されない()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
 
         const double sampleRate = 44100.0;
         var processor = new Processor(model, sampleRate);
@@ -111,7 +121,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_複数ノートで音が出力される()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         model.Master = 0.5f;
 
         const double sampleRate = 44100.0;
@@ -154,7 +164,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_ノートオフ後はエンベロープが減衰する()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         model.Master = 0.5f;
         model.Input.Stack = 1;
 
@@ -218,7 +228,7 @@ public static class ProcessorTest
     [Fact]
     public static void ChangeSampleRate_サンプルレートが変更される()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         var processor = new Processor(model, 44100.0);
 
         processor.OnActive(true);
@@ -253,10 +263,10 @@ public static class ProcessorTest
     [Fact]
     public static void Recalculate_パラメータ変更が反映される()
     {
-        var model1 = new TsumikiModel();
+        var model1 = new MockTsumikiModel();
         model1.Master = 0.5f;
 
-        var model2 = new TsumikiModel();
+        var model2 = new MockTsumikiModel();
         model2.Master = 0.25f;
 
         var processor1 = new Processor(model1, 44100.0);
@@ -298,10 +308,10 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_マスターボリュームで出力が変化する()
     {
-        var model1 = new TsumikiModel();
+        var model1 = new MockTsumikiModel();
         model1.Master = 1.0f;
 
-        var model2 = new TsumikiModel();
+        var model2 = new MockTsumikiModel();
         model2.Master = 0.5f;
 
         var processor1 = new Processor(model1, 44100.0);
@@ -342,7 +352,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_ポリフォニーモードで複数ノートが同時に鳴る()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         model.Master = 0.5f;
         model.PitchBend = 0.5f;
         model.A1.Pitch = 1f;
@@ -383,7 +393,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_モノフォニーモードでは最新ノートのみ鳴る()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         model.Master = 0.5f;
         model.Input.Glide = 0; // モノフォニーモード
 
@@ -421,7 +431,7 @@ public static class ProcessorTest
     [Fact]
     public static void ProcessMain_出力が有限値の範囲内()
     {
-        var model = new TsumikiModel();
+        var model = new MockTsumikiModel();
         model.Master = 1.0f;
 
         var processor = new Processor(model, 44100.0);

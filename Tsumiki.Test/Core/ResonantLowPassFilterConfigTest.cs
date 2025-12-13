@@ -4,19 +4,10 @@ namespace Tsumiki.Test.Core;
 
 public static class ResonantLowPassFilterConfigTest
 {
-    /// <summary>テスト用のフィルターユニットのモック</summary>
-    private class TestFilterUnit : IFilterUnit
-    {
-        public float Mix { get; set; }
-        public float MorphFactor { get; set; }
-        public int Cutoff { get; set; }
-        public float Resonance { get; set; }
-    }
-
     [Fact]
     public static void ResonantLowPassFilterConfig_通常のパラメータで正常に動作()
     {
-        var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(60);
 
@@ -28,7 +19,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_ピッチ0でも発散しない()
     {
-        var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(0);
 
@@ -44,11 +35,10 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_ピッチ127でも発散しない()
     {
-        var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(127);
 
-        Assert.InRange(config.Alpha, 0f, 1f);
         Assert.False(float.IsNaN(config.Alpha), "Alpha が NaN になっている");
         Assert.False(float.IsInfinity(config.Alpha), "Alpha が無限大になっている");
 
@@ -60,7 +50,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_レゾナンス最大でも発散しない()
     {
-        var unit = new TestFilterUnit { Cutoff = 0, Resonance = 0.98f };
+        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.98f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(60);
 

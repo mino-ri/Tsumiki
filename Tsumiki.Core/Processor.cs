@@ -34,7 +34,7 @@ public class Processor
             _voices = GC.AllocateArray<StackedVoice>(MaxVoices, true);
             for (var i = 0; i < MaxVoices; i++)
             {
-                _voices[i] = new(_config, _config.Filter[i]);
+                _voices[i] = new(_config, _config.Filter[i], _config.Modulation);
             }
             Recalculate();
         }

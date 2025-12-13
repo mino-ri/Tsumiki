@@ -49,7 +49,7 @@ internal struct SynthVoice(GliderConfig glideConfig)
         {
             var oldState = State;
             State = VoiceState.Active;
-            _targetPitch = midi.Note.Pitch + pitchBend;
+            _targetPitch = midi.Note.Pitch + _glideConfig.PitchShift + pitchBend;
             _targetVelocity = midi.Note.Velocity;
             if (!_glideConfig.Enable || oldState != VoiceState.Active)
             {
@@ -70,7 +70,11 @@ internal struct SynthVoice(GliderConfig glideConfig)
         }
         else
         {
-            State = VoiceState.Release;
+            if (State == VoiceState.Active)
+            {
+                State = VoiceState.Release;
+            }
+
             return VoiceEvent.None;
         }
     }

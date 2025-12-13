@@ -122,7 +122,7 @@ internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampl
     private double _pitch = 128.0;
     public float _cutoff = unit.Cutoff;
     public float Damping = 1f - unit.Resonance;
-    public float Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(unit.Cutoff) * 2.0 * MathF.PI / sampleRate));
+    public float Alpha = (float)(MathT.PitchToFreq(unit.Cutoff) * 2.0 * MathF.PI / sampleRate);
 
     [EventTiming]
     public void Recalculate(double sampleRate)
@@ -131,7 +131,7 @@ internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampl
         _cutoff = unit.Cutoff;
         _frequencyFactor = 2.0 * MathF.PI / _sampleRate;
         Damping = 1f - unit.Resonance;
-        Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor));
+        Alpha = (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor);
     }
 
     [AudioTiming]
@@ -140,32 +140,45 @@ internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampl
         if (_pitch == pitch)
             return;
         _pitch = pitch;
-        Alpha = MathF.Min(1f, (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor));
+        Alpha = (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor);
     }
 }
 
 [AudioTiming]
 [method: InitTiming]
-internal struct ResonantLowPassFilter(ResonantLowPassFilterConfig config)
+internal struct ResonantLowPassFilter(ResonantLowPassFilterConfig config, Modulation modulation)
 {
+    private readonly MultiplyModulation _cutoffModulation = new(modulation.Config.FilterCutoffDest, modulation);
+    private readonly AddModulation _resonanceModulation = new(modulation.Config.FilterResonanceDest, modulation);
     private readonly ResonantLowPassFilterConfig _config = config;
-    private float _low;
-    private float _band;
+    private float _leftLow;
+    private float _leftBand;
+    private float _rightLow;
+    private float _rightBand;
 
     [EventTiming]
     public void Reset()
     {
-        _low = 0f;
-        _band = 0f;
+        _leftLow = 0f;
+        _leftBand = 0f;
+        _rightLow = 0f;
+        _rightBand = 0f;
     }
 
     [AudioTiming]
-    public float TickAndRender(float input)
+    public (float left, float right) TickAndRender(float left, float right)
     {
-        _low += _config.Alpha * _band;
-        var high = input - _low - _config.Damping * _band;
-        _band += _config.Alpha * high;
+        var alpha = Math.Min(1f, _config.Alpha * (float)_cutoffModulation.Render());
+        var damping = Math.Clamp(_config.Damping + (float)_resonanceModulation.Render(), 0.02f, 1f);
 
-        return _low;
+        _leftLow += alpha * _leftBand;
+        var leftHigh = left - _leftLow - damping * _leftBand;
+        _leftBand += alpha * leftHigh;
+
+        _rightLow += alpha * _rightBand;
+        var rightHigh = right - _rightLow - damping * _rightBand;
+        _rightBand += alpha * rightHigh;
+
+        return (_leftLow, _rightLow);
     }
 }
