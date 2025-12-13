@@ -44,15 +44,15 @@ internal class ModulationConfig
             unit.FilterResonance,
             unit.FilterMix,
         ];
-        LfoSpeedDest = new(unit.LfoSpeed);
-        LfoLevelDest = new(unit.LfoLevel);
-        PitchDest = [new(unit.APitch), new(unit.BPitch)];
-        PanDest = [new(unit.APan), new(unit.BPan)];
-        LevelDest = [new(unit.A1Level), new(unit.B1Level)];
-        FmLevelDest = [new(unit.A2Level), new(unit.B2Level)];
-        FilterCutoffDest = new(unit.FilterCutoff);
-        FilterResonanceDest = new(unit.FilterResonance);
-        FilterMixDest = new(unit.FilterMix);
+        LfoSpeedDest = new(model, unit.LfoSpeed);
+        LfoLevelDest = new(model, unit.LfoLevel);
+        PitchDest = [new(model, unit.APitch), new(model, unit.BPitch)];
+        PanDest = [new(model, unit.APan), new(model, unit.BPan)];
+        LevelDest = [new(model, unit.A1Level), new(model, unit.B1Level)];
+        FmLevelDest = [new(model, unit.A2Level), new(model, unit.B2Level)];
+        FilterCutoffDest = new(model, unit.FilterCutoff);
+        FilterResonanceDest = new(model, unit.FilterResonance);
+        FilterMixDest = new(model, unit.FilterMix);
 
         LfoWave = new(unit.Lfo, _destinations, sampleRate);
         LfoLevel = unit.Lfo.Level;
@@ -98,14 +98,16 @@ internal class ModulationConfig
 
 [EventTiming]
 [method: InitTiming]
-internal class ModulationDestinationConfig(IModulationSourceUnit unit)
+internal class ModulationDestinationConfig(ITsumikiModel model, IModulationSourceUnit unit)
 {
+    private readonly ITsumikiModel _model = model;
     private readonly IModulationSourceUnit _unit = unit;
     public double Lfo = unit.Lfo;
     public double Envelope = unit.Env;
     public double Wheel = unit.Wheel;
     public double Velocity = unit.Velocity;
     public double Pressure = unit.Pressure;
+    public double MultipliedWheel = model.Wheel * unit.Wheel;
     public bool IsActive = unit.Lfo != 0.0 || unit.Env != 0.0 || unit.Wheel != 0.0 || unit.Velocity != 0.0 || unit.Pressure != 0.0;
 
     [EventTiming]
@@ -116,6 +118,7 @@ internal class ModulationDestinationConfig(IModulationSourceUnit unit)
         Wheel = _unit.Wheel;
         Velocity = _unit.Velocity;
         Pressure = _unit.Pressure;
+        MultipliedWheel = _model.Wheel * _unit.Wheel;
         IsActive = _unit.Lfo != 0.0 || _unit.Env != 0.0 || _unit.Wheel != 0.0 || _unit.Velocity != 0.0 || _unit.Pressure != 0.0;
     }
 }
@@ -169,7 +172,6 @@ internal class Modulation
 [method: InitTiming]
 internal readonly struct AddModulation(ModulationDestinationConfig config, Modulation modulation)
 {
-    private readonly ModulationConfig _modulationConfig = modulation.Config;
     private readonly Modulation _modulation = modulation;
     private readonly ModulationDestinationConfig _config = config;
 
@@ -179,7 +181,7 @@ internal readonly struct AddModulation(ModulationDestinationConfig config, Modul
         return _config.IsActive ?
             _modulation.Lfo * _config.Lfo +
             _modulation.Envelope * _config.Envelope +
-            _modulationConfig.Wheel * _config.Wheel +
+            _config.MultipliedWheel +
             _modulation.Pressure * _config.Pressure +
             _modulation.Velocity * _config.Velocity
             : 0.0;
@@ -200,7 +202,7 @@ internal readonly struct MultiplyModulation(ModulationDestinationConfig config, 
         return _config.IsActive ?
             (Math.Min(1.0, 1.0 - _config.Lfo * _modulationConfig.LfoLevel) + (_modulation.Lfo + 1.0) * 0.5 * _config.Lfo) *
             (Math.Min(1.0, 1.0 - _config.Envelope * _modulationConfig.EnvelopeLevel) + _modulation.Envelope * _config.Envelope) *
-            (Math.Min(1.0, 1.0 - _config.Wheel) + _modulationConfig.Wheel * _config.Wheel) *
+            (Math.Min(1.0, 1.0 - _config.Wheel) + _config.MultipliedWheel) *
             (Math.Min(1.0, 1.0 - _config.Pressure) + _modulation.Pressure * _config.Pressure) *
             (Math.Min(1.0, 1.0 - _config.Velocity) + _modulation.Velocity * _config.Velocity)
             : 1.0;
@@ -211,7 +213,6 @@ internal readonly struct MultiplyModulation(ModulationDestinationConfig config, 
 [method: InitTiming]
 internal readonly struct PitchModulation(ModulationDestinationConfig config, Modulation modulation)
 {
-    private readonly ModulationConfig _modulationConfig = modulation.Config;
     private readonly Modulation _modulation = modulation;
     private readonly ModulationDestinationConfig _config = config;
 
@@ -221,7 +222,7 @@ internal readonly struct PitchModulation(ModulationDestinationConfig config, Mod
         return _config.IsActive ?
             (1.0 + _modulation.Lfo * _config.Lfo) *
             (1.0 + _modulation.Envelope * _config.Envelope) *
-            (1.0 + _modulationConfig.Wheel * _config.Wheel) *
+            (1.0 + _config.MultipliedWheel) *
             (1.0 + _modulation.Pressure * _config.Pressure) *
             (1.0 + _modulation.Velocity * _config.Velocity)
             : 1.0;
