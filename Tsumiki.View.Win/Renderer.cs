@@ -192,6 +192,7 @@ internal sealed class Renderer : IDisposable, IDrawingContext
         _sourceTexture = tabPageType switch
         {
             TabPageType.Modulation => Resources.ImageResource.LoadMod(_graphics),
+            TabPageType.Tuning => Resources.ImageResource.LoadTuning(_graphics),
             _ => Resources.ImageResource.LoadMain(_graphics),
         };
 

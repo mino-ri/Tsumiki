@@ -45,12 +45,9 @@ public class TsumikiProcessor : AudioProcessor<TsumikiModel>
                 _processor.ReserveNote(new(new MidiNote(noteOff.Channel, noteOff.Pitch, MidiNote.OffVelocity, noteOff.NoteId), audioEvent.SampleOffset));
                 break;
 
-            case AudioEventKind.LegacyMIDICCOut:
-                ref readonly var cc = ref audioEvent.Value.MidiCCOut;
-                break;
-
             case AudioEventKind.PolyPressure:
                 ref readonly var polyPressure = ref audioEvent.Value.PolyPressure;
+                _processor.ReservePolyPressure(new(new MidiPolyPressure(polyPressure.Channel, polyPressure.Pitch, polyPressure.Pressure, polyPressure.NoteId), audioEvent.SampleOffset));
                 break;
         }
     }

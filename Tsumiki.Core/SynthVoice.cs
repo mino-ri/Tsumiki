@@ -38,13 +38,7 @@ internal struct SynthVoice(GliderConfig glideConfig)
     [AudioTiming]
     public VoiceEvent Tick(in MidiVoice midi, double pitchBend)
     {
-        if (_glideConfig.Enable)
-        {
-            Pitch = _pitchGlider.TickAndRender(in _glideConfig.Filter, _targetPitch);
-            Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
-            Velocity = (float)_velocityGlider.TickAndRender(in _glideConfig.Filter, _targetVelocity);
-        }
-
+        VoiceEvent result;
         if (midi.Note.IsOn)
         {
             var oldState = State;
@@ -63,8 +57,7 @@ internal struct SynthVoice(GliderConfig glideConfig)
             }
 
             PolyPressure = midi.PolyPressure;
-
-            return midi.Length != 1 ? (_glideConfig.Enable ? VoiceEvent.PitchChanged : VoiceEvent.None)
+            result = midi.Length != 1 ? VoiceEvent.None
                 : oldState == VoiceState.Inactive ? VoiceEvent.StartNote
                 : VoiceEvent.RestartNote;
         }
@@ -75,7 +68,32 @@ internal struct SynthVoice(GliderConfig glideConfig)
                 State = VoiceState.Release;
             }
 
-            return VoiceEvent.None;
+            result = VoiceEvent.None;
         }
+
+        if (_glideConfig.Enable)
+        {
+            var pitchDiff = _targetPitch - Pitch;
+            if (pitchDiff != 0.0)
+            {
+                Pitch = Math.Abs(pitchDiff) < MathT.ExpThreshold
+                    ? _targetPitch
+                    : Pitch + pitchDiff * _glideConfig.GlideRate;
+                Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
+
+                if (result == VoiceEvent.None)
+                    result = VoiceEvent.PitchChanged;
+            }
+
+            var velocityDiff = _targetVelocity - Velocity;
+            if (velocityDiff != 0.0)
+            {
+                Velocity = Math.Abs(velocityDiff) < MathT.ExpThreshold
+                    ? (float)_targetVelocity
+                    : Velocity + (float)(velocityDiff * _glideConfig.GlideRate);
+            }
+        }
+
+        return result;
     }
 }

@@ -104,7 +104,7 @@ internal class GliderConfig(IInputUnit unit, double sampleRate)
     public bool Enable = unit.Glide > 0;
     public bool Polyphony = unit.Glide < 0;
     public int PitchShift = unit.Octave * 12;
-    public FilterConfigD Filter = new(50 - unit.Glide, sampleRate);
+    public double GlideRate = MathT.GetGlideRate(unit.Glide, sampleRate);
 
     [EventTiming]
     public void Recalculate(double sampleRate)
@@ -119,7 +119,7 @@ internal class GliderConfig(IInputUnit unit, double sampleRate)
         Polyphony = _glide < 0;
         if (_glide > 0)
         {
-            Filter.Recalculate(50 - _glide, SampleRate);
+            GlideRate = MathT.GetGlideRate(_unit.Glide, sampleRate);
         }
 
         PitchShift = _unit.Octave * 12;

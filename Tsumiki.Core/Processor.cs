@@ -11,6 +11,7 @@ public class Processor
     private MidiVoiceContainer _container;
     private StackedVoice[] _voices;
     private Delay _delay;
+    private float _afterTouch;
 
     public bool IsActive => _voices.Length > 0;
 
@@ -23,6 +24,7 @@ public class Processor
         _container = new(0);
         _voices = [];
         _delay = new(_config.Delay, sampleRate);
+        _afterTouch = 0f;
     }
 
     [InitTiming]
@@ -56,10 +58,22 @@ public class Processor
     public void Recalculate()
     {
         _config.Recalculate(_sampleRate);
+        var newAfterTouch = _model.AfterTouch;
+        if (_afterTouch != newAfterTouch)
+        {
+            _afterTouch = newAfterTouch;
+            _container.SetAfterTouch(_afterTouch);
+        }
     }
 
     [EventTiming]
     public void ReserveNote(in MidiEventReservation<MidiNote> reservation)
+    {
+        _container.Reserve(in reservation);
+    }
+
+    [EventTiming]
+    public void ReservePolyPressure(in MidiEventReservation<MidiPolyPressure> reservation)
     {
         _container.Reserve(in reservation);
     }

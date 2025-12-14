@@ -43,8 +43,8 @@ internal struct DelayChannel(DelayConfig config, double sampleRate)
     [AudioTiming]
     public float TickAndRender(float input)
     {
-        _currentIndex = (_currentIndex + 1) % _config.DelaySampleCount;
-        var output = _buffer[_currentIndex];
+        _currentIndex = (_currentIndex + 1) % _buffer.Length;
+        var output = _buffer[(_buffer.Length + _currentIndex - _config.DelaySampleCount) % _buffer.Length];
         _buffer[_currentIndex] = input;
 
         output = _lowCut.TickAndRender(in _config.LowCutConfig, output);

@@ -26,6 +26,7 @@ public partial class TsumikiPage
             {
                 // Tab
                 new TabSwitcher(TabPageType.Modulation, PixelToControl(150, 0, 150, 80), PixelToTexture(2260, 1000, 150, 80)),
+                new TabSwitcher(TabPageType.Tuning, PixelToControl(300, 0, 150, 80), PixelToTexture(2410, 1000, 150, 80)),
 
                 Carrier(PixelToControl(120, 80, 1560, 240), data.A1, data.A2),
                 Modulator(PixelToControl(120, 320, 1560, 240), data.A2),
@@ -62,6 +63,9 @@ public partial class TsumikiPage
             {
                 // Tab
                 new TabSwitcher(TabPageType.Main, PixelToControl(0, 0, 150, 80), PixelToTexture(2110, 1000, 150, 80)),
+                new TabSwitcher(TabPageType.Tuning, PixelToControl(300, 0, 150, 80), PixelToTexture(2410, 1000, 150, 80)),
+
+                // Modulations
                 Lfo(data.Modulation.Lfo),
                 ModulationEnvelope(data.Modulation.Envelope),
                 ModulationSource(PixelToControl(360, 480, 120, 800), PixelToTexture(1930, 240, 120, 160), data.Modulation.LfoSpeed),
@@ -77,6 +81,12 @@ public partial class TsumikiPage
                 ModulationSource(PixelToControl(1560, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterCutoff),
                 ModulationSource(PixelToControl(1680, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterResonance),
                 ModulationSource(PixelToControl(1800, 480, 120, 800), PixelToTexture(2230, 420, 120, 160), data.Modulation.FilterMix),
+            },
+            new TabPageControl(TabPageType.Tuning)
+            {
+                // Tab
+                new TabSwitcher(TabPageType.Main, PixelToControl(0, 0, 150, 80), PixelToTexture(2110, 1000, 150, 80)),
+                new TabSwitcher(TabPageType.Modulation, PixelToControl(150, 0, 150, 80), PixelToTexture(2260, 1000, 150, 80)),
             },
         ];
         page.SetTabPageType(TabPageType.Main);

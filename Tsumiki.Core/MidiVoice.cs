@@ -68,7 +68,7 @@ public struct MidiEventReservation<T>(in T @event, int sampleOffset)
 [method: EventTiming]
 internal struct MidiVoice(in MidiNote note)
 {
-    public readonly MidiNote Note = note;
+    public MidiNote Note = note;
     public int Length = 0;
     public float PolyPressure = 0f;
 }
@@ -204,6 +204,15 @@ internal readonly struct MidiVoiceContainer
         }
     }
 
+    [EventTiming]
+    public readonly void SetAfterTouch(float afterTouch)
+    {
+        for (var i = 0; i < Voices.Length; i++)
+        {
+            Voices[i].PolyPressure = afterTouch;
+        }
+    }
+
     /// <summary>ノート・オンまたはノート・オフを実行します。</summary>
     [EventTiming]
     private readonly void ProcessNote(in MidiNote note)
@@ -244,7 +253,8 @@ internal readonly struct MidiVoiceContainer
             targetIndex = oldestOnIndex;
         }
 
-        Voices[targetIndex] = new MidiVoice(in note);
+        Voices[targetIndex].Note = note;
+        Voices[targetIndex].Length = 0;
         Selector.LatestIndex = targetIndex;
     }
 
@@ -254,7 +264,8 @@ internal readonly struct MidiVoiceContainer
         var isLatestNoteOff = false;
         if (Voices[Selector.LatestIndex].Note.IsOn && Voices[Selector.LatestIndex].Note.IsSame(in note))
         {
-            Voices[Selector.LatestIndex] = new MidiVoice(in MidiNote.Off);
+            Voices[Selector.LatestIndex].Note = MidiNote.Off;
+            Voices[Selector.LatestIndex].Length = 0;
             isLatestNoteOff = true;
         }
 
@@ -264,7 +275,8 @@ internal readonly struct MidiVoiceContainer
             {
                 if (Voices[i].Note.IsSame(in note))
                 {
-                    Voices[i] = new MidiVoice(in MidiNote.Off);
+                    Voices[i].Note = MidiNote.Off;
+                    Voices[i].Length = 0;
                 }
                 else if (isLatestNoteOff || Voices[i].Length < Voices[Selector.LatestIndex].Length)
                 {

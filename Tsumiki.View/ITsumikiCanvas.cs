@@ -205,4 +205,5 @@ public enum TabPageType
 {
     Main = 0,
     Modulation = 1,
+    Tuning = 2,
 }
