@@ -25,7 +25,7 @@ internal struct StackedOscillator(StackConfig stackConfig, OscillatorConfig oscC
 
         var envelopeLevel = _envelope1.TickAndRender(noteOn);
         var level1 = envelopeLevel * (float)_levelModulation.Render();
-        var level2 = _envelope2.TickAndRender(noteOn) * (float)_fmLevelModulation.Render();
+        var level2 = _envelope2.TickAndRender(noteOn) * (float)_fmLevelModulation.Render() * 0.5f;
         var modulatedDelta = voiceDelta * _pitchModulation.Render();
         var pan = _oscConfig.Pan + (float)_panModulation.Render();
         var left = 0f;

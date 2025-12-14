@@ -1,3 +1,4 @@
+using IndirectX;
 using Tsumiki.Core;
 
 namespace Tsumiki.Test.Core;
@@ -124,7 +125,7 @@ public static class EnvelopeTest
         // アタック
         for (var i = 0; i < 1000; i++)
         {
-            envelope.TickAndRender(true);
+            var result = envelope.TickAndRender(true);
         }
 
         // リリースして0まで減衰

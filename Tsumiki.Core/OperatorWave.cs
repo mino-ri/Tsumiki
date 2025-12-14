@@ -71,8 +71,8 @@ internal struct OperatorWave(OperatorWaveConfig config)
             _phase = delta * _config.Pitch;
         }
 
-        var dActualPhase = _phase + fm;
-        var up = Math.Min(1f, Math.Abs((float)(dActualPhase - Math.Round(dActualPhase)) * _config.UpSlope));
+        var dActualPhase = _phase + fm + 1.0;
+        var up = Math.Min(1f, Math.Abs((float)(dActualPhase - (int)(dActualPhase + 0.5)) * _config.UpSlope));
         var down = (float)(dActualPhase - (int)dActualPhase - 0.5) * _config.DownSlope;
         var output = MathT.TriToSin2(Math.Clamp(down, -up, up), _config.SinFactor);
 

@@ -109,6 +109,8 @@ internal class GliderConfig(IInputUnit unit, double sampleRate)
     [EventTiming]
     public void Recalculate(double sampleRate)
     {
+        PitchShift = _unit.Octave * 12;
+
         var glide = _unit.Glide;
         if (_glide == glide && SampleRate == sampleRate) return;
 
@@ -121,8 +123,6 @@ internal class GliderConfig(IInputUnit unit, double sampleRate)
         {
             GlideRate = MathT.GetGlideRate(_unit.Glide, sampleRate);
         }
-
-        PitchShift = _unit.Octave * 12;
     }
 }
 
@@ -224,6 +224,7 @@ internal struct StackedVoice
     public StackedOscillator OscillatorB;
     public ResonantLowPassFilter Filter;
 
+    [InitTiming]
     public StackedVoice(ConfigSet config, ResonantLowPassFilterConfig filterConfig, ModulationConfig modulationConfig)
     {
         _config = config;

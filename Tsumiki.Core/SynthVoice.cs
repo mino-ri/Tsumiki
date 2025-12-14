@@ -22,6 +22,7 @@ internal enum VoiceEvent
 }
 
 [AudioTiming]
+[method: InitTiming]
 internal struct SynthVoice(GliderConfig glideConfig)
 {
     private readonly GliderConfig _glideConfig = glideConfig;
@@ -30,10 +31,8 @@ internal struct SynthVoice(GliderConfig glideConfig)
     public float PolyPressure;
     public double Pitch;
     public double Delta;
-    private double _targetPitch;
-    private double _targetVelocity;
-    private LowPassFilterD _pitchGlider;
-    private LowPassFilterD _velocityGlider;
+    private Glide _pitchGlide = new(glideConfig);
+    private Glide _velocityGlide = new(glideConfig);
 
     [AudioTiming]
     public VoiceEvent Tick(in MidiVoice midi, double pitchBend)
@@ -43,23 +42,31 @@ internal struct SynthVoice(GliderConfig glideConfig)
         {
             var oldState = State;
             State = VoiceState.Active;
-            _targetPitch = midi.Note.Pitch + _glideConfig.PitchShift + pitchBend;
-            _targetVelocity = midi.Note.Velocity;
+            var targetPitch = midi.Note.Pitch + _glideConfig.PitchShift + pitchBend;
+            var targetVelocity = midi.Note.Velocity;
             if (!_glideConfig.Enable || oldState != VoiceState.Active)
             {
-                Pitch = _targetPitch;
+                Pitch = targetPitch;
                 Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
-                Velocity = (float)_targetVelocity;
+                Velocity = targetVelocity;
                 // EVENT CALL
-                _pitchGlider.Reset(_targetPitch);
+                _pitchGlide.Reset(targetPitch);
                 // EVENT CALL
-                _velocityGlider.Reset(_targetVelocity);
+                _velocityGlide.Reset(targetVelocity);
+            }
+            else
+            {
+                _pitchGlide.SetTarget(targetPitch);
+                _velocityGlide.SetTarget(targetVelocity);
             }
 
             PolyPressure = midi.PolyPressure;
-            result = midi.Length != 1 ? VoiceEvent.None
-                : oldState == VoiceState.Inactive ? VoiceEvent.StartNote
-                : VoiceEvent.RestartNote;
+            result = oldState switch
+            {
+                VoiceState.Inactive => VoiceEvent.StartNote,
+                VoiceState.Release => VoiceEvent.RestartNote,
+                _ => VoiceEvent.None,
+            };
         }
         else
         {
@@ -71,26 +78,20 @@ internal struct SynthVoice(GliderConfig glideConfig)
             result = VoiceEvent.None;
         }
 
-        if (_glideConfig.Enable)
+        if (!_glideConfig.Enable)
         {
-            var pitchDiff = _targetPitch - Pitch;
-            if (pitchDiff != 0.0)
-            {
-                Pitch = Math.Abs(pitchDiff) < MathT.ExpThreshold
-                    ? _targetPitch
-                    : Pitch + pitchDiff * _glideConfig.GlideRate;
-                Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
+            return result;
+        }
 
-                if (result == VoiceEvent.None)
-                    result = VoiceEvent.PitchChanged;
-            }
-
-            var velocityDiff = _targetVelocity - Velocity;
-            if (velocityDiff != 0.0)
+        Velocity = (float)_velocityGlide.TickAndRender();
+        var newPitch = _pitchGlide.TickAndRender();
+        if (Pitch != newPitch)
+        {
+            Pitch = newPitch;
+            Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
+            if (result == VoiceEvent.None)
             {
-                Velocity = Math.Abs(velocityDiff) < MathT.ExpThreshold
-                    ? (float)_targetVelocity
-                    : Velocity + (float)(velocityDiff * _glideConfig.GlideRate);
+                return VoiceEvent.PitchChanged;
             }
         }
 

@@ -76,7 +76,7 @@ internal static class MathT
         return frequency / sampleRate;
     }
 
-    public const double ExpThreshold = 1.0 / 1024.0;
+    public const double ExpThreshold = 1.0 / 16.0;
 
     /// <summary>
     /// 線形に変化する、エンベロープの1サンプルあたりの変化レートを返します。
@@ -98,6 +98,8 @@ internal static class MathT
         return 1.0 - Math.Pow(ExpThreshold, 1.0 / (seconds * sampleRate));
     }
 
+    public const double GlideExpThreshold = 1.0 / 32.0;
+
     /// <summary>
     /// 指数曲線で変化する、グライドの1サンプルあたりの変化レートを返します。
     /// </summary>
@@ -106,7 +108,7 @@ internal static class MathT
     {
         return seconds <= 0
             ? 1.0
-            : 1.0 - Math.Pow(ExpThreshold, 100.0 / (seconds * sampleRate));
+            : 1.0 - Math.Pow(GlideExpThreshold, 100.0 / (seconds * sampleRate));
     }
 
     /// <summary>パン(-1.0～1.0)の値から、左チャンネルの音量を取得します。合計値は常に2です。</summary>

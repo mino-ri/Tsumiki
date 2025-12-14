@@ -15,6 +15,8 @@ internal sealed class EnvelopeConfig
     public double DecayRate;
     public double SustainLevel;
     public double ReleaseRate;
+    public double TargetSustainLevel;
+    public double TargetReleaseLevel;
 
     [InitTiming]
     public EnvelopeConfig(IEnvelopeUnit unit, double sampleRate)
@@ -28,7 +30,12 @@ internal sealed class EnvelopeConfig
     {
         var isSampleRateChanged = _sampleRate != sampleRate;
         _sampleRate = sampleRate;
-        SustainLevel = _unit.Sustain;
+        if (SustainLevel != _unit.Sustain)
+        {
+            SustainLevel = _unit.Sustain;
+            TargetSustainLevel = 1.0 - (1.0 - SustainLevel) / (1.0 - MathT.ExpThreshold);
+            TargetReleaseLevel = SustainLevel - SustainLevel / (1.0 - MathT.ExpThreshold);
+        }
 
         if (isSampleRateChanged || _attack != _unit.Attack)
         {
@@ -54,7 +61,7 @@ internal sealed class EnvelopeConfig
 [AudioTiming]
 internal struct Envelope(EnvelopeConfig config)
 {
-    const double MaxThreshold = 1.0 - MathT.ExpThreshold;
+    const double MaxThreshold = 1023.0 / 1024.0;
     private readonly EnvelopeConfig _config = config;
     double _level;
     bool _decaying;
@@ -77,6 +84,7 @@ internal struct Envelope(EnvelopeConfig config)
     {
         if (!noteOn)
         {
+            // Release 中
             // 減衰途中からでも次のノート・オンに対応するために、予め _decaying を false にしておく
             _decaying = false;
 
@@ -85,17 +93,18 @@ internal struct Envelope(EnvelopeConfig config)
                 return 0f;
             }
 
-            _level -= _level * _config.ReleaseRate;
-            if (_level <= MathT.ExpThreshold)
+            _level += (_config.TargetReleaseLevel - _level) * _config.ReleaseRate;
+            if (_level <= 0.0)
             {
                 _level = 0.0;
                 return 0f;
             }
 
-            return (float)(_level - MathT.ExpThreshold);
+            return (float)_level;
         }
         else if (!_decaying)
         {
+            // Attack 中
             _level += _config.AttackDelta;
             if (_level >= MaxThreshold)
             {
@@ -104,22 +113,23 @@ internal struct Envelope(EnvelopeConfig config)
                 return 1f;
             }
 
-            return (float)(_level + MathT.ExpThreshold);
+            return (float)_level;
         }
         else if (_level <= _config.SustainLevel)
         {
+            // サステインレベル継続
             return (float)_level;
         }
         else
         {
-            _level += (_config.SustainLevel - _level) * _config.DecayRate;
-            if (_level <= _config.SustainLevel + MathT.ExpThreshold)
+            // Attack -> Decay 減衰中
+            _level += (_config.TargetSustainLevel - _level) * _config.DecayRate;
+            if (_level <= _config.SustainLevel)
             {
                 _level = _config.SustainLevel;
-                return (float)_level;
             }
 
-            return (float)(_level - MathT.ExpThreshold);
+            return (float)_level;
         }
     }
 }

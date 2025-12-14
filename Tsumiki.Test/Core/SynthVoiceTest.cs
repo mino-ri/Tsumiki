@@ -159,7 +159,7 @@ public static class SynthVoiceTest
         // ピッチが変化したノート（Length != 1）でPitchChangedが返る
         var result = voice.Tick(in midiVoice2, 0.0);
         Assert.Equal(VoiceEvent.PitchChanged, result);
-        Assert.Equal(60.0, voice.Pitch);
+        Assert.InRange(voice.Pitch, 60.0001, 63.9999);
     }
 
     [Fact]
