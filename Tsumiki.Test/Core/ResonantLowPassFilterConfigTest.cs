@@ -7,7 +7,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_通常のパラメータで正常に動作()
     {
-        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new FilterFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(60);
 
@@ -19,7 +19,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_ピッチ0でも発散しない()
     {
-        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new FilterFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(0);
 
@@ -35,7 +35,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_ピッチ127でも発散しない()
     {
-        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.5f };
+        var unit = new FilterFilterUnit { Cutoff = 0, Resonance = 0.5f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(127);
 
@@ -50,7 +50,7 @@ public static class ResonantLowPassFilterConfigTest
     [Fact]
     public static void ResonantLowPassFilterConfig_レゾナンス最大でも発散しない()
     {
-        var unit = new MockFilterUnit { Cutoff = 0, Resonance = 0.98f };
+        var unit = new FilterFilterUnit { Cutoff = 0, Resonance = 0.98f };
         var config = new ResonantLowPassFilterConfig(unit, sampleRate: 44100);
         config.RecalculatePitch(60);
 

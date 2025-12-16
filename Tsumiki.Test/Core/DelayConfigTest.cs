@@ -4,21 +4,10 @@ namespace Tsumiki.Test.Core;
 
 public static class DelayConfigTest
 {
-    /// <summary>テスト用のディレイユニットのモック</summary>
-    private class TestDelayUnit : IDelayUnit
-    {
-        public float Mix { get; set; }
-        public int Delay { get; set; }
-        public float Feedback { get; set; }
-        public bool Cross { get; set; }
-        public int LowCut { get; set; }
-        public int HighCut { get; set; }
-    }
-
     [Fact]
     public static void DelayConfig_通常のパラメータで正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 0.5f,
@@ -38,7 +27,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_最小ディレイ時間でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 2,
             Feedback = 0.5f,
@@ -57,7 +46,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_最大ディレイ時間でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 500,
             Feedback = 0.5f,
@@ -75,7 +64,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_フィードバック0でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 0.0f,
@@ -92,7 +81,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_フィードバック1でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 1.0f,
@@ -109,7 +98,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_クロスフィードバックが反映される()
     {
-        var unitNoCross = new TestDelayUnit
+        var unitNoCross = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 0.5f,
@@ -117,7 +106,7 @@ public static class DelayConfigTest
             LowCut = 50,
             HighCut = 90
         };
-        var unitCross = new TestDelayUnit
+        var unitCross = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 0.5f,
@@ -136,7 +125,7 @@ public static class DelayConfigTest
     [Fact]
     public static void DelayConfig_フィルター設定が反映される()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 250,
             Feedback = 0.5f,

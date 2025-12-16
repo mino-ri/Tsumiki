@@ -23,9 +23,13 @@ internal enum VoiceEvent
 
 [AudioTiming]
 [method: InitTiming]
-internal struct SynthVoice(GliderConfig glideConfig)
+internal struct SynthVoice(GliderConfig glideConfig, ITuningUnit tuningUnit)
 {
     private readonly GliderConfig _glideConfig = glideConfig;
+    private readonly ITuningUnit _tuningUnit = tuningUnit;
+    private int _channelIndex = -1;
+    private int _pitchIndex = -1;
+    private double _notePitch;
     public VoiceState State;
     public float Velocity;
     public float PolyPressure;
@@ -42,7 +46,14 @@ internal struct SynthVoice(GliderConfig glideConfig)
         {
             var oldState = State;
             State = VoiceState.Active;
-            var targetPitch = midi.Note.Pitch + _glideConfig.PitchShift + pitchBend;
+            if (_channelIndex != midi.Note.Channel || _pitchIndex != midi.Note.Pitch)
+            {
+                _channelIndex = midi.Note.Channel;
+                _pitchIndex = midi.Note.Pitch;
+                _notePitch = _tuningUnit.Channel(midi.Note.Channel).GetPitch(midi.Note.Pitch);
+            }
+
+            var targetPitch = _notePitch + _glideConfig.PitchShift + pitchBend;
             var targetVelocity = midi.Note.Velocity;
             if (!_glideConfig.Enable || oldState != VoiceState.Active)
             {

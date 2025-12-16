@@ -4,25 +4,10 @@ namespace Tsumiki.Test.Core;
 
 public static class OperatorWaveTest
 {
-    /// <summary>テスト用のキャリアユニットのモック</summary>
-    private class TestCarrierUnit : ICarrierUnit
-    {
-        public float Level { get; set; }
-        public double Pitch { get; set; }
-        public bool Sync { get; set; }
-        public float ShapeX { get; set; }
-        public float ShapeY { get; set; }
-        public float Pan { get; set; }
-        public int Attack { get; set; }
-        public int Decay { get; set; }
-        public float Sustain { get; set; }
-        public int Release { get; set; }
-    }
-
     [Fact]
     public static void Reset_位相がリセットされる()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -44,7 +29,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_出力値が範囲内()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -62,7 +47,7 @@ public static class OperatorWaveTest
     public static void TickAndRender_位相が進む()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -91,8 +76,8 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_ピッチが2倍だと周期が半分()
     {
-        var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unit2 = new TestCarrierUnit { Pitch = 2.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit1 = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit2 = new A1CarrierUnit { Pitch = 2.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config1 = new OperatorWaveConfig(unit1);
         var config2 = new OperatorWaveConfig(unit2);
         var wave1 = new OperatorWave(config1);
@@ -118,7 +103,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_シンク有効時に位相がリセットされる()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = true };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -145,7 +130,7 @@ public static class OperatorWaveTest
     public static void TickAndRender_FM変調が効く()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var waveNoFm = new OperatorWave(config);
         var waveFm = new OperatorWave(config);
@@ -179,9 +164,9 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_ShapeYで波形が変わる()
     {
-        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
+        var unitNeutral = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0.5f, Sync = false };
+        var unitNegative = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -0.5f, Sync = false };
 
         var configNeutral = new OperatorWaveConfig(unitNeutral);
         var configPositive = new OperatorWaveConfig(unitPositive);
@@ -231,8 +216,8 @@ public static class OperatorWaveTest
     public static void TickAndRender_ShapeXで波形が変わる()
     {
         // ShapeY = 0 で純粋な三角波を生成
-        var unitNeutral = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
+        var unitNeutral = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.5f, ShapeY = 0f, Sync = false };
 
         var configNeutral = new OperatorWaveConfig(unitNeutral);
         var configPositive = new OperatorWaveConfig(unitPositive);
@@ -270,8 +255,8 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_Levelで出力が変わる()
     {
-        var unitHalf = new TestCarrierUnit { Pitch = 1.0, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitFull = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitHalf = new A1CarrierUnit { Pitch = 1.0, Level = 0.5f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitFull = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
 
         var configHalf = new OperatorWaveConfig(unitHalf);
         var configFull = new OperatorWaveConfig(unitFull);
@@ -303,7 +288,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_設定値が正しく格納される()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 2.5,
             Level = 0.8f,
@@ -322,7 +307,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_ShapeYが正の時の計算()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -340,7 +325,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_ShapeYが負の時の計算()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -358,7 +343,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_Recalculate_ShapeX変更で再計算される()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -383,7 +368,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_Recalculate_ShapeY変更で再計算される()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -407,7 +392,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_Recalculate_Shape変更なしでは形状パラメータは変わらない()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -437,7 +422,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void CarrierWaveConfig_Recalculate_パラメータ変更が反映される()
     {
-        var unit = new TestCarrierUnit
+        var unit = new A1CarrierUnit
         {
             Pitch = 1.0,
             Level = 1.0f,
@@ -463,7 +448,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_Level0で無音()
     {
-        var unit = new TestCarrierUnit { Pitch = 1.0, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 1.0, Level = 0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -480,7 +465,7 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_Pitch0で位相が進まない()
     {
-        var unit = new TestCarrierUnit { Pitch = 0.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unit = new A1CarrierUnit { Pitch = 0.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
         var config = new OperatorWaveConfig(unit);
         var wave = new OperatorWave(config);
 
@@ -502,9 +487,9 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_ShapeXの境界値()
     {
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -1f, ShapeY = 0f, Sync = false };
-        var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
+        var unitNegative = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -1f, ShapeY = 0f, Sync = false };
+        var unitZero = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 1f, ShapeY = 0f, Sync = false };
 
         var configNegative = new OperatorWaveConfig(unitNegative);
         var configZero = new OperatorWaveConfig(unitZero);
@@ -534,9 +519,9 @@ public static class OperatorWaveTest
     [Fact]
     public static void TickAndRender_ShapeYの境界値()
     {
-        var unitNegative = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -1f, Sync = false };
-        var unitZero = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
-        var unitPositive = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
+        var unitNegative = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = -1f, Sync = false };
+        var unitZero = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 0f, Sync = false };
+        var unitPositive = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0f, ShapeY = 1f, Sync = false };
 
         var configNegative = new OperatorWaveConfig(unitNegative);
         var configZero = new OperatorWaveConfig(unitZero);
@@ -568,8 +553,8 @@ public static class OperatorWaveTest
     {
         // ShapeX と ShapeY を変えることで UpSlope, DownSlope, TriFactor, SinFactor が変わり、
         // それが実際の波形出力に反映されることを確認
-        var unit1 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
-        var unit2 = new TestCarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
+        var unit1 = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = -0.5f, ShapeY = -0.5f, Sync = false };
+        var unit2 = new A1CarrierUnit { Pitch = 1.0, Level = 1.0f, ShapeX = 0.8f, ShapeY = 0.6f, Sync = false };
 
         var config1 = new OperatorWaveConfig(unit1);
         var config2 = new OperatorWaveConfig(unit2);

@@ -4,21 +4,10 @@ namespace Tsumiki.Test.Core;
 
 public static class DelayChannelTest
 {
-    /// <summary>テスト用のディレイユニットのモック</summary>
-    private class TestDelayUnit : IDelayUnit
-    {
-        public float Mix { get; set; }
-        public int Delay { get; set; }
-        public float Feedback { get; set; }
-        public bool Cross { get; set; }
-        public int LowCut { get; set; }
-        public int HighCut { get; set; }
-    }
-
     [Fact]
     public static void TickAndRender_出力値が有限()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.5f,
@@ -27,7 +16,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         for (var i = 0; i < 10000; i++)
         {
@@ -40,7 +29,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_遅延が正しく機能する()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 10, // 10ms の遅延
             Feedback = 0.0f, // フィードバックなし
@@ -49,7 +38,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
         var delaySamples = config.DelaySampleCount;
 
         // インパルス入力を与える
@@ -71,7 +60,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_フィードバック0で発散しない()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.0f,
@@ -80,7 +69,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         for (var i = 0; i < 10000; i++)
         {
@@ -96,7 +85,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_フィードバック1でも発散しない()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 1.0f,
@@ -105,7 +94,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         // フィードバック1.0の場合、理論上は発散する可能性があるが、
         // フィルタによる減衰とフィードバック閾値処理により安定するはず
@@ -121,7 +110,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_フィードバック閾値処理が機能する()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.5f,
@@ -130,7 +119,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         // 微小な入力を与え続けると、フィードバックが閾値以下になって0になるはず
         for (var i = 0; i < 50000; i++)
@@ -145,7 +134,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_最小ディレイ時間でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 2,
             Feedback = 0.5f,
@@ -154,7 +143,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -167,7 +156,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_最大ディレイ時間でも正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 500,
             Feedback = 0.5f,
@@ -176,7 +165,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -189,7 +178,7 @@ public static class DelayChannelTest
     [Fact]
     public static void TickAndRender_変動する入力でも安定している()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.8f,
@@ -198,7 +187,7 @@ public static class DelayChannelTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var channel = new DelayChannel(config, 44100);
+        var channel = new DelayChannel(config);
 
         for (var i = 0; i < 10000; i++)
         {

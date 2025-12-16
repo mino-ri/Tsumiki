@@ -7,7 +7,7 @@ public static class ResonantLowPassFilterTest
     [Fact]
     public static void TickAndRender_出力値が有限()
     {
-        var model = new MockTsumikiModel();
+        var model = new TsumikiModel();
         model.Filter.Cutoff = 0;
         model.Filter.Resonance = 0.5f;
         
@@ -30,7 +30,7 @@ public static class ResonantLowPassFilterTest
     [Fact]
     public static void TickAndRender_ピッチ0でも発散しない()
     {
-        var model = new MockTsumikiModel();
+        var model = new TsumikiModel();
         model.Filter.Cutoff = 0;
         model.Filter.Resonance = 0.5f;
 
@@ -51,7 +51,7 @@ public static class ResonantLowPassFilterTest
     [Fact]
     public static void TickAndRender_ピッチ127でも発散しない()
     {
-        var model = new MockTsumikiModel();
+        var model = new TsumikiModel();
         model.Filter.Cutoff = 0;
         model.Filter.Resonance = 0.5f;
 
@@ -72,7 +72,7 @@ public static class ResonantLowPassFilterTest
     [Fact]
     public static void TickAndRender_高レゾナンスでも発散しない()
     {
-        var model = new MockTsumikiModel();
+        var model = new TsumikiModel();
         model.Filter.Cutoff = 0;
         model.Filter.Resonance = 0.98f;
 
@@ -96,11 +96,11 @@ public static class ResonantLowPassFilterTest
     [Fact]
     public static void TickAndRender_レゾナンスで特性が変化する()
     {
-        var modelNoRes = new MockTsumikiModel();
+        var modelNoRes = new TsumikiModel();
         modelNoRes.Filter.Cutoff = 0;
         modelNoRes.Filter.Resonance = 0.02f;
 
-        var modelWithRes = new MockTsumikiModel();
+        var modelWithRes = new TsumikiModel();
         modelWithRes.Filter.Cutoff = 0;
         modelWithRes.Filter.Resonance = 0.9f;
 

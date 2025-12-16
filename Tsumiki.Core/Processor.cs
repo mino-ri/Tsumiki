@@ -23,7 +23,7 @@ public class Processor
         _sampleRate = sampleRate;
         _container = new(0);
         _voices = [];
-        _delay = new(_config.Delay, sampleRate);
+        _delay = new(_config.Delay);
         _afterTouch = 0f;
     }
 

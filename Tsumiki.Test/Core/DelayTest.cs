@@ -4,21 +4,10 @@ namespace Tsumiki.Test.Core;
 
 public static class DelayTest
 {
-    /// <summary>テスト用のディレイユニットのモック</summary>
-    private class TestDelayUnit : IDelayUnit
-    {
-        public float Mix { get; set; }
-        public int Delay { get; set; }
-        public float Feedback { get; set; }
-        public bool Cross { get; set; }
-        public int LowCut { get; set; }
-        public int HighCut { get; set; }
-    }
-
     [Fact]
     public static void TickAndRender_出力値が有限()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.5f,
@@ -27,7 +16,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
 
         for (var i = 0; i < 10000; i++)
         {
@@ -42,7 +31,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_左右チャンネルが独立して動作する()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 10,
             Feedback = 0.0f,
@@ -51,7 +40,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
         var delaySamples = config.DelaySampleCount;
 
         // 左チャンネルのみにインパルスを入力
@@ -88,7 +77,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックなしで正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.5f,
@@ -97,7 +86,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -112,7 +101,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックありで正常に動作()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.5f,
@@ -121,7 +110,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
 
         for (var i = 0; i < 1000; i++)
         {
@@ -136,7 +125,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_クロスフィードバックで左右が混ざる()
     {
-        var unitNoCross = new TestDelayUnit
+        var unitNoCross = new DelayDelayUnit
         {
             Delay = 50, // 遅延時間を長くして、フィードバックが回るようにする
             Feedback = 0.7f, // フィードバックを高めにする
@@ -144,7 +133,7 @@ public static class DelayTest
             LowCut = 50,
             HighCut = 90
         };
-        var unitCross = new TestDelayUnit
+        var unitCross = new DelayDelayUnit
         {
             Delay = 50,
             Feedback = 0.7f,
@@ -155,8 +144,8 @@ public static class DelayTest
 
         var configNoCross = new DelayConfig(unitNoCross, 44100);
         var configCross = new DelayConfig(unitCross, 44100);
-        var delayNoCross = new Delay(configNoCross, 44100);
-        var delayCross = new Delay(configCross, 44100);
+        var delayNoCross = new Delay(configNoCross);
+        var delayCross = new Delay(configCross);
 
         // 継続的に左チャンネルに入力を与える
         var samplesCount = 5000; // サンプル数を増やす
@@ -200,7 +189,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_フィードバック最大でも発散しない()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 1.0f,
@@ -209,7 +198,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
 
         for (var i = 0; i < 10000; i++)
         {
@@ -226,7 +215,7 @@ public static class DelayTest
     [Fact]
     public static void TickAndRender_変動する入力でも安定している()
     {
-        var unit = new TestDelayUnit
+        var unit = new DelayDelayUnit
         {
             Delay = 100,
             Feedback = 0.8f,
@@ -235,7 +224,7 @@ public static class DelayTest
             HighCut = 90
         };
         var config = new DelayConfig(unit, 44100);
-        var delay = new Delay(config, 44100);
+        var delay = new Delay(config);
 
         for (var i = 0; i < 10000; i++)
         {

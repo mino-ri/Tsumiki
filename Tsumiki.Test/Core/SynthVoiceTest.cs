@@ -4,25 +4,12 @@ namespace Tsumiki.Test.Core;
 
 public static class SynthVoiceTest
 {
-    /// <summary>テスト用のInputユニットのモック</summary>
-    private class TestInputUnit : IInputUnit
-    {
-        public int Bend { get; set; }
-        public int Glide { get; set; }
-        public int Octave { get; set; }
-        public int Stack { get; set; }
-        public StackMode StackMode { get; set; }
-        public bool Polyphony { get; set; }
-        public int StackDetune { get; set; }
-        public float StackStereo { get; set; }
-    }
-
     [Fact]
     public static void Tick_ノートオンでActiveになる()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 0.8f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
@@ -36,9 +23,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_ノートオフでReleaseになる()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 0.8f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
@@ -58,9 +45,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_ピッチベンドが反映される()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 1.0f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
@@ -75,9 +62,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_ベロシティが正しく設定される()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var velocity = 0.75f;
         var midiNote = new MidiNote(0, 60, velocity, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
@@ -90,9 +77,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_ポリプレッシャーが正しく設定される()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 1.0f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1, PolyPressure = 0.6f };
 
@@ -104,9 +91,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_Lengthが1の時にtrueを返す()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 1.0f, 1);
         var midiVoice1 = new MidiVoice(in midiNote) { Length = 1 };
         var midiVoice2 = new MidiVoice(in midiNote) { Length = 2 };
@@ -120,9 +107,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_リリース状態からのノートオンでRestartNoteを返す()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote = new MidiNote(0, 60, 1.0f, 1);
         var midiVoice = new MidiVoice(in midiNote) { Length = 1 };
 
@@ -145,9 +132,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_グライド有効時にPitchChangedを返す()
     {
-        var inputUnit = new TestInputUnit { Glide = 30 }; // グライド有効
+        var inputUnit = new InputInputUnit { Glide = 30 }; // グライド有効
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
         var midiNote2 = new MidiNote(0, 64, 1.0f, 2); // Lengthが1でない
         var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
@@ -165,9 +152,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_グライド無効時はPitchChangedを返さない()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 }; // グライド無効
+        var inputUnit = new InputInputUnit { Glide = -1 }; // グライド無効
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
         var midiNote2 = new MidiNote(0, 64, 1.0f, 2); // Lengthが1でない
         var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
@@ -184,9 +171,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_グライド有効時はDeltaが徐々に変化する()
     {
-        var inputUnit = new TestInputUnit { Glide = 30 }; // グライド有効
+        var inputUnit = new InputInputUnit { Glide = 30 }; // グライド有効
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
         var midiNote2 = new MidiNote(0, 72, 1.0f, 2); // 1オクターブ上
         var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
@@ -217,9 +204,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_グライド無効時はDeltaが即座に変化する()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 }; // グライド無効
+        var inputUnit = new InputInputUnit { Glide = -1 }; // グライド無効
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
         var midiNote2 = new MidiNote(0, 72, 1.0f, 2); // 1オクターブ上
         var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
@@ -239,9 +226,9 @@ public static class SynthVoiceTest
     [Fact]
     public static void Tick_連続したノートオンでStateがActiveを維持する()
     {
-        var inputUnit = new TestInputUnit { Glide = -1 };
+        var inputUnit = new InputInputUnit { Glide = -1 };
         var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig);
+        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
         var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
         var midiNote2 = new MidiNote(0, 64, 1.0f, 2);
         var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
@@ -263,7 +250,7 @@ public static class SynthVoiceTest
     [Fact]
     public static void GliderConfig_Recalculate_Glide変更で再計算される()
     {
-        var inputUnit = new TestInputUnit { Glide = 10 };
+        var inputUnit = new InputInputUnit { Glide = 10 };
         var config = new GliderConfig(inputUnit, 44100.0);
 
         Assert.True(config.Enable);
@@ -281,7 +268,7 @@ public static class SynthVoiceTest
     [Fact]
     public static void GliderConfig_Recalculate_Glide負でPolyphonyがtrue()
     {
-        var inputUnit = new TestInputUnit { Glide = 10 };
+        var inputUnit = new InputInputUnit { Glide = 10 };
         var config = new GliderConfig(inputUnit, 44100.0);
 
         Assert.True(config.Enable);
@@ -300,19 +287,19 @@ public static class SynthVoiceTest
     public static void GliderConfig_Glide値によるEnable切り替え()
     {
         // Glide > 0 の場合
-        var inputUnit1 = new TestInputUnit { Glide = 30 };
+        var inputUnit1 = new InputInputUnit { Glide = 30 };
         var config1 = new GliderConfig(inputUnit1, 44100.0);
         Assert.True(config1.Enable);
         Assert.False(config1.Polyphony);
 
         // Glide = 0 の場合
-        var inputUnit2 = new TestInputUnit { Glide = 0 };
+        var inputUnit2 = new InputInputUnit { Glide = 0 };
         var config2 = new GliderConfig(inputUnit2, 44100.0);
         Assert.False(config2.Enable);
         Assert.False(config2.Polyphony);
 
         // Glide < 0 の場合
-        var inputUnit3 = new TestInputUnit { Glide = -1 };
+        var inputUnit3 = new InputInputUnit { Glide = -1 };
         var config3 = new GliderConfig(inputUnit3, 44100.0);
         Assert.False(config3.Enable);
         Assert.True(config3.Polyphony);
@@ -321,7 +308,7 @@ public static class SynthVoiceTest
     [Fact]
     public static void GliderConfig_Recalculate_サンプルレート変更で再計算される()
     {
-        var inputUnit = new TestInputUnit { Glide = 30 };
+        var inputUnit = new InputInputUnit { Glide = 30 };
         var config = new GliderConfig(inputUnit, 44100.0);
 
         Assert.Equal(44100.0, config.SampleRate);
@@ -336,7 +323,7 @@ public static class SynthVoiceTest
     [Fact]
     public static void GliderConfig_Recalculate_変更なしではスキップされる()
     {
-        var inputUnit = new TestInputUnit { Glide = 30 };
+        var inputUnit = new InputInputUnit { Glide = 30 };
         var config = new GliderConfig(inputUnit, 44100.0);
 
         var oldSampleRate = config.SampleRate;

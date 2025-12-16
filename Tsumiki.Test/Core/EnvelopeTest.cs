@@ -5,19 +5,10 @@ namespace Tsumiki.Test.Core;
 
 public static class EnvelopeTest
 {
-    /// <summary>テスト用のエンベロープユニットのモック</summary>
-    private class TestEnvelopeUnit : IEnvelopeUnit
-    {
-        public int Attack { get; set; }
-        public int Decay { get; set; }
-        public float Sustain { get; set; }
-        public int Release { get; set; }
-    }
-
     [Fact]
     public static void TickAndRender_初期状態でノートオフの場合は0を返す()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -29,7 +20,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_ノートオンでアタックフェーズが開始される()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 1000.0);
         var envelope = new Envelope(config);
 
@@ -57,7 +48,7 @@ public static class EnvelopeTest
     public static void TickAndRender_サステインレベルまで減衰する()
     {
         var sustainLevel = 0.5f;
-        var unit = new TestEnvelopeUnit { Attack = 60, Decay = 60, Sustain = sustainLevel, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 60, Decay = 60, Sustain = sustainLevel, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -85,7 +76,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_ノートオフでリリースフェーズに入る()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.8f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.8f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -118,7 +109,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_リリース後は0を維持する()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -147,7 +138,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_リリース途中からノートオンできる()
     {
-        var unit = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -183,7 +174,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_出力値は0から1の範囲内()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.7f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.7f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -206,7 +197,7 @@ public static class EnvelopeTest
     public static void EnvelopeConfig_コンストラクタでレートが正しく計算される()
     {
         var sampleRate = 44100.0;
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 50, Sustain = 0.6f, Release = 60 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 50, Sustain = 0.6f, Release = 60 };
         var config = new EnvelopeConfig(unit, sampleRate);
 
         // レートは0～1の範囲内
@@ -222,9 +213,9 @@ public static class EnvelopeTest
     public static void EnvelopeConfig_値が大きいほどレートが小さい()
     {
         var sampleRate = 44100.0;
-        var unit1 = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 20 };
-        var unit2 = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
-        var unit3 = new TestEnvelopeUnit { Attack = 60, Decay = 60, Sustain = 0.5f, Release = 60 };
+        var unit1 = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 20 };
+        var unit2 = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit3 = new EnvelopeModulationEnvelopeUnit { Attack = 60, Decay = 60, Sustain = 0.5f, Release = 60 };
         var config1 = new EnvelopeConfig(unit1, sampleRate);
         var config2 = new EnvelopeConfig(unit2, sampleRate);
         var config3 = new EnvelopeConfig(unit3, sampleRate);
@@ -241,7 +232,7 @@ public static class EnvelopeTest
     [Fact]
     public static void EnvelopeConfig_Recalculate_サンプルレート変更で再計算される()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
 
         var oldAttackDelta = config.AttackDelta;
@@ -260,7 +251,7 @@ public static class EnvelopeTest
     [Fact]
     public static void EnvelopeConfig_Recalculate_パラメータ変更で再計算される()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
 
         var oldAttackDelta = config.AttackDelta;
@@ -285,7 +276,7 @@ public static class EnvelopeTest
     [Fact]
     public static void Envelope_Restart_減衰をリセットする()
     {
-        var unit = new TestEnvelopeUnit { Attack = 10, Decay = 10, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 10, Decay = 10, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -306,7 +297,7 @@ public static class EnvelopeTest
     [Fact]
     public static void Envelope_Reset_完全に初期状態に戻る()
     {
-        var unit = new TestEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 40, Decay = 40, Sustain = 0.5f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -327,8 +318,8 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_Attack値が小さいほど速く最大値に達する()
     {
-        var unitSlow = new TestEnvelopeUnit { Attack = 60, Decay = 40, Sustain = 0.5f, Release = 40 };
-        var unitFast = new TestEnvelopeUnit { Attack = 10, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unitSlow = new EnvelopeModulationEnvelopeUnit { Attack = 60, Decay = 40, Sustain = 0.5f, Release = 40 };
+        var unitFast = new EnvelopeModulationEnvelopeUnit { Attack = 10, Decay = 40, Sustain = 0.5f, Release = 40 };
         var configSlow = new EnvelopeConfig(unitSlow, 44100.0);
         var configFast = new EnvelopeConfig(unitFast, 44100.0);
         var envelopeSlow = new Envelope(configSlow);
@@ -364,8 +355,8 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_Release値が小さいほど速く0に達する()
     {
-        var unitSlow = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 60 };
-        var unitFast = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 10 };
+        var unitSlow = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 60 };
+        var unitFast = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0.5f, Release = 10 };
         var configSlow = new EnvelopeConfig(unitSlow, 44100.0);
         var configFast = new EnvelopeConfig(unitFast, 44100.0);
         var envelopeSlow = new Envelope(configSlow);
@@ -406,7 +397,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_Sustain0でディケイ後は無音()
     {
-        var unit = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 0f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 
@@ -424,7 +415,7 @@ public static class EnvelopeTest
     [Fact]
     public static void TickAndRender_Sustain1でディケイなし()
     {
-        var unit = new TestEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 1f, Release = 40 };
+        var unit = new EnvelopeModulationEnvelopeUnit { Attack = 20, Decay = 20, Sustain = 1f, Release = 40 };
         var config = new EnvelopeConfig(unit, 44100.0);
         var envelope = new Envelope(config);
 

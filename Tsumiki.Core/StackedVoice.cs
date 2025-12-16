@@ -36,6 +36,7 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
 {
     private readonly ITsumikiModel _model = model;
     public readonly DelayConfig Delay = new(model.Delay, sampleRate);
+    public readonly ITuningUnit TuningUnit = model.Tuning;
     public StackConfig Stack = new(model.Input);
     public GliderConfig Glide = new(model.Input, sampleRate);
     public ResonantLowPassFilterConfig[] Filter =
@@ -231,7 +232,7 @@ internal struct StackedVoice
         _filterConfig = filterConfig;
         _modulation = new(modulationConfig);
         _filterMixModulation = new(modulationConfig.FilterMixDest, _modulation);
-        SynthVoice = new(config.Glide);
+        SynthVoice = new(config.Glide, config.TuningUnit);
         OscillatorA = new(config.Stack, config.OscillatorA, _modulation, 0);
         OscillatorB = new(config.Stack, config.OscillatorB, _modulation, 1);
         Filter = new(filterConfig, _modulation);
