@@ -2,6 +2,29 @@ namespace Tsumiki.View;
 
 public static class TsumikiViewModelExtension
 {
+    private static IChannelTuningViewModel Channel(this ITuningViewModel unit, int channel)
+    {
+        return channel switch
+        {
+            1 => unit.Channel2,
+            2 => unit.Channel3,
+            3 => unit.Channel4,
+            4 => unit.Channel5,
+            5 => unit.Channel6,
+            6 => unit.Channel7,
+            7 => unit.Channel8,
+            8 => unit.Channel9,
+            9 => unit.Channel10,
+            10 => unit.Channel11,
+            11 => unit.Channel12,
+            12 => unit.Channel13,
+            13 => unit.Channel14,
+            14 => unit.Channel15,
+            15 => unit.Channel16,
+            _ => unit.Channel1,
+        };
+    }
+
     public static IRangeViewParameter<double> Pitch(this IChannelTuningViewModel unit, int index)
     {
         return index switch
@@ -135,48 +158,6 @@ public static class TsumikiViewModelExtension
             126 => unit.Pitch126,
             _ => unit.Pitch127,
         };
-    }
-
-    public static void RebuildPitches(this IChannelTuningViewModel unit, int rootIndex, int keyCount)
-    {
-        var offset = unit.Offset.Value;
-        var ratio = GetPitchValue(unit.RatioN.Value, unit.RatioD.Value, unit.RatioPn.Value, unit.RatioPd.Value);
-        var generator = GetPitchValue(unit.GeneratorN.Value, unit.GeneratorD.Value, unit.GeneratorPn.Value, unit.GeneratorPd.Value);
-        var period = GetPitchValue(unit.PeriodN.Value, unit.PeriodD.Value, unit.PeriodPn.Value, unit.PeriodPd.Value);
-        var basePitch = rootIndex + ratio;
-
-        // KeyCount は 1～127 の範囲なので常に stack alloc が可能
-        Span<double> periodPitches = stackalloc double[keyCount];
-        for (var i = 0; i < keyCount; i++)
-        {
-            var factor = i - offset;
-            var targetPitch = generator * factor % period;
-            if (factor < 0 && targetPitch != 0.0)
-            {
-                targetPitch += period;
-            }
-
-            targetPitch += basePitch;
-            periodPitches[i] = targetPitch;
-        }
-
-        periodPitches.Sort();
-
-        for (var i = 0; i < 128; i++)
-        {
-            var relativeKey = i - rootIndex;
-            var (periodCount, index) = Math.DivRem(relativeKey, keyCount);
-            if (relativeKey < 0 && index != 0)
-            {
-                periodCount--;
-                index += keyCount;
-            }
-
-            var pitchViewModel = unit.Pitch(i);
-            pitchViewModel.BeginEdit();
-            pitchViewModel.Value = period * periodCount + periodPitches[index];
-            pitchViewModel.EndEdit();
-        }
     }
 
     private static double GetPitchValue(int n, int d, int pn, int pd)

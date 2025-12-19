@@ -44,6 +44,25 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
     public OscillatorConfig OscillatorA = new(model.A1, model.A2, sampleRate);
     public OscillatorConfig OscillatorB = new(model.B1, model.B2, sampleRate);
     public ModulationConfig Modulation = new(model, sampleRate);
+    public ChannelTuningConfig[] ChannelTunings =
+    [
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel1),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel2),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel3),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel4),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel5),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel6),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel7),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel8),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel9),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel10),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel11),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel12),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel13),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel14),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel15),
+        new ChannelTuningConfig(model.Tuning, model.Tuning.Channel16),
+    ];
     public float Master = model.Master;
     public double PitchBend = model.PitchBend * model.Input.Bend;
     public bool UseFilter = model.Filter.Mix != 0f;
@@ -61,6 +80,8 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
         OscillatorA.Recalculate(sampleRate);
         OscillatorB.Recalculate(sampleRate);
         Modulation.Recalculate(sampleRate);
+        for (var i = 0; i < 16; i++)
+            ChannelTunings[i].Recalculate();
 
         Master = _model.Master;
         PitchBend = _model.PitchBend * _model.Input.Bend;

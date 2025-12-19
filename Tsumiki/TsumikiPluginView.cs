@@ -5,7 +5,7 @@ using Tsumiki.View.Win;
 
 namespace Tsumiki;
 
-public class TsumikiPluginView(TsumikiModel model, TsumikiController controller) : IAudioPluginView
+public class TsumikiPluginView(TsumikiViewModel viewModel) : IAudioPluginView
 {
     private TsumikiPage? _page;
     private ITsumikiCanvas? _canvas;
@@ -27,7 +27,7 @@ public class TsumikiPluginView(TsumikiModel model, TsumikiController controller)
         TsumikiLogger.WriteAccess([parent, (int)type]);
         try
         {
-            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page ??= TsumikiPage.Create(new TsumikiViewModel(model, controller)));
+            _canvas = TsumikiCanvas.Create(parent, ToTsumikiViewSize(Size), _page ??= TsumikiPage.Create(viewModel));
         }
         catch (Exception ex)
         {

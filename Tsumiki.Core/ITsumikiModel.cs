@@ -207,7 +207,7 @@ public interface IEnvelopeUnit
     [VstRangeParameter(1, 0, 80, 40, StepCount = 80)]
     int Decay { get; set; }
 
-    [VstRangeParameter(2, 0.0, 1.0, 1.0)]
+    [VstRangeParameter(2, 0.0, 1.0, 0.5)]
     float Sustain { get; set; }
 
     [VstRangeParameter(3, 0, 80, 40, StepCount = 80)]
@@ -225,7 +225,7 @@ public interface ILfoUnit
     [VstRangeParameter(0, 0.0, 1.0, 1.0)]
     float Level { get; set; }
 
-    [VstRangeParameter(1, 0.0, 100.0, 4.0, Units = "Hz")]
+    [VstRangeParameter(1, 0.0, 80.0, 4.0, Units = "Hz")]
     double Speed { get; set; }
 
     [VstRangeParameter(2, -1.0, 1.0, 0.0)]
@@ -240,7 +240,7 @@ public interface ITuningUnit
     [VstRangeParameter(0, 0, 128, 69, StepCount = 128)]
     int Root { get; set; }
 
-    [VstRangeParameter(1, 1, 127, 0, StepCount = 126)]
+    [VstRangeParameter(1, 1, 127, 12, StepCount = 126)]
     int KeyPeriod { get; set; }
 
     [VstUnit(31, 50)]

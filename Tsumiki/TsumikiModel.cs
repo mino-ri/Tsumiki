@@ -28,7 +28,7 @@ public partial class TsumikiModel
 
     private static void InitModel(TsumikiModel model)
     {
-        for (var i = 0; i < 300; i++)
+        for (var i = 0; i < 2500; i++)
         {
             if (model.TryGetParameterById(new AudioParameterId(i), out var parameter))
             {

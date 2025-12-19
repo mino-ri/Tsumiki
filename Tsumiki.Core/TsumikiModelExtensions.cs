@@ -294,49 +294,4 @@ public static class TsumikiModelExtensions
             default: unit.Pitch127 = value; break;
         }
     }
-
-    public static void RebuildPitches(this IChannelTuningUnit unit, int rootIndex, int keyCount)
-    {
-        var offset = unit.Offset;
-        var ratio = GetPitchValue(unit.RatioN, unit.RatioD, unit.RatioPn, unit.RatioPd);
-        var generator = GetPitchValue(unit.GeneratorN, unit.GeneratorD, unit.GeneratorPn, unit.GeneratorPd);
-        var period = GetPitchValue(unit.PeriodN, unit.PeriodD, unit.PeriodPn, unit.PeriodPd);
-        var basePitch = rootIndex + ratio;
-
-        // KeyCount は 1～127 の範囲なので常に stack alloc が可能
-        Span<double> periodPitches = stackalloc double[keyCount];
-        for (var i = 0; i < keyCount; i++)
-        {
-            var factor = i - offset;
-            var targetPitch = generator * factor % period;
-            if (factor < 0 && targetPitch != 0.0)
-            {
-                targetPitch += period;
-            }
-
-            targetPitch += basePitch;
-            periodPitches[i] = targetPitch;
-        }
-
-        periodPitches.Sort();
-
-        for (var i = 0; i < 128; i++)
-        {
-            var relativeKey = i - rootIndex;
-            var (periodCount, index) = Math.DivRem(relativeKey, keyCount);
-            if (relativeKey < 0 && index != 0)
-            {
-                periodCount--;
-                index += keyCount;
-            }
-
-            unit.SetPitch(i, period * periodCount + periodPitches[index]);
-        }
-    }
-
-    private static double GetPitchValue(int n, int d, int pn, int pd)
-    {
-        var baseValue = Math.Log2((double)n / d) * 12;
-        return baseValue * pn / pd;
-    }
 }

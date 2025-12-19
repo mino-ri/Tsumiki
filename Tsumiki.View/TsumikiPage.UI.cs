@@ -1,3 +1,5 @@
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Tsumiki.View;
 
 public partial class TsumikiPage
@@ -18,6 +20,8 @@ public partial class TsumikiPage
     private static RectF Decay => PixelToTexture(2410, 840, 120, 120);
     private static RectF Under => PixelToTexture(2320, 930, 30, 30);
     private static RectF DelayBar => PixelToTexture(1930, 900, 30, 180);
+    private static RectF DigitMiddle => PixelToTexture(2080, 0, 30, 60);
+    private static RectF DigitSmall => PixelToTexture(2080, 60, 25, 30);
 
     public static TsumikiPage Create(ITsumikiViewModel data)
     {
@@ -87,8 +91,36 @@ public partial class TsumikiPage
                 // Tab
                 new TabSwitcher(TabPageType.Main, PixelToControl(0, 0, 150, 80), PixelToTexture(2110, 1000, 150, 80)),
                 new TabSwitcher(TabPageType.Modulation, PixelToControl(150, 0, 150, 80), PixelToTexture(2260, 1000, 150, 80)),
+
+                // Basic
+                new DigitControl(data.Tuning.Root, PixelToControl(15, 140, 30, 60), DigitMiddle, 100),
+                new DigitControl(data.Tuning.Root, PixelToControl(45, 140, 30, 60), DigitMiddle, 10),
+                new DigitControl(data.Tuning.Root, PixelToControl(75, 140, 30, 60), DigitMiddle, 1),
+                new DigitControl(data.Tuning.KeyPeriod, PixelToControl(135, 140, 30, 60), DigitMiddle, 100),
+                new DigitControl(data.Tuning.KeyPeriod, PixelToControl(165, 140, 30, 60), DigitMiddle, 10),
+                new DigitControl(data.Tuning.KeyPeriod, PixelToControl(195, 140, 30, 60), DigitMiddle, 1),
+
+                // Channels
+                ChannelTuning(PixelToControl(480, 80 + 150 * 0, 660, 150), data.Tuning.Channel1),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 1, 660, 150), data.Tuning.Channel2),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 2, 660, 150), data.Tuning.Channel3),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 3, 660, 150), data.Tuning.Channel4),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 4, 660, 150), data.Tuning.Channel5),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 5, 660, 150), data.Tuning.Channel6),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 6, 660, 150), data.Tuning.Channel7),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 7, 660, 150), data.Tuning.Channel8),
+
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 0, 660, 150), data.Tuning.Channel9),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 1, 660, 150), data.Tuning.Channel10),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 2, 660, 150), data.Tuning.Channel11),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 3, 660, 150), data.Tuning.Channel12),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 4, 660, 150), data.Tuning.Channel13),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 5, 660, 150), data.Tuning.Channel14),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 6, 660, 150), data.Tuning.Channel15),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 7, 660, 150), data.Tuning.Channel16),
             },
         ];
+
         page.SetTabPageType(TabPageType.Main);
 
         return page;
@@ -151,11 +183,11 @@ public partial class TsumikiPage
     {
         return new(PixelToControl(120, 80, 840, 240))
         {
-            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(0, 75, 60, 60), PixelToTexture(1930, 15, 60, 60), 100000, 100, 10),
-            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 75, 60, 60), PixelToTexture(1930, 105, 60, 60), 100000, 100, 100),
-            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(35, 150, 25, 30), LfoSpeedDecimal, 100000, 100, 1000),
-            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 150, 25, 30), LfoSpeedDecimal, 100000, 1000, 10000),
-            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(85, 150, 25, 30), LfoSpeedDecimal, 100000, 10000, 100000),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(0, 75, 60, 60), PixelToTexture(1930, 15, 60, 60), 80000, 80, 8),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 75, 60, 60), PixelToTexture(1930, 105, 60, 60), 80000, 80, 80),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(35, 150, 25, 30), LfoSpeedDecimal, 80000, 80, 800),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 150, 25, 30), LfoSpeedDecimal, 80000, 800, 8000),
+            new PitchDecimalControl<double>(lfo.Speed, PixelToControl(85, 150, 25, 30), LfoSpeedDecimal, 80000, 8000, 80000),
             new ModulatorXYControl(lfo.ShapeX, lfo.ShapeY, null, null, lfo.Level,
                 PixelToControl(150, 0, 600, 240), XYControl),
             new VerticalSlider<float>(lfo.Level, PixelToControl(750, 0, 90, 240), VerticalSlider),
@@ -187,6 +219,39 @@ public partial class TsumikiPage
             new ModulationVerticalSlider(source.Wheel, PixelToControl(0, 320, 120, 160), background, VerticalSlider),
             new ModulationVerticalSlider(source.Velocity, PixelToControl(0, 480, 120, 160), background, VerticalSlider),
             new ModulationVerticalSlider(source.Pressure, PixelToControl(0, 640, 120, 160), background, VerticalSlider),
+        };
+    }
+
+    private static Panel ChannelTuning(RectF control, IChannelTuningViewModel tuning)
+    {
+        return new Panel(control)
+        {
+            // Offset
+            new DigitControl(tuning.Offset, PixelToControl(195, 60, 30, 60), DigitMiddle, 100),
+            new DigitControl(tuning.Offset, PixelToControl(225, 60, 30, 60), DigitMiddle, 10),
+            new DigitControl(tuning.Offset, PixelToControl(255, 60, 30, 60), DigitMiddle, 1),
+            TuningValue(PixelToControl(15, 45, 165, 90), tuning.RatioN, tuning.RatioD, tuning.RatioPn, tuning.RatioPd),
+            TuningValue(PixelToControl(300, 45, 165, 90), tuning.GeneratorN, tuning.GeneratorD, tuning.GeneratorPn, tuning.GeneratorPd),
+            TuningValue(PixelToControl(480, 45, 165, 90), tuning.PeriodN, tuning.PeriodD, tuning.PeriodPn, tuning.PeriodPd),
+        };
+    }
+
+    private static Panel TuningValue(RectF control, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
+    {
+        return new Panel(control)
+        {
+            new DigitControl(n, PixelToControl(0, 10, 25, 30), DigitSmall, 100),
+            new DigitControl(n, PixelToControl(25, 10, 25, 30), DigitSmall, 10),
+            new DigitControl(n, PixelToControl(50, 10, 25, 30), DigitSmall, 1),
+            new DigitControl(d, PixelToControl(0, 50, 25, 30), DigitSmall, 100),
+            new DigitControl(d, PixelToControl(25, 50, 25, 30), DigitSmall, 10),
+            new DigitControl(d, PixelToControl(50, 50, 25, 30), DigitSmall, 1),
+            new DigitControl(pn, PixelToControl(90, 10, 25, 30), DigitSmall, 100),
+            new DigitControl(pn, PixelToControl(115, 10, 25, 30), DigitSmall, 10),
+            new DigitControl(pn, PixelToControl(140, 10, 25, 30), DigitSmall, 1),
+            new DigitControl(pd, PixelToControl(90, 50, 25, 30), DigitSmall, 100),
+            new DigitControl(pd, PixelToControl(115, 50, 25, 30), DigitSmall, 10),
+            new DigitControl(pd, PixelToControl(140, 50, 25, 30), DigitSmall, 1),
         };
     }
 }
