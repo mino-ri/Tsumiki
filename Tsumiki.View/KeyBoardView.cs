@@ -1,5 +1,3 @@
-using System.Threading.Channels;
-
 namespace Tsumiki.View;
 
 internal class KeyBoardView : Control

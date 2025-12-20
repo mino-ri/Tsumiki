@@ -1,3 +1,4 @@
+using Tsumiki.Core;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Tsumiki.View;
@@ -99,6 +100,9 @@ public partial class TsumikiPage
                 new DigitControl(data.Tuning.KeyPeriod, PixelToControl(135, 140, 30, 60), DigitMiddle, 100),
                 new DigitControl(data.Tuning.KeyPeriod, PixelToControl(165, 140, 30, 60), DigitMiddle, 10),
                 new DigitControl(data.Tuning.KeyPeriod, PixelToControl(195, 140, 30, 60), DigitMiddle, 1),
+
+                // Hidden
+                new VerticalSwitcher<SaveMode>(data.SaveMode, PixelToControl(270, 140, 60, 60), PixelToTexture(2080, 120, 60, 60), 1, 0),
 
                 // View
                 new ChannelNumber(PixelToControl(0, 230, 105, 105), PixelToTexture(360, 80, 105, 105), PixelToTexture(1140, 80, 105, 105), 150f / PixelTextureHeight, data.Tuning),

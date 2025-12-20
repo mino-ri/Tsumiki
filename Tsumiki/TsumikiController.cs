@@ -1,6 +1,5 @@
 using System;
 using NPlug;
-using Tsumiki.View;
 
 namespace Tsumiki;
 
@@ -13,6 +12,7 @@ public class TsumikiController : AudioController<TsumikiModel>
 
     public TsumikiController()
     {
+        Model.Controller = this;
         SetMidiCCMapping(AudioMidiControllerNumber.PitchBend, Model.PitchBendParameter);
         SetMidiCCMapping(AudioMidiControllerNumber.ModWheel, Model.WheelParameter);
         SetMidiCCMapping(AudioMidiControllerNumber.AfterTouch, Model.AfterTouchParameter);

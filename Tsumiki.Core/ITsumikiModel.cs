@@ -40,7 +40,10 @@ public interface ITsumikiModel
     [VstUnit(8, 100)]
     IModulationUnit Modulation { get; }
 
-    [VstUnit(9, 200)]
+    [VstStringListParameter(999, typeof(SaveMode))]
+    SaveMode SaveMode { get; set; }
+
+    [VstUnit(9, 1000)]
     ITuningUnit Tuning { get; }
 }
 
@@ -233,6 +236,13 @@ public interface ILfoUnit
 
     [VstRangeParameter(3, -1.0, 1.0, 0.0)]
     float ShapeY { get; set; }
+}
+
+public enum SaveMode
+{
+    Full,
+    TimbreOnly,
+    TuningOnly,
 }
 
 public interface ITuningUnit

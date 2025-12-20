@@ -81,7 +81,7 @@ public class BoolViewParameter(AudioBoolParameter parameter, TsumikiController? 
     public void EndEdit() => controller?.EndEditParameter();
 }
 
-public class EnumViewParameter<T>(AudioStringListParameter parameter, TsumikiController? controller) : IViewParameter<T>
+public class EnumViewParameter<T>(AudioStringListParameter parameter, TsumikiController? controller) : IRangeViewParameter<T>
     where T : Enum
 {
     public T Value { get => AsT(parameter.SelectedItem); set => parameter.SelectedItem = Unsafe.As<T, int>(ref value); }
@@ -89,6 +89,10 @@ public class EnumViewParameter<T>(AudioStringListParameter parameter, TsumikiCon
     public T DefaultValue { get; } = AsT((int)parameter.ToPlain(parameter.DefaultNormalizedValue));
     public double DefaultNormalizedValue => parameter.DefaultNormalizedValue;
     public int Id => parameter.Id.Value;
+    public T MinValue { get; } = AsT(0);
+    public T MaxValue { get; } = AsT(parameter.Items.Length - 1);
+    public int StepCount => parameter.StepCount;
+
     public void BeginEdit() => controller?.BeginEditParameter(parameter);
     public void EndEdit() => controller?.EndEditParameter();
 

@@ -144,7 +144,7 @@ public class VstViewModelSourceGenerator : IIncrementalGenerator
         var returnType = property.Type.ToDisplayString();
         var interfaceType = attribute.AttributeClass?.Name switch
         {
-            "VstRangeParameterAttribute" => $"IRangeViewParameter<{returnType}>",
+            "VstRangeParameterAttribute" or "VstStringListParameterAttribute" => $"IRangeViewParameter<{returnType}>",
             _ => $"IViewParameter<{returnType}>",
         };
 

@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text;
 
 namespace Tsumiki.SourceGenerator;
@@ -211,7 +210,7 @@ public class VstModelSourceGenerator : IIncrementalGenerator
         var returnType = property.Type.ToDisplayString();
         var interfaceType = attribute.AttributeClass?.Name switch
         {
-            "VstRangeParameterAttribute" => $"IRangeViewParameter<{returnType}>",
+            "VstRangeParameterAttribute" or "VstStringListParameterAttribute" => $"IRangeViewParameter<{returnType}>",
             _ => $"IViewParameter<{returnType}>",
         };
         var initialization = (attribute.AttributeClass?.Name, returnType) switch
