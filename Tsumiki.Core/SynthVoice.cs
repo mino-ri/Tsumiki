@@ -17,8 +17,6 @@ internal enum VoiceEvent
     StartNote = 1,
     /// <summary>リリース途中から発音状態に移行する</summary>
     RestartNote = 2,
-    /// <summary>発音中にピッチが変化した</summary>
-    PitchChanged = 3,
 }
 
 [AudioTiming]
@@ -46,7 +44,7 @@ internal struct SynthVoice(GliderConfig glideConfig, ITuningUnit tuningUnit)
         {
             var oldState = State;
             State = VoiceState.Active;
-            if (_channelIndex != midi.Note.Channel || _pitchIndex != midi.Note.Pitch)
+            if (oldState != VoiceState.Active || _channelIndex != midi.Note.Channel || _pitchIndex != midi.Note.Pitch)
             {
                 _channelIndex = midi.Note.Channel;
                 _pitchIndex = midi.Note.Pitch;
@@ -100,10 +98,6 @@ internal struct SynthVoice(GliderConfig glideConfig, ITuningUnit tuningUnit)
         {
             Pitch = newPitch;
             Delta = MathT.PitchToDelta(Pitch, _glideConfig.SampleRate);
-            if (result == VoiceEvent.None)
-            {
-                return VoiceEvent.PitchChanged;
-            }
         }
 
         return result;

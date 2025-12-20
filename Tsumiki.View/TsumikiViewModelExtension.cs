@@ -2,7 +2,7 @@ namespace Tsumiki.View;
 
 public static class TsumikiViewModelExtension
 {
-    private static IChannelTuningViewModel Channel(this ITuningViewModel unit, int channel)
+    public static IChannelTuningViewModel Channel(this ITuningViewModel unit, int channel)
     {
         return channel switch
         {
@@ -158,11 +158,5 @@ public static class TsumikiViewModelExtension
             126 => unit.Pitch126,
             _ => unit.Pitch127,
         };
-    }
-
-    private static double GetPitchValue(int n, int d, int pn, int pd)
-    {
-        var baseValue = Math.Log2((double)n / d) * 12;
-        return baseValue * pn / pd;
     }
 }

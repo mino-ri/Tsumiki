@@ -39,8 +39,7 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
     public readonly ITuningUnit TuningUnit = model.Tuning;
     public StackConfig Stack = new(model.Input);
     public GliderConfig Glide = new(model.Input, sampleRate);
-    public ResonantLowPassFilterConfig[] Filter =
-        [.. Enumerable.Range(0, MathT.MaxVoices).Select(_ => new ResonantLowPassFilterConfig(model.Filter, sampleRate))];
+    public ResonantLowPassFilterConfig Filter = new(model.Filter);
     public OscillatorConfig OscillatorA = new(model.A1, model.A2, sampleRate);
     public OscillatorConfig OscillatorB = new(model.B1, model.B2, sampleRate);
     public ModulationConfig Modulation = new(model, sampleRate);
@@ -75,8 +74,7 @@ internal class ConfigSet(ITsumikiModel model, double sampleRate)
         Delay.Recalculate(sampleRate);
         Stack.Recalculate();
         Glide.Recalculate(sampleRate);
-        for (var i = 0; i < MathT.MaxVoices; i++)
-            Filter[i].Recalculate(sampleRate);
+        Filter.Recalculate();
         OscillatorA.Recalculate(sampleRate);
         OscillatorB.Recalculate(sampleRate);
         Modulation.Recalculate(sampleRate);
@@ -239,7 +237,6 @@ internal struct StackedVoice
 {
     private readonly ConfigSet _config;
     private readonly Modulation _modulation;
-    private readonly ResonantLowPassFilterConfig _filterConfig;
     private readonly MultiplyModulation _filterMixModulation;
     public SynthVoice SynthVoice;
     public StackedOscillator OscillatorA;
@@ -250,7 +247,6 @@ internal struct StackedVoice
     public StackedVoice(ConfigSet config, ResonantLowPassFilterConfig filterConfig, ModulationConfig modulationConfig)
     {
         _config = config;
-        _filterConfig = filterConfig;
         _modulation = new(modulationConfig);
         _filterMixModulation = new(modulationConfig.FilterMixDest, _modulation);
         SynthVoice = new(config.Glide, config.TuningUnit);
@@ -271,9 +267,6 @@ internal struct StackedVoice
             case VoiceEvent.RestartNote:
                 // EVENT CALL
                 RestartNote();
-                break;
-            case VoiceEvent.PitchChanged:
-                _filterConfig.RecalculatePitch(SynthVoice.Pitch);
                 break;
         }
 
@@ -296,7 +289,7 @@ internal struct StackedVoice
         if (_config.UseFilter)
         {
             var filterMix = _config.FilterMix * (float)_filterMixModulation.Render();
-            var (filteredLeft, filteredRight) = Filter.TickAndRender(left, right);
+            var (filteredLeft, filteredRight) = Filter.TickAndRender(left, right, SynthVoice.Delta);
             return (_config.FilterSource * left + filterMix * filteredLeft,
                 _config.FilterSource * right + filterMix * filteredRight);
         }
@@ -312,7 +305,6 @@ internal struct StackedVoice
         OscillatorA.StartNote();
         OscillatorB.StartNote();
         _modulation.StartNote();
-        _filterConfig.RecalculatePitch(SynthVoice.Pitch);
         Filter.Reset();
     }
 
@@ -322,6 +314,5 @@ internal struct StackedVoice
         OscillatorA.RestartNote();
         OscillatorB.RestartNote();
         _modulation.RestartNote();
-        _filterConfig.RecalculatePitch(SynthVoice.Pitch);
     }
 }

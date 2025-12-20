@@ -100,6 +100,11 @@ public partial class TsumikiPage
                 new DigitControl(data.Tuning.KeyPeriod, PixelToControl(165, 140, 30, 60), DigitMiddle, 10),
                 new DigitControl(data.Tuning.KeyPeriod, PixelToControl(195, 140, 30, 60), DigitMiddle, 1),
 
+                // View
+                new ChannelNumber(PixelToControl(0, 230, 105, 105), PixelToTexture(360, 80, 105, 105), PixelToTexture(1140, 80, 105, 105), 150f / PixelTextureHeight, data.Tuning),
+                new KeyBoardView(PixelToControl(180, 350, 150, 900), PixelToTexture(1930, 360, 150, 900), PixelToControl(0, -30), data.Tuning),
+                new PitchBarView(PixelToControl(30, 350, 120, 900), PixelToTexture(2080, 960, 120, 30), PixelToTexture(2200, 960, 120, 30), data.Tuning),
+
                 // Channels
                 ChannelTuning(PixelToControl(480, 80 + 150 * 0, 660, 150), data.Tuning.Channel1),
                 ChannelTuning(PixelToControl(480, 80 + 150 * 1, 660, 150), data.Tuning.Channel2),

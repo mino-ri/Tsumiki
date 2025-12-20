@@ -333,6 +333,9 @@ public interface IChannelTuningUnit
     [VstRangeParameter(12, 1, 999, 1, StepCount = 998)]
     int PeriodPd { get; set; }
 
+    [VstBoolParameter(13, false)]
+    bool IsCustomPitch { get; set; }
+
     [VstRangeParameter(20, 0.0, 128.0, 0.0, Flags = VstParameterFlags.IsHidden)] double Pitch000 { get; set; }
     [VstRangeParameter(21, 0.0, 128.0, 1.0, Flags = VstParameterFlags.IsHidden)] double Pitch001 { get; set; }
     [VstRangeParameter(22, 0.0, 128.0, 2.0, Flags = VstParameterFlags.IsHidden)] double Pitch002 { get; set; }

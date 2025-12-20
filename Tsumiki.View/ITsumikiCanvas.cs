@@ -21,6 +21,9 @@ public readonly record struct PointF(float X, float Y)
 
     public static PointF operator -(PointF a, PointF b)
         => new(a.X - b.X, a.Y - b.Y);
+
+    public static PointF operator *(PointF a, float b)
+        => new(a.X * b, a.Y * b);
 }
 
 public readonly record struct SizeF(float Width, float Height)

@@ -115,32 +115,22 @@ internal struct HighPassFilter
 
 [AudioTiming]
 [method: EventTiming]
-internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit, double sampleRate)
+internal sealed class ResonantLowPassFilterConfig(IFilterUnit unit)
 {
-    private double _sampleRate = sampleRate;
-    private double _frequencyFactor = 2.0 * MathF.PI / sampleRate;
-    private double _pitch = 128.0;
-    public float _cutoff = unit.Cutoff;
+    private float _cutoff = unit.Cutoff;
+    public double Alpha = 2.0 * MathF.PI * Math.Pow(2.0, unit.Cutoff / 12.0);
     public float Damping = 1f - unit.Resonance;
-    public float Alpha = (float)(MathT.PitchToFreq(unit.Cutoff) * 2.0 * MathF.PI / sampleRate);
 
     [EventTiming]
-    public void Recalculate(double sampleRate)
+    public void Recalculate()
     {
-        _sampleRate = sampleRate;
-        _cutoff = unit.Cutoff;
-        _frequencyFactor = 2.0 * MathF.PI / _sampleRate;
         Damping = 1f - unit.Resonance;
-        Alpha = (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor);
-    }
-
-    [AudioTiming]
-    public void RecalculatePitch(double pitch)
-    {
-        if (_pitch == pitch)
-            return;
-        _pitch = pitch;
-        Alpha = (float)(MathT.PitchToFreq(_cutoff + _pitch) * _frequencyFactor);
+        var newCutoff = unit.Cutoff;
+        if (_cutoff != newCutoff)
+        {
+            _cutoff = unit.Cutoff;
+            Alpha = 2.0 * MathF.PI * Math.Pow(2.0, _cutoff / 12.0);
+        }
     }
 }
 
@@ -166,9 +156,9 @@ internal struct ResonantLowPassFilter(ResonantLowPassFilterConfig config, Modula
     }
 
     [AudioTiming]
-    public (float left, float right) TickAndRender(float left, float right)
+    public (float left, float right) TickAndRender(float left, float right, double delta)
     {
-        var alpha = Math.Min(1f, _config.Alpha * (float)_cutoffModulation.Render());
+        var alpha = (float)Math.Min(1f, _config.Alpha * delta * _cutoffModulation.Render());
         var damping = Math.Clamp(_config.Damping + (float)_resonanceModulation.Render(), 0.02f, 1f);
 
         _leftLow += alpha * _leftBand;

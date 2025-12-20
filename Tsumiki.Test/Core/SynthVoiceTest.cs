@@ -130,45 +130,6 @@ public static class SynthVoiceTest
     }
 
     [Fact]
-    public static void Tick_グライド有効時にPitchChangedを返す()
-    {
-        var inputUnit = new InputInputUnit { Glide = 30 }; // グライド有効
-        var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
-        var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
-        var midiNote2 = new MidiNote(0, 64, 1.0f, 2); // Lengthが1でない
-        var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
-        var midiVoice2 = new MidiVoice(in midiNote2) { Length = 2 };
-
-        // 最初のノート・オン
-        Assert.Equal(VoiceEvent.StartNote, voice.Tick(in midiVoice1, 0.0));
-
-        // ピッチが変化したノート（Length != 1）でPitchChangedが返る
-        var result = voice.Tick(in midiVoice2, 0.0);
-        Assert.Equal(VoiceEvent.PitchChanged, result);
-        Assert.InRange(voice.Pitch, 60.0001, 63.9999);
-    }
-
-    [Fact]
-    public static void Tick_グライド無効時はPitchChangedを返さない()
-    {
-        var inputUnit = new InputInputUnit { Glide = -1 }; // グライド無効
-        var glideConfig = new GliderConfig(inputUnit, 44100.0);
-        var voice = new SynthVoice(glideConfig, new TuningTuningUnit());
-        var midiNote1 = new MidiNote(0, 60, 1.0f, 1);
-        var midiNote2 = new MidiNote(0, 64, 1.0f, 2); // Lengthが1でない
-        var midiVoice1 = new MidiVoice(in midiNote1) { Length = 1 };
-        var midiVoice2 = new MidiVoice(in midiNote2) { Length = 2 };
-
-        // 最初のノート・オン
-        Assert.Equal(VoiceEvent.StartNote, voice.Tick(in midiVoice1, 0.0));
-
-        // グライド無効時はNoneが返る
-        var result = voice.Tick(in midiVoice2, 0.0);
-        Assert.Equal(VoiceEvent.None, result);
-    }
-
-    [Fact]
     public static void Tick_グライド有効時はDeltaが徐々に変化する()
     {
         var inputUnit = new InputInputUnit { Glide = 30 }; // グライド有効

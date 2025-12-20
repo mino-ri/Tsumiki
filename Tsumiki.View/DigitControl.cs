@@ -13,7 +13,8 @@ internal class DigitControl(IRangeViewParameter<int> data, RectF control, RectF 
     protected override void RecalculateRect(double value, ref RectF controlRect, ref RectF textureRect)
     {
         var intValue = (int)Math.Round(value * _range) + _minimum;
-        var steps = intValue / step % baseNumber;
+        var divided = intValue / step;
+        var steps = divided == 0 ? baseNumber : divided % baseNumber;
         textureRect = new RectF(
             _originalTexture.Left + _originalTexture.Width * steps,
             _originalTexture.Top,

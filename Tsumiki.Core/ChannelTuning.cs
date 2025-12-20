@@ -26,7 +26,6 @@ internal struct TuningValue(int n, int d, int pn, int pd)
 
 internal class ChannelTuningConfig(ITuningUnit tuningUnit, IChannelTuningUnit unit)
 {
-    // public double[] PitchValues = GC.AllocateArray<double>(128, true);
     private int _root = tuningUnit.Root;
     private int _keyPeriod = tuningUnit.KeyPeriod;
     private int _offset = unit.Offset;
@@ -39,12 +38,16 @@ internal class ChannelTuningConfig(ITuningUnit tuningUnit, IChannelTuningUnit un
         var newOffset = unit.Offset;
         var newRoot = tuningUnit.Root;
         var newKeyPeriod = tuningUnit.KeyPeriod;
-        if (_offset == newOffset &&
+        var updated =
+            _ratio.Updated(unit.RatioN, unit.RatioD, unit.RatioPn, unit.RatioPd) |
+            _generator.Updated(unit.GeneratorN, unit.GeneratorD, unit.GeneratorPn, unit.GeneratorPd) |
+            _period.Updated(unit.PeriodN, unit.PeriodD, unit.PeriodPn, unit.PeriodPd);
+
+        if (unit.IsCustomPitch ||
+            _offset == newOffset &&
             _root == newRoot &&
             _keyPeriod == newKeyPeriod &&
-            !_ratio.Updated(unit.RatioN, unit.RatioD, unit.RatioPn, unit.RatioPd) &&
-            !_generator.Updated(unit.GeneratorN, unit.GeneratorD, unit.GeneratorPn, unit.GeneratorPd) &&
-            !_period.Updated(unit.PeriodN, unit.PeriodD, unit.PeriodPn, unit.PeriodPd))
+            !updated)
         {
             return;
         }
