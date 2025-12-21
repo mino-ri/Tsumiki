@@ -74,7 +74,6 @@ internal partial class TuningValueControl(
 
     internal override void OnLostFocus()
     {
-        base.OnLostFocus();
         if (_focusedPart == FocusPart.N && _nLength == 0)
         {
             n.NormalizedValue = n.DefaultNormalizedValue;
@@ -82,9 +81,51 @@ internal partial class TuningValueControl(
             pn.NormalizedValue = pn.DefaultNormalizedValue;
             pd.NormalizedValue = pd.DefaultNormalizedValue;
         }
+        else
+        {
+            SetParameter(FocusPart.N);
+            SetParameter(FocusPart.D);
+            SetParameter(FocusPart.Pn);
+            SetParameter(FocusPart.Pd);
+
+            int GetValue(FocusPart focusPart)
+            {
+                var digits = FocusedPartDigits(focusPart);
+                var length = FocusedPartLength(focusPart);
+
+                // 未入力の場合は1を返す。全体として (1/1)^(1/1) がデフォルト値となる
+                if (length == 0) return 1;
+
+                var value = 0;
+                for (var i = 0; i < length; i++)
+                {
+                    value = value * 10 + digits[i];
+                }
+
+                return value;
+            }
+
+            void SetParameter(FocusPart focusPart)
+            {
+                var parameter = FocusedParameter(focusPart);
+                var value = Math.Clamp(GetValue(focusPart), parameter.MinValue, parameter.MaxValue);
+                SetParameterValue(parameter, value);
+            }
+
+            void SetParameterValue(IRangeViewParameter<int> parameter, int value)
+            {
+                if (parameter.Value != value)
+                {
+                    parameter.BeginEdit();
+                    parameter.Value = value;
+                    parameter.EndEdit();
+                }
+            }
+        }
 
         LoadParameters();
         RequestRender();
+        base.OnLostFocus();
     }
 
     /// <summary>フォーカスをひとつ前のパートに移動する</summary>
@@ -139,14 +180,14 @@ internal partial class TuningValueControl(
         };
     }
 
-    /// <summary>パラメータから表示用データに値を読み込む</summary>
     private void LoadParameters()
     {
-        var nValue = n.Value;
-        var dValue = d.Value;
-        var pnValue = pn.Value;
-        var pdValue = pd.Value;
+        LoadParameters(n.Value, d.Value, pn.Value, pd.Value);
+    }
 
+    /// <summary>パラメータから表示用データに値を読み込む</summary>
+    private void LoadParameters(int nValue, int dValue, int pnValue, int pdValue)
+    {
         LoadValue(FocusPart.N, nValue);
         LoadOrClearValue(FocusPart.D, dValue);
 
@@ -228,11 +269,7 @@ internal partial class TuningValueControl(
         }
         else if (key == 'v')
         {
-            n.Value = CopiedN;
-            d.Value = CopiedD;
-            pn.Value = CopiedPn;
-            pd.Value = CopiedPd;
-            LoadParameters();
+            LoadParameters(CopiedN, CopiedD, CopiedPn, CopiedPd);
             RequestRender();
             return;
         }
@@ -274,35 +311,7 @@ internal partial class TuningValueControl(
             }
         }
 
-        SetParameter(FocusPart.N);
-        SetParameter(FocusPart.D);
-        SetParameter(FocusPart.Pn);
-        SetParameter(FocusPart.Pd);
         RequestRender();
-
-        void SetParameter(FocusPart focusPart)
-        {
-            var parameter = FocusedParameter(focusPart);
-            var value = GetValue(focusPart);
-            parameter.Value = Math.Clamp(value, parameter.MinValue, parameter.MaxValue);
-        }
-
-        int GetValue(FocusPart focusPart)
-        {
-            var digits = FocusedPartDigits(focusPart);
-            var length = FocusedPartLength(focusPart);
-
-            // 未入力の場合は1を返す。全体として (1/1)^(1/1) がデフォルト値となる
-            if (length == 0) return 1;
-
-            var value = 0;
-            for (var i = 0; i < length; i++)
-            {
-                value = value * 10 + digits[i];
-            }
-
-            return value;
-        }
 
         void AddDigit(FocusPart focusPart, byte value)
         {

@@ -9,6 +9,8 @@ public abstract class PanelBase(RectF rect) : Control(rect)
     internal virtual void SetTabPageType(TabPageType tabPageType) => Parent?.SetTabPageType(tabPageType);
 
     internal virtual void Focus(Control control) => Parent?.Focus(control);
+
+    internal virtual void Unfocus(Control control) => Parent?.Unfocus(control);
 }
 
 public class PanelBase<T>(RectF rect) : PanelBase(rect), IEnumerable<T>

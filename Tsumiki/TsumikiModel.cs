@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using NPlug;
 using NPlug.IO;
 using Tsumiki.Core;
@@ -88,33 +89,47 @@ public partial class TsumikiModel
         try
         {
             var count = reader.ReadUInt16();
-            var skipProgramChange = mode == AudioProcessorModelStorageMode.SkipProgramChangeParameters;
-            if (Controller is { } controller)
+            var valueDictionary = new Dictionary<ushort, double>();
+            for (var i = 0; i < count; i++)
             {
-                for (var i = 0; i < count; i++)
+                var index = reader.ReadUInt16();
+                var value = reader.ReadFloat64();
+                valueDictionary[index] = value;
+            }
+
+            using (var stream = new MemoryStream(count * 8))
+            {
+                using (var writer = new PortableBinaryWriter(stream, false))
                 {
-                    var index = reader.ReadUInt16();
-                    var value = reader.ReadFloat64();
-                    if (TryGetParameterById(index, out var parameter) && (!skipProgramChange || !parameter.IsProgramChange))
+                    var parameterCount = ParameterCount;
+                    for (var i = 0; i < parameterCount; i++)
                     {
-                        controller.BeginEditParameter(parameter);
-                        parameter.NormalizedValue = value;
-                        controller.EndEditParameter();
+                        var parameter = GetParameterByIndex(i);
+                        var parameterId = (ushort)parameter.Id.Value;
+                        var currentValue = parameter.NormalizedValue;
+                        if (valueDictionary.TryGetValue(parameterId, out var value))
+                        {
+                            writer.WriteFloat64(value);
+                            // 通知用のパラメータリストから除去
+                            if (currentValue == value)
+                            {
+                                valueDictionary.Remove(parameterId);
+                            }
+                        }
+                        else
+                        {
+                            writer.WriteFloat64(currentValue);
+                        }
                     }
                 }
+
+                stream.Seek(0, SeekOrigin.Begin);
+
+                using var innerReader = new PortableBinaryReader(stream, false);
+                base.Load(innerReader, mode);
             }
-            else
-            {
-                for (var i = 0; i < count; i++)
-                {
-                    var index = reader.ReadUInt16();
-                    var value = reader.ReadFloat64();
-                    if (TryGetParameterById(index, out var parameter) && (!skipProgramChange || !parameter.IsProgramChange))
-                    {
-                        parameter.NormalizedValue = value;
-                    }
-                }
-            }
+
+            Controller?.OnLoaded(valueDictionary);
         }
         catch (System.Exception ex)
         {

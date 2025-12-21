@@ -101,6 +101,15 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
         }
     }
 
+    internal override void Unfocus(Control control)
+    {
+        if (_focused == control)
+        {
+            _focused?.OnLostFocus();
+            _focused = null;
+        }
+    }
+
     public bool TryFindParameter(float x, float y, out int parameterId) => TryFindParameter(new PointF(x, y), out parameterId);
 
     internal override void RequestRender(Control control) => RenderRequested?.Invoke(control);

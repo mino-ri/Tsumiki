@@ -17,7 +17,7 @@ internal struct TuningValue(int n, int d, int pn, int pd)
             _d = d;
             _pn = pn;
             _pd = pd;
-            Value = Math.Log2((double)n / d) * 12.0 * pn / pd;
+            Value = Math.Log2((double)_n / _d) * 12.0 * _pn / _pd;
         }
 
         return shouldUpdate;
@@ -52,6 +52,7 @@ internal class ChannelTuningConfig(ITuningUnit tuningUnit, IChannelTuningUnit un
             return;
         }
 
+        if (_period.Value <= 0.0) _period.Value = 1.0;
         _offset = unit.Offset;
         _root = tuningUnit.Root;
         _keyPeriod = tuningUnit.KeyPeriod;

@@ -21,7 +21,6 @@ public partial class TsumikiPage
     private static RectF Under => PixelToTexture(2320, 930, 30, 30);
     private static RectF DelayBar => PixelToTexture(1930, 900, 30, 180);
     private static RectF DigitMiddle => PixelToTexture(2080, 0, 30, 60);
-    private static RectF DigitSmall => PixelToTexture(2080, 60, 25, 30);
 
     public static TsumikiPage Create(ITsumikiViewModel data)
     {
@@ -247,21 +246,5 @@ public partial class TsumikiPage
     private static TuningValueControl TuningValue(RectF control, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
     {
         return new TuningValueControl(control, n, d, pn, pd);
-
-        // return new Panel(control)
-        // {
-        //     new DigitControl(n, PixelToControl(0, 10, 25, 30), DigitSmall, 100),
-        //     new DigitControl(n, PixelToControl(25, 10, 25, 30), DigitSmall, 10),
-        //     new DigitControl(n, PixelToControl(50, 10, 25, 30), DigitSmall, 1),
-        //     new DigitControl(d, PixelToControl(0, 50, 25, 30), DigitSmall, 100),
-        //     new DigitControl(d, PixelToControl(25, 50, 25, 30), DigitSmall, 10),
-        //     new DigitControl(d, PixelToControl(50, 50, 25, 30), DigitSmall, 1),
-        //     new DigitControl(pn, PixelToControl(90, 10, 25, 30), DigitSmall, 100),
-        //     new DigitControl(pn, PixelToControl(115, 10, 25, 30), DigitSmall, 10),
-        //     new DigitControl(pn, PixelToControl(140, 10, 25, 30), DigitSmall, 1),
-        //     new DigitControl(pd, PixelToControl(90, 50, 25, 30), DigitSmall, 100),
-        //     new DigitControl(pd, PixelToControl(115, 50, 25, 30), DigitSmall, 10),
-        //     new DigitControl(pd, PixelToControl(140, 50, 25, 30), DigitSmall, 1),
-        // };
     }
 }

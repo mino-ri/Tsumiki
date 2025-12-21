@@ -5,12 +5,10 @@ internal partial class TuningValueControl
     private IRangeViewParameter<int>? _draggingParameter;
     private double _dragStartValue;
 
-    internal override void OnLeftButtonDown(PointF point)
-    {
-    }
-
     internal override void OnMouseDrag(PointF point, PointF mouseDownPoint)
     {
+        if (IsFocused) return;
+
         var dragDelta = (int)((point.Y - mouseDownPoint.Y) * -160f);
         if (dragDelta != 0 && _draggingParameter is null)
         {

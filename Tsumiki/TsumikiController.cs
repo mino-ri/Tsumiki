@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NPlug;
 
 namespace Tsumiki;
@@ -28,5 +29,16 @@ public class TsumikiController : AudioController<TsumikiModel>
     {
         base.OnParameterValueChanged(parameter, parameterValueChangedFromHost);
         _view?.OnParameterChanged(parameter.Id.Value);
+    }
+
+    internal void OnLoaded(Dictionary<ushort, double> valueDictionary)
+    {
+        if (_view is { } view)
+        {
+            foreach (var (key, _) in valueDictionary)
+            {
+                view.OnParameterChanged(key);
+            }
+        }
     }
 }

@@ -44,6 +44,13 @@ public abstract class Control(RectF rect) : IVisual
 
     internal void RequestRender() => Parent?.RequestRender(this);
 
+    internal void Unfocus()
+    {
+        if (IsFocused) return;
+        IsFocused = false;
+        Parent?.Unfocus(this);
+    }
+
     internal void Focus()
     {
         IsFocused = true;

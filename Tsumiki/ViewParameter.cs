@@ -30,7 +30,7 @@ public class FloatViewParameter(AudioParameter parameter, TsumikiController? con
 
 public class DoubleRangeViewParameter(AudioRangeParameter parameter, TsumikiController? controller) : IRangeViewParameter<double>
 {
-    public double Value { get => parameter.Value; set => parameter.Value = value; }
+    public double Value { get => parameter.Value; set => parameter.NormalizedValue = parameter.ToNormalized(value); }
     public double NormalizedValue { get => parameter.NormalizedValue; set => parameter.NormalizedValue = value; }
     public double DefaultValue => parameter.ToPlain(parameter.DefaultNormalizedValue);
     public double DefaultNormalizedValue => parameter.DefaultNormalizedValue;
@@ -44,9 +44,9 @@ public class DoubleRangeViewParameter(AudioRangeParameter parameter, TsumikiCont
 
 public class Int32RangeViewParameter(AudioRangeParameter parameter, TsumikiController? controller) : IRangeViewParameter<int>
 {
-    public int Value { get => (int)parameter.Value; set => parameter.Value = value; }
+    public int Value { get => (int)parameter.Value; set => parameter.NormalizedValue = parameter.ToNormalized(value); }
     public double NormalizedValue { get => parameter.NormalizedValue; set => parameter.NormalizedValue = value; }
-    public int DefaultValue => (int)parameter.ToPlain(parameter.Value);
+    public int DefaultValue => (int)parameter.ToPlain(parameter.DefaultNormalizedValue);
     public double DefaultNormalizedValue => parameter.DefaultNormalizedValue;
     public int MinValue => (int)parameter.MinValue;
     public int MaxValue => (int)parameter.MaxValue;
@@ -58,9 +58,9 @@ public class Int32RangeViewParameter(AudioRangeParameter parameter, TsumikiContr
 
 public class FloatRangeViewParameter(AudioRangeParameter parameter, TsumikiController? controller) : IRangeViewParameter<float>
 {
-    public float Value { get => (float)parameter.Value; set => parameter.Value = value; }
+    public float Value { get => (float)parameter.Value; set => parameter.NormalizedValue = parameter.ToNormalized(value); }
     public double NormalizedValue { get => parameter.NormalizedValue; set => parameter.NormalizedValue = value; }
-    public float DefaultValue => (float)parameter.ToPlain(parameter.Value);
+    public float DefaultValue => (float)parameter.ToPlain(parameter.DefaultNormalizedValue);
     public double DefaultNormalizedValue => parameter.DefaultNormalizedValue;
     public float MinValue => (float)parameter.MinValue;
     public float MaxValue => (float)parameter.MaxValue;
