@@ -17,6 +17,8 @@ public abstract class Control(RectF rect) : IVisual
 
     internal bool CanCaptureKey { get; init; } = false;
 
+    internal bool IsFocused { get; private set; } = false;
+
     internal virtual void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
 
     internal virtual void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
@@ -35,7 +37,18 @@ public abstract class Control(RectF rect) : IVisual
 
     internal virtual void OnMouseLeave() { }
 
+    internal virtual void OnLostFocus()
+    {
+        IsFocused = false;
+    }
+
     internal void RequestRender() => Parent?.RequestRender(this);
+
+    internal void Focus()
+    {
+        IsFocused = true;
+        Parent?.Focus(this);
+    }
 
     public abstract void OnParameterChanged(int parameterId);
 

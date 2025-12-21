@@ -36,6 +36,12 @@ public readonly record struct SizeF(float Width, float Height)
 
     public static SizeF operator *(SizeF a, float b)
         => new(a.Width * b, a.Height * b);
+
+    public bool Contains(float x, float y)
+        => 0f <= x && x <= Width && 0f <= y && y <= Height;
+
+    public bool Contains(PointF point)
+        => Contains(point.X, point.Y);
 }
 
 public readonly record struct RectF(float Left, float Top, float Right, float Bottom)
@@ -191,12 +197,13 @@ public enum VirtualKeyCode : short
     Super,
     FirstCode = Back,
     LastCode = Super,
-    VKEY_FIRST_ASCII = 128,
+    FirstAscii = 128,
 }
 
 [Flags]
 public enum KeyModifier : short
 {
+    None = 0,
     Shift = 1 << 0,
     Alternate = 1 << 1,
     Command = 1 << 2,

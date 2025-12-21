@@ -1,5 +1,4 @@
 using Tsumiki.Core;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Tsumiki.View;
 
@@ -239,28 +238,30 @@ public partial class TsumikiPage
             new DigitControl(tuning.Offset, PixelToControl(195, 60, 30, 60), DigitMiddle, 100),
             new DigitControl(tuning.Offset, PixelToControl(225, 60, 30, 60), DigitMiddle, 10),
             new DigitControl(tuning.Offset, PixelToControl(255, 60, 30, 60), DigitMiddle, 1),
-            TuningValue(PixelToControl(15, 45, 165, 90), tuning.RatioN, tuning.RatioD, tuning.RatioPn, tuning.RatioPd),
-            TuningValue(PixelToControl(300, 45, 165, 90), tuning.GeneratorN, tuning.GeneratorD, tuning.GeneratorPn, tuning.GeneratorPd),
-            TuningValue(PixelToControl(480, 45, 165, 90), tuning.PeriodN, tuning.PeriodD, tuning.PeriodPn, tuning.PeriodPd),
+            TuningValue(PixelToControl(15, 55, 165, 70), tuning.RatioN, tuning.RatioD, tuning.RatioPn, tuning.RatioPd),
+            TuningValue(PixelToControl(300, 55, 165, 70), tuning.GeneratorN, tuning.GeneratorD, tuning.GeneratorPn, tuning.GeneratorPd),
+            TuningValue(PixelToControl(480, 55, 165, 70), tuning.PeriodN, tuning.PeriodD, tuning.PeriodPn, tuning.PeriodPd),
         };
     }
 
-    private static Panel TuningValue(RectF control, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
+    private static TuningValueControl TuningValue(RectF control, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
     {
-        return new Panel(control)
-        {
-            new DigitControl(n, PixelToControl(0, 10, 25, 30), DigitSmall, 100),
-            new DigitControl(n, PixelToControl(25, 10, 25, 30), DigitSmall, 10),
-            new DigitControl(n, PixelToControl(50, 10, 25, 30), DigitSmall, 1),
-            new DigitControl(d, PixelToControl(0, 50, 25, 30), DigitSmall, 100),
-            new DigitControl(d, PixelToControl(25, 50, 25, 30), DigitSmall, 10),
-            new DigitControl(d, PixelToControl(50, 50, 25, 30), DigitSmall, 1),
-            new DigitControl(pn, PixelToControl(90, 10, 25, 30), DigitSmall, 100),
-            new DigitControl(pn, PixelToControl(115, 10, 25, 30), DigitSmall, 10),
-            new DigitControl(pn, PixelToControl(140, 10, 25, 30), DigitSmall, 1),
-            new DigitControl(pd, PixelToControl(90, 50, 25, 30), DigitSmall, 100),
-            new DigitControl(pd, PixelToControl(115, 50, 25, 30), DigitSmall, 10),
-            new DigitControl(pd, PixelToControl(140, 50, 25, 30), DigitSmall, 1),
-        };
+        return new TuningValueControl(control, n, d, pn, pd);
+
+        // return new Panel(control)
+        // {
+        //     new DigitControl(n, PixelToControl(0, 10, 25, 30), DigitSmall, 100),
+        //     new DigitControl(n, PixelToControl(25, 10, 25, 30), DigitSmall, 10),
+        //     new DigitControl(n, PixelToControl(50, 10, 25, 30), DigitSmall, 1),
+        //     new DigitControl(d, PixelToControl(0, 50, 25, 30), DigitSmall, 100),
+        //     new DigitControl(d, PixelToControl(25, 50, 25, 30), DigitSmall, 10),
+        //     new DigitControl(d, PixelToControl(50, 50, 25, 30), DigitSmall, 1),
+        //     new DigitControl(pn, PixelToControl(90, 10, 25, 30), DigitSmall, 100),
+        //     new DigitControl(pn, PixelToControl(115, 10, 25, 30), DigitSmall, 10),
+        //     new DigitControl(pn, PixelToControl(140, 10, 25, 30), DigitSmall, 1),
+        //     new DigitControl(pd, PixelToControl(90, 50, 25, 30), DigitSmall, 100),
+        //     new DigitControl(pd, PixelToControl(115, 50, 25, 30), DigitSmall, 10),
+        //     new DigitControl(pd, PixelToControl(140, 50, 25, 30), DigitSmall, 1),
+        // };
     }
 }

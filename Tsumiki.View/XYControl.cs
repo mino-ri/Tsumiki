@@ -37,10 +37,28 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
         _yDragging = range.Left <= point.X && point.X <= range.Right;
         _dragStartX = XData.NormalizedValue;
         _dragStartY = YData.NormalizedValue;
+
+        if (_xDragging && !_yDragging)
+        {
+            XData.BeginEdit();
+        }
+        else if (!_xDragging && _yDragging)
+        {
+            YData.BeginEdit();
+        }
     }
 
     internal override void OnLeftButtonUp(PointF point)
     {
+        if (_xDragging && !_yDragging)
+        {
+            XData.EndEdit();
+        }
+        else if (!_xDragging && _yDragging)
+        {
+            YData.EndEdit();
+        }
+
         _xDragging = false;
         _yDragging = false;
     }
@@ -55,9 +73,16 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
             var newX = Math.Round(Math.Clamp(_dragStartX + deltaX, 0.0, 1.0) * _xStepCount) / _xStepCount;
             if (XData.NormalizedValue != newX)
             {
-                XData.BeginEdit();
-                XData.NormalizedValue = newX;
-                XData.EndEdit();
+                if (_xDragging && _yDragging)
+                {
+                    XData.BeginEdit();
+                    XData.NormalizedValue = newX;
+                    XData.EndEdit();
+                }
+                else
+                {
+                    XData.NormalizedValue = newX;
+                }
             }
         }
 
@@ -67,9 +92,16 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
             var newY = Math.Round(Math.Clamp(_dragStartY + deltaY, 0.0, 1.0) * _yStepCount) / _yStepCount;
             if (YData.NormalizedValue != newY)
             {
-                YData.BeginEdit();
-                YData.NormalizedValue = newY;
-                YData.EndEdit();
+                if (_xDragging && _yDragging)
+                {
+                    YData.BeginEdit();
+                    YData.NormalizedValue = newY;
+                    YData.EndEdit();
+                }
+                else
+                {
+                    YData.NormalizedValue = newY;
+                }
             }
         }
 

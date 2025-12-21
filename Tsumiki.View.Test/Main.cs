@@ -14,6 +14,7 @@ using var form = new Form
 form.MinimumSize = new Size(form.Width, form.Height);
 form.MaximumSize = new Size(form.Width + rect.Width, form.Height + rect.Height);
 
+TsumikiPage? page = null;
 ITsumikiCanvas? canvas = null;
 try
 {
@@ -27,9 +28,22 @@ try
     form.Shown += (_, _) =>
     {
         var model = new TsumikiModel();
-        var page = TsumikiPage.Create(new TsumikiViewModel(model, null));
-        model.ParameterValueChanged += (parameter) => page.OnParameterChanged(parameter.Id.Value);
+        page = TsumikiPage.Create(new TsumikiViewModel(model, null));
+        model.ParameterValueChanged += parameter => page.OnParameterChanged(parameter.Id.Value);
         canvas = TsumikiCanvas.Create(form.Handle, rect, page);
+    };
+
+    form.KeyDown += (_, e) =>
+    {
+        if (e.KeyCode == Keys.Back)
+        {
+            page?.OnKeyDown(' ', VirtualKeyCode.Back, KeyModifier.None);
+        }
+    };
+
+    form.KeyPress += (_, e) =>
+    {
+        page?.OnKeyDown(e.KeyChar, (VirtualKeyCode)e.KeyChar, KeyModifier.None);
     };
 
     Application.Run(form);

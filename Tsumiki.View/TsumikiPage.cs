@@ -5,13 +5,20 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
     private PointF _mouseDownPoint;
     private Control? _hovered;
     private Control? _mouseCaptured;
+    private Control? _focused;
     private TabPageControl? _currentTab;
 
     public event Action<IVisual>? RenderRequested;
 
-    public new void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
+    public new void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    {
+        _focused?.OnKeyDown(key, keyCode, modifiers);
+    }
 
-    public new void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
+    public new void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    {
+        _focused?.OnKeyUp(key, keyCode, modifiers);
+    }
 
     public void OnLeftButtonDoubleClick(float x, float y)
     {
@@ -25,6 +32,12 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
         var point = new PointF(x, y);
         _mouseDownPoint = point;
         _mouseCaptured = FindControl(point);
+        if (_mouseCaptured != _focused)
+        {
+            _focused?.OnLostFocus();
+            _focused = null;
+        }
+
         _mouseCaptured?.OnLeftButtonDown(point - _mouseCaptured.GlobalRect.Location);
     }
 
@@ -77,6 +90,15 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
     internal override void RenderCore(IDrawingContext context)
     {
         _currentTab?.RenderCore(context);
+    }
+
+    internal override void Focus(Control control)
+    {
+        if (_focused != control)
+        {
+            _focused?.OnLostFocus();
+            _focused = control;
+        }
     }
 
     public bool TryFindParameter(float x, float y, out int parameterId) => TryFindParameter(new PointF(x, y), out parameterId);
