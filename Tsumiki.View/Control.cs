@@ -19,9 +19,9 @@ public abstract class Control(RectF rect) : IVisual
 
     internal bool IsFocused { get; private set; } = false;
 
-    internal virtual void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
+    internal virtual bool OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers) => false;
 
-    internal virtual void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers) { }
+    internal virtual bool OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers) => false;
 
     internal virtual void OnLeftButtonDoubleClick(PointF point) { }
 
@@ -31,7 +31,7 @@ public abstract class Control(RectF rect) : IVisual
 
     internal virtual void OnMouseDrag(PointF point, PointF mouseDownPoint) { }
 
-    internal virtual void OnWheel(float distance) { }
+    internal virtual bool OnWheel(float distance) => false;
 
     internal virtual void OnMouseEnter() { }
 

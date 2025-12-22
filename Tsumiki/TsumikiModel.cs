@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using NPlug;
@@ -10,7 +11,17 @@ namespace Tsumiki;
 [VstModel("Tsumiki", typeof(ITsumikiModel))]
 public partial class TsumikiModel
 {
-    public TsumikiController? Controller { get; set; }
+    private int _threadId;
+
+    public TsumikiController? Controller
+    {
+        get;
+        set
+        {
+            field = value;
+            _threadId = Environment.CurrentManagedThreadId;
+        }
+    }
 
     private static readonly AudioProgramListBuilder<TsumikiModel> DefaultProgramListBuilder = CreateAudioProgramListBuilder();
 
@@ -85,7 +96,8 @@ public partial class TsumikiModel
 
     public override void Load(PortableBinaryReader reader, AudioProcessorModelStorageMode mode)
     {
-        TsumikiLogger.WriteAccess([mode]);
+        var currentThreadId = Environment.CurrentManagedThreadId;
+        TsumikiLogger.WriteAccess([mode, _threadId, currentThreadId]);
         try
         {
             var count = reader.ReadUInt16();
@@ -97,41 +109,80 @@ public partial class TsumikiModel
                 valueDictionary[index] = value;
             }
 
-            using (var stream = new MemoryStream(count * 8))
+            if (Controller is not { } controller)
             {
-                using (var writer = new PortableBinaryWriter(stream, false))
+                foreach (var (parameterId, value) in valueDictionary)
                 {
-                    var parameterCount = ParameterCount;
-                    for (var i = 0; i < parameterCount; i++)
+                    if (TryGetParameterById(parameterId, out var parameter))
                     {
-                        var parameter = GetParameterByIndex(i);
-                        var parameterId = (ushort)parameter.Id.Value;
-                        var currentValue = parameter.NormalizedValue;
-                        if (valueDictionary.TryGetValue(parameterId, out var value))
+                        parameter.NormalizedValue = value;
+                    }
+                }
+            }
+            else
+            {
+                if (_threadId == currentThreadId)
+                {
+                    try
+                    {
+                        foreach (var (parameterId, value) in valueDictionary)
                         {
-                            writer.WriteFloat64(value);
-                            // 通知用のパラメータリストから除去
-                            if (currentValue == value)
+                            if (TryGetParameterById(parameterId, out var parameter))
                             {
-                                valueDictionary.Remove(parameterId);
+                                if (parameter.NormalizedValue != value)
+                                {
+                                    controller.BeginEditParameter(parameter);
+                                    parameter.NormalizedValue = value;
+                                    controller.EndEditParameter();
+                                }
                             }
                         }
-                        else
-                        {
-                            writer.WriteFloat64(currentValue);
-                        }
+
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        TsumikiLogger.WriteException(ex);
                     }
                 }
 
-                stream.Seek(0, SeekOrigin.Begin);
+                // 非UIスレッドから呼び出された場合と、 BeginEditParameter の呼び出しに失敗した場合にここにフォールバックする
+                using (var stream = new MemoryStream(count * 8))
+                {
+                    using (var writer = new PortableBinaryWriter(stream, false))
+                    {
+                        var parameterCount = ParameterCount;
+                        for (var i = 0; i < parameterCount; i++)
+                        {
+                            var parameter = GetParameterByIndex(i);
+                            var parameterId = (ushort)parameter.Id.Value;
+                            var currentValue = parameter.NormalizedValue;
+                            if (valueDictionary.TryGetValue(parameterId, out var value))
+                            {
+                                writer.WriteFloat64(value);
+                                // 通知用のパラメータリストから除去
+                                if (currentValue == value)
+                                {
+                                    valueDictionary.Remove(parameterId);
+                                }
+                            }
+                            else
+                            {
+                                writer.WriteFloat64(currentValue);
+                            }
+                        }
+                    }
 
-                using var innerReader = new PortableBinaryReader(stream, false);
-                base.Load(innerReader, mode);
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    using var innerReader = new PortableBinaryReader(stream, false);
+                    base.Load(innerReader, mode);
+                }
+
+                controller.OnLoaded(valueDictionary);
             }
-
-            Controller?.OnLoaded(valueDictionary);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             TsumikiLogger.WriteException(ex);
         }

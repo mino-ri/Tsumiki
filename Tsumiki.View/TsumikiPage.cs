@@ -10,14 +10,14 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
 
     public event Action<IVisual>? RenderRequested;
 
-    public new void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    public new bool OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
     {
-        _focused?.OnKeyDown(key, keyCode, modifiers);
+        return _focused?.OnKeyDown(key, keyCode, modifiers) ?? false;
     }
 
-    public new void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    public new bool OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
     {
-        _focused?.OnKeyUp(key, keyCode, modifiers);
+        return _focused?.OnKeyUp(key, keyCode, modifiers) ?? false;
     }
 
     public void OnLeftButtonDoubleClick(float x, float y)
@@ -55,9 +55,9 @@ public partial class TsumikiPage() : PanelBase<TabPageControl>(new RectF(0f, 0f,
         _mouseCaptured?.OnMouseDrag(point - _mouseCaptured.GlobalRect.Location, _mouseDownPoint - _mouseCaptured.GlobalRect.Location);
     }
 
-    public new void OnWheel(float distance)
+    public new bool OnWheel(float distance)
     {
-        (_mouseCaptured ?? _hovered)?.OnWheel(distance);
+        return (_mouseCaptured ?? _hovered)?.OnWheel(distance) ?? false;
     }
 
     internal override bool TryFindParameter(PointF point, out int parameterId)

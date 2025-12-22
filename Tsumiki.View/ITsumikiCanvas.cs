@@ -68,9 +68,9 @@ public interface IControl : IVisual
 {
     event Action<IVisual>? RenderRequested;
 
-    void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers);
-    void OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers);
-    void OnWheel(float distance);
+    bool OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers);
+    bool OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers);
+    bool OnWheel(float distance);
     void OnMouseMove(float x, float y);
     void OnLeftButtonDown(float x, float y);
     void OnLeftButtonUp(float x, float y);

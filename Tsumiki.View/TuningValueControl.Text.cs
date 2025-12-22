@@ -7,7 +7,7 @@ internal partial class TuningValueControl(
     IRangeViewParameter<int> pn,
     IRangeViewParameter<int> pd) : Control(control)
 {
-    private static readonly string ValidChars = "0123456789^/";
+    private static readonly string ValidChars = "0123456789^/cv";
     private static readonly Dictionary<VirtualKeyCode, char> ValidKeyCodes = new()
     {
         [VirtualKeyCode.Divide] = '/',
@@ -21,6 +21,7 @@ internal partial class TuningValueControl(
         [VirtualKeyCode.NumPad7] = '7',
         [VirtualKeyCode.NumPad8] = '8',
         [VirtualKeyCode.NumPad9] = '9',
+        [VirtualKeyCode.Back] = '\b',
     };
     private static readonly RectF[] Textures = CreateDigitRects(PixelToTexture(2080, 60, 25, 30));
     private static readonly SizeF TextureSize = PixelToControlSize(25, 30);
@@ -253,7 +254,7 @@ internal partial class TuningValueControl(
         }
     }
 
-    internal override void OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    internal override bool OnKeyDown(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
     {
         if (keyCode == VirtualKeyCode.Back)
         {
@@ -265,13 +266,13 @@ internal partial class TuningValueControl(
             CopiedD = d.Value;
             CopiedPn = pn.Value;
             CopiedPd = pd.Value;
-            return;
+            return true;
         }
         else if (key == 'v')
         {
             LoadParameters(CopiedN, CopiedD, CopiedPn, CopiedPd);
             RequestRender();
-            return;
+            return true;
         }
         else
         {
@@ -282,7 +283,7 @@ internal partial class TuningValueControl(
             }
             else if (!ValidKeyCodes.TryGetValue(keyCode, out targetChar))
             {
-                return;
+                return false;
             }
 
             switch (targetChar)
@@ -312,6 +313,7 @@ internal partial class TuningValueControl(
         }
 
         RequestRender();
+        return true;
 
         void AddDigit(FocusPart focusPart, byte value)
         {
@@ -323,6 +325,11 @@ internal partial class TuningValueControl(
                 length++;
             }
         }
+    }
+
+    internal override bool OnKeyUp(char key, VirtualKeyCode keyCode, KeyModifier modifiers)
+    {
+        return ValidChars.Contains(key) || ValidKeyCodes.TryGetValue(keyCode, out _);
     }
 
     public override void OnParameterChanged(int parameterId)

@@ -89,22 +89,22 @@ public class TsumikiPluginView(TsumikiViewModel viewModel) : IAudioPluginView
         TsumikiLogger.WriteAccess([state]);
     }
 
-    public void OnKeyDown(ushort key, short keyCode, short modifiers)
+    public bool OnKeyDown(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
-        _page?.OnKeyDown((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers);
+        return _page?.OnKeyDown((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers) ?? false;
     }
 
-    public void OnKeyUp(ushort key, short keyCode, short modifiers)
+    public bool OnKeyUp(ushort key, short keyCode, short modifiers)
     {
         TsumikiLogger.WriteAccess([key, keyCode, modifiers]);
-        _page?.OnKeyUp((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers);
+        return _page?.OnKeyUp((char)key, (VirtualKeyCode)keyCode, (KeyModifier)modifiers) ?? false;
     }
 
-    public void OnWheel(float distance)
+    public bool OnWheel(float distance)
     {
         TsumikiLogger.WriteAccess([distance]);
-        _page?.OnWheel(distance);
+        return _page?.OnWheel(distance) ?? false;
     }
 
     public void Removed()
