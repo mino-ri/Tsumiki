@@ -5,11 +5,12 @@ internal class FilterXYControl : XYControl<int, float>
     private readonly RectF _backgroundRect;
 
     public FilterXYControl(
+        IParameterGroup parameterGroup,
         IRangeViewParameter<int> cutoff,
         IRangeViewParameter<float> resonance,
         RectF control,
         RectF texture)
-        : base(cutoff, resonance, control, texture)
+        : base(parameterGroup, cutoff, resonance, control, texture)
     {
         var textureSize = TextureToControl(texture.Size);
         var motionSize = control.Size - textureSize;

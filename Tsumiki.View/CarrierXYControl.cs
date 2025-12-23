@@ -13,6 +13,7 @@ internal class CarrierXYControl : XYControl<float, float>
     private readonly IRangeViewParameter<float> _fmLevel;
 
     public CarrierXYControl(
+        IParameterGroup parameterGroup,
         IRangeViewParameter<float> shapeX,
         IRangeViewParameter<float> shapeY,
         IRangeViewParameter<double> pitch,
@@ -25,7 +26,7 @@ internal class CarrierXYControl : XYControl<float, float>
         IRangeViewParameter<float> fmLevel,
         RectF control,
         RectF texture)
-        : base(shapeX, shapeY, control, texture)
+        : base(parameterGroup, shapeX, shapeY, control, texture)
     {
         var textureSize = TextureToControl(texture.Size);
         var motionSize = control.Size - textureSize;

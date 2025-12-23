@@ -31,19 +31,19 @@ public partial class TsumikiPage
                 new TabSwitcher(TabPageType.Modulation, PixelToControl(150, 0, 150, 80), PixelToTexture(2260, 1000, 150, 80)),
                 new TabSwitcher(TabPageType.Tuning, PixelToControl(300, 0, 150, 80), PixelToTexture(2410, 1000, 150, 80)),
 
-                Carrier(PixelToControl(120, 80, 1560, 240), data.A1, data.A2),
-                Modulator(PixelToControl(120, 320, 1560, 240), data.A2),
-                Carrier(PixelToControl(120, 560, 1560, 240), data.B1, data.B2),
-                Modulator(PixelToControl(120, 800, 1560, 240), data.B2),
+                Carrier(PixelToControl(120, 80, 1560, 240), data, data.A1, data.A2),
+                Modulator(PixelToControl(120, 320, 1560, 240), data, data.A2),
+                Carrier(PixelToControl(120, 560, 1560, 240), data, data.B1, data.B2),
+                Modulator(PixelToControl(120, 800, 1560, 240), data, data.B2),
 
                 // Filter
-                new FilterXYControl(data.Filter.Cutoff, data.Filter.Resonance, PixelToControl(120, 1040, 510, 240), XYControl),
+                new FilterXYControl(data, data.Filter.Cutoff, data.Filter.Resonance, PixelToControl(120, 1040, 510, 240), XYControl),
                 new VerticalSlider<float>(data.Filter.Mix, PixelToControl(630, 1040, 90, 240), VerticalSlider),
 
                 // Delay
                 new DelayPanel(data.Delay.Delay, data.Delay.Feedback, PixelToControl(840, 1040, 600, 240), PixelToControl(30, 30, 330, 180), DelayBar)
                 {
-                    new XYControl<int, float>(data.Delay.Delay, data.Delay.Feedback, PixelToControl(0, 0, 390, 240), XYControl),
+                    new XYControl<int, float>(data, data.Delay.Delay, data.Delay.Feedback, PixelToControl(0, 0, 390, 240), XYControl),
                     new ToggleButton(data.Delay.Cross, PixelToControl(405, 15, 90, 90), DelayCrossSwitcher),
                     new VerticalSlider<float>(data.Delay.Mix, PixelToControl(510, 0, 90, 240), VerticalSlider),
                 },
@@ -69,7 +69,7 @@ public partial class TsumikiPage
                 new TabSwitcher(TabPageType.Tuning, PixelToControl(300, 0, 150, 80), PixelToTexture(2410, 1000, 150, 80)),
 
                 // Modulations
-                Lfo(data.Modulation.Lfo),
+                Lfo(data, data.Modulation.Lfo),
                 ModulationEnvelope(data.Modulation.Envelope),
                 ModulationSource(PixelToControl(360, 480, 120, 800), PixelToTexture(1930, 240, 120, 160), data.Modulation.LfoSpeed),
                 ModulationSource(PixelToControl(480, 480, 120, 800), PixelToTexture(1930, 240, 120, 160), data.Modulation.LfoLevel),
@@ -108,23 +108,23 @@ public partial class TsumikiPage
                 new PitchBarView(PixelToControl(30, 350, 120, 900), PixelToTexture(2080, 960, 120, 30), PixelToTexture(2200, 960, 120, 30), data.Tuning),
 
                 // Channels
-                ChannelTuning(PixelToControl(480, 80 + 150 * 0, 660, 150), data.Tuning.Channel1),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 1, 660, 150), data.Tuning.Channel2),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 2, 660, 150), data.Tuning.Channel3),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 3, 660, 150), data.Tuning.Channel4),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 4, 660, 150), data.Tuning.Channel5),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 5, 660, 150), data.Tuning.Channel6),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 6, 660, 150), data.Tuning.Channel7),
-                ChannelTuning(PixelToControl(480, 80 + 150 * 7, 660, 150), data.Tuning.Channel8),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 0, 660, 150), data, data.Tuning.Channel1),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 1, 660, 150), data, data.Tuning.Channel2),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 2, 660, 150), data, data.Tuning.Channel3),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 3, 660, 150), data, data.Tuning.Channel4),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 4, 660, 150), data, data.Tuning.Channel5),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 5, 660, 150), data, data.Tuning.Channel6),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 6, 660, 150), data, data.Tuning.Channel7),
+                ChannelTuning(PixelToControl(480, 80 + 150 * 7, 660, 150), data, data.Tuning.Channel8),
 
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 0, 660, 150), data.Tuning.Channel9),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 1, 660, 150), data.Tuning.Channel10),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 2, 660, 150), data.Tuning.Channel11),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 3, 660, 150), data.Tuning.Channel12),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 4, 660, 150), data.Tuning.Channel13),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 5, 660, 150), data.Tuning.Channel14),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 6, 660, 150), data.Tuning.Channel15),
-                ChannelTuning(PixelToControl(1260, 80 + 150 * 7, 660, 150), data.Tuning.Channel16),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 0, 660, 150), data, data.Tuning.Channel9),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 1, 660, 150), data, data.Tuning.Channel10),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 2, 660, 150), data, data.Tuning.Channel11),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 3, 660, 150), data, data.Tuning.Channel12),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 4, 660, 150), data, data.Tuning.Channel13),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 5, 660, 150), data, data.Tuning.Channel14),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 6, 660, 150), data, data.Tuning.Channel15),
+                ChannelTuning(PixelToControl(1260, 80 + 150 * 7, 660, 150), data, data.Tuning.Channel16),
             },
         ];
 
@@ -133,7 +133,7 @@ public partial class TsumikiPage
         return page;
     }
 
-    private static Panel Carrier(RectF rect, ICarrierViewModel carrier, IModulatorViewModel modulator)
+    private static Panel Carrier(RectF rect, IParameterGroup parameterGroup, ICarrierViewModel carrier, IModulatorViewModel modulator)
     {
         return new(rect)
         {
@@ -143,6 +143,7 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(carrier.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 16, 16000),
             new ToggleButton(carrier.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
             new CarrierXYControl(
+                parameterGroup,
                 carrier.ShapeX, carrier.ShapeY, carrier.Pitch, carrier.Sync, carrier.Level,
                 modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
                 PixelToControl(240, 0, 600, 240), XYControl),
@@ -161,7 +162,7 @@ public partial class TsumikiPage
         };
     }
 
-    private static Panel Modulator(RectF rect, IModulatorViewModel modulator)
+    private static Panel Modulator(RectF rect, IParameterGroup parameterGroup, IModulatorViewModel modulator)
     {
         return new(rect)
         {
@@ -170,7 +171,7 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(60, 150, 25, 30), PitchDecimal, 16000, 160, 1600),
             new PitchDecimalControl<double>(modulator.Pitch, PixelToControl(85, 150, 25, 30), PitchDecimal, 16000, 1600, 16000),
             new ToggleButton(modulator.Sync, PixelToControl(135, 15, 90, 90), SyncSwitcher),
-            new ModulatorXYControl(modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
+            new ModulatorXYControl(parameterGroup, modulator.ShapeX, modulator.ShapeY, modulator.Pitch, modulator.Sync, modulator.Level,
                 PixelToControl(240, 0, 600, 240), XYControl),
             new EnvelopePanel(modulator.Attack, modulator.Decay, modulator.Sustain, modulator.Release, modulator.Level,
                 PixelToControl(840, 0, 480, 240), PixelToControl(30, 60, 360, 120), Attack, Decay, Under)
@@ -186,7 +187,7 @@ public partial class TsumikiPage
         };
     }
 
-    private static Panel Lfo(ILfoViewModel lfo)
+    private static Panel Lfo(IParameterGroup parameterGroup, ILfoViewModel lfo)
     {
         return new(PixelToControl(120, 80, 840, 240))
         {
@@ -195,7 +196,7 @@ public partial class TsumikiPage
             new PitchDecimalControl<double>(lfo.Speed, PixelToControl(35, 150, 25, 30), LfoSpeedDecimal, 80000, 80, 800),
             new PitchDecimalControl<double>(lfo.Speed, PixelToControl(60, 150, 25, 30), LfoSpeedDecimal, 80000, 800, 8000),
             new PitchDecimalControl<double>(lfo.Speed, PixelToControl(85, 150, 25, 30), LfoSpeedDecimal, 80000, 8000, 80000),
-            new ModulatorXYControl(lfo.ShapeX, lfo.ShapeY, null, null, lfo.Level,
+            new ModulatorXYControl(parameterGroup, lfo.ShapeX, lfo.ShapeY, null, null, lfo.Level,
                 PixelToControl(150, 0, 600, 240), XYControl),
             new VerticalSlider<float>(lfo.Level, PixelToControl(750, 0, 90, 240), VerticalSlider),
         };
@@ -229,7 +230,7 @@ public partial class TsumikiPage
         };
     }
 
-    private static Panel ChannelTuning(RectF control, IChannelTuningViewModel tuning)
+    private static Panel ChannelTuning(RectF control, IParameterGroup parameterGroup, IChannelTuningViewModel tuning)
     {
         return new Panel(control)
         {
@@ -237,14 +238,14 @@ public partial class TsumikiPage
             new DigitControl(tuning.Offset, PixelToControl(195, 60, 30, 60), DigitMiddle, 100),
             new DigitControl(tuning.Offset, PixelToControl(225, 60, 30, 60), DigitMiddle, 10),
             new DigitControl(tuning.Offset, PixelToControl(255, 60, 30, 60), DigitMiddle, 1),
-            TuningValue(PixelToControl(15, 55, 165, 70), tuning.RatioN, tuning.RatioD, tuning.RatioPn, tuning.RatioPd),
-            TuningValue(PixelToControl(300, 55, 165, 70), tuning.GeneratorN, tuning.GeneratorD, tuning.GeneratorPn, tuning.GeneratorPd),
-            TuningValue(PixelToControl(480, 55, 165, 70), tuning.PeriodN, tuning.PeriodD, tuning.PeriodPn, tuning.PeriodPd),
+            TuningValue(PixelToControl(15, 55, 165, 70), parameterGroup, tuning.RatioN, tuning.RatioD, tuning.RatioPn, tuning.RatioPd),
+            TuningValue(PixelToControl(300, 55, 165, 70), parameterGroup, tuning.GeneratorN, tuning.GeneratorD, tuning.GeneratorPn, tuning.GeneratorPd),
+            TuningValue(PixelToControl(480, 55, 165, 70), parameterGroup, tuning.PeriodN, tuning.PeriodD, tuning.PeriodPn, tuning.PeriodPd),
         };
     }
 
-    private static TuningValueControl TuningValue(RectF control, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
+    private static TuningValueControl TuningValue(RectF control, IParameterGroup parameterGroup, IRangeViewParameter<int> n, IRangeViewParameter<int> d, IRangeViewParameter<int> pn, IRangeViewParameter<int> pd)
     {
-        return new TuningValueControl(control, n, d, pn, pd);
+        return new TuningValueControl(control, parameterGroup, n, d, pn, pd);
     }
 }

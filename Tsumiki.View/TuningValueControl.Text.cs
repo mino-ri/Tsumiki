@@ -2,6 +2,7 @@ namespace Tsumiki.View;
 
 internal partial class TuningValueControl(
     RectF control,
+    IParameterGroup parameterGroup,
     IRangeViewParameter<int> n,
     IRangeViewParameter<int> d,
     IRangeViewParameter<int> pn,
@@ -77,17 +78,29 @@ internal partial class TuningValueControl(
     {
         if (_focusedPart == FocusPart.N && _nLength == 0)
         {
+            parameterGroup.BeginGroupEdit();
+            n.BeginEdit();
             n.NormalizedValue = n.DefaultNormalizedValue;
+            n.EndEdit();
+            d.BeginEdit();
             d.NormalizedValue = d.DefaultNormalizedValue;
+            d.EndEdit();
+            pn.BeginEdit();
             pn.NormalizedValue = pn.DefaultNormalizedValue;
+            pn.EndEdit();
+            pd.BeginEdit();
             pd.NormalizedValue = pd.DefaultNormalizedValue;
+            pd.EndEdit();
+            parameterGroup.EndGroupEdit();
         }
         else
         {
+            parameterGroup.BeginGroupEdit();
             SetParameter(FocusPart.N);
             SetParameter(FocusPart.D);
             SetParameter(FocusPart.Pn);
             SetParameter(FocusPart.Pd);
+            parameterGroup.EndGroupEdit();
 
             int GetValue(FocusPart focusPart)
             {

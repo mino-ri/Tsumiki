@@ -1,6 +1,6 @@
 namespace Tsumiki.View;
 
-internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParameter<TY> yData, RectF control, RectF texture)
+internal class XYControl<TX, TY>(IParameterGroup parameterGroup, IRangeViewParameter<TX> xData, IRangeViewParameter<TY> yData, RectF control, RectF texture)
     : Control(control)
 {
     private readonly SizeF _foregroundSize = TextureToControl(texture.Size);
@@ -38,7 +38,11 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
         _dragStartX = XData.NormalizedValue;
         _dragStartY = YData.NormalizedValue;
 
-        if (_xDragging && !_yDragging)
+        if (_xDragging && _yDragging)
+        {
+            parameterGroup.BeginGroupEdit();
+        }
+        else if (_xDragging && !_yDragging)
         {
             XData.BeginEdit();
         }
@@ -50,7 +54,11 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
 
     internal override void OnLeftButtonUp(PointF point)
     {
-        if (_xDragging && !_yDragging)
+        if (_xDragging && _yDragging)
+        {
+            parameterGroup.EndGroupEdit();
+        }
+        else if (_xDragging && !_yDragging)
         {
             XData.EndEdit();
         }
@@ -113,6 +121,7 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
 
     internal override void OnLeftButtonDoubleClick(PointF point)
     {
+        parameterGroup.BeginGroupEdit();
         XData.BeginEdit();
         XData.NormalizedValue = XData.DefaultNormalizedValue;
         XData.EndEdit();
@@ -120,6 +129,7 @@ internal class XYControl<TX, TY>(IRangeViewParameter<TX> xData, IRangeViewParame
         YData.BeginEdit();
         YData.NormalizedValue = YData.DefaultNormalizedValue;
         YData.EndEdit();
+        parameterGroup.EndGroupEdit();
 
         RequestRender();
     }

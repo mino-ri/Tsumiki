@@ -247,7 +247,7 @@ public enum SaveMode
 
 public interface ITuningUnit
 {
-    [VstRangeParameter(0, 0, 128, 69, StepCount = 128)]
+    [VstRangeParameter(0, 0, 128, 60, StepCount = 128)]
     int Root { get; set; }
 
     [VstRangeParameter(1, 1, 127, 12, StepCount = 126)]

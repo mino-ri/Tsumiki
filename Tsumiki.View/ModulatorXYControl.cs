@@ -8,6 +8,7 @@ internal class ModulatorXYControl : XYControl<float, float>
     private readonly IViewParameter _level;
 
     public ModulatorXYControl(
+        IParameterGroup parameterGroup,
         IRangeViewParameter<float> shapeX,
         IRangeViewParameter<float> shapeY,
         IRangeViewParameter<double>? pitch,
@@ -15,7 +16,7 @@ internal class ModulatorXYControl : XYControl<float, float>
         IViewParameter level,
         RectF control,
         RectF texture)
-        : base(shapeX, shapeY, control, texture)
+        : base(parameterGroup, shapeX, shapeY, control, texture)
     {
         var textureSize = TextureToControl(texture.Size);
         var motionSize = control.Size - textureSize;
