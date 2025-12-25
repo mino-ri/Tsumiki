@@ -76,3 +76,44 @@ cd /Users/minori/Codes/Tsumiki
 - Python パッケージ未インストール → pip3 install Pillow brotli
 - xcrun が見つからない → Xcode コマンドラインツールをインストール
 - .dylib が見つからない → Native/Makefile でビルドを確認
+
+# 調査結果
+
+NPlugのソースコードを調査した結果、M4 Macで.vst3ファイルが生成されない原因を特定しました。
+
+## 問題の根本原因
+
+macOS（M4 Mac含む）では、VST3プラグインは単一ファイルではなく、特定のディレクトリ構造を持つバンドルでなければならないのですが、NPlugは現在この構造を自動生成していません。
+
+## プラットフォーム間の違い
+
+Windows環境:
+- VST3プラグインは単一の.vst3ファイル（実際はDLL）
+- NPlugはdotnet publish後、DLLを.vst3にリネームするだけで動作
+
+macOS環境:
+- VST3プラグインは以下のようなバンドル構造が必須:
+Tsumiki.vst3/               # ディレクトリ（ファイルではない）
+├── Contents/
+│   ├── MacOS/
+│   │   └── Tsumiki         # 実際のバイナリ
+│   └── Info.plist          # 必須のプロパティリストファイル
+
+## NPlugの現在の動作
+
+macOSでdotnet publishを実行すると:
+1. NativeAOTが.dylibファイルを生成
+2. NPlugは単純にファイル名を変更するだけ（../NPlug-main/src/NPlug/build/NPlug.targets:76-79）
+3. 結果: 単一の.dylibファイルができるだけで、必要なバンドル構造が作られない
+
+## 証拠
+
+- NPlugのドキュメント（../NPlug-main/doc/readme.md:379）にも「他のプラットフォームではプラグイン構造を正しく設定する必要がある（issue #1参照）」と明記されています
+- この問題はhttps://github.com/xoofx/NPlug/issues/1として認識されています
+
+## 関連ファイル
+
+- ../NPlug-main/src/NPlug/build/NPlug.targets:76-79 - .vst3へのリネーム処理（macOS対応が不足）
+- ../NPlug-main/src/NPlug.Validator/build/NPlug.Validator.targets - Validator用には適切なバンドル構造を作成している（参考実装）
+
+この問題を解決するには、macOS向けに適切なバンドル構造を生成するMSBuildターゲットを追加する必要があります。
