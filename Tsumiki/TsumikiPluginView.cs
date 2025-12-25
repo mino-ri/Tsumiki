@@ -1,7 +1,11 @@
 using System;
 using NPlug;
 using Tsumiki.View;
+#if WINDOWS
 using Tsumiki.View.Win;
+#elif MACOS
+using Tsumiki.View.Mac;
+#endif
 
 namespace Tsumiki;
 
@@ -19,7 +23,13 @@ public class TsumikiPluginView(TsumikiViewModel viewModel) : IAudioPluginView
     public bool IsPlatformTypeSupported(AudioPluginViewPlatform platform)
     {
         TsumikiLogger.WriteAccess([(int)platform]);
+        #if WINDOWS
         return platform == AudioPluginViewPlatform.Hwnd;
+        #elif MACOS
+        return platform == AudioPluginViewPlatform.NSView;
+        #else
+        return false;
+        #endif
     }
 
     public void Attached(nint parent, AudioPluginViewPlatform type)

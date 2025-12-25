@@ -3,6 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- プラットフォーム別の定数定義 -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' Or '$(RuntimeIdentifier)' == ''">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64' Or '$(RuntimeIdentifier)' == 'osx-x64'">
+    <DefineConstants>$(DefineConstants);MACOS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -28,11 +38,19 @@
   <ItemGroup>
     <PackageReference Include="NPlug" Version="0.4.0.377" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.csproj" />
     <ProjectReference Include="..\Tsumiki.SourceGenerator\Tsumiki.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Tsumiki.View.Win\Tsumiki.View.Win.csproj" />
     <ProjectReference Include="..\Tsumiki.View\Tsumiki.View.csproj" />
+  </ItemGroup>
+
+  <!-- プラットフォーム別のプロジェクト参照 -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' Or '$(RuntimeIdentifier)' == ''">
+    <ProjectReference Include="..\Tsumiki.View.Win\Tsumiki.View.Win.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64' Or '$(RuntimeIdentifier)' == 'osx-x64'">
+    <ProjectReference Include="..\Tsumiki.View.Mac\Tsumiki.View.Mac.csproj" />
   </ItemGroup>
 </Project>
