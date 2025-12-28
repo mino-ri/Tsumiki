@@ -70,7 +70,7 @@ public interface IInputUnit
     [VstStringListParameter(4, typeof(StackMode))]
     StackMode StackMode { get; set; }
 
-    [VstRangeParameter(5, 0, 100, 10, StepCount = 100, Units = "cent")]
+    [VstRangeParameter(5, 0, 100, 10, StepCount = 100, Units = "dcent")]
     int StackDetune { get; set; }
 
     [VstRangeParameter(6, -1.0, 1.0, 0.0)]
@@ -108,7 +108,7 @@ public interface IFilterUnit
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
     float Mix { get; set; }
 
-    [VstRangeParameter(1, -64, 64, 0, StepCount = 128)]
+    [VstRangeParameter(1, -64, 64, 0)]
     int Cutoff { get; set; }
 
     [VstRangeParameter(2, 0.0, 0.98, 0.49)]
@@ -120,7 +120,7 @@ public interface IDelayUnit
     [VstRangeParameter(0, 0.0, 1.0, 0.0)]
     float Mix { get; set; }
 
-    [VstRangeParameter(1, 2, 514, 250, StepCount = 512, Units = "ms")]
+    [VstRangeParameter(1, 2, 514, 250, Units = "ms")]
     int Delay { get; set; }
 
     [VstRangeParameter(2, 0.0, 1.0, 0.5)]
