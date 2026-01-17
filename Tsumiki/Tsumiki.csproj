@@ -23,6 +23,7 @@
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <IlcInstructionSet>sse4.2</IlcInstructionSet>
   </PropertyGroup>
   
   <ItemGroup>

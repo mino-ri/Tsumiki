@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <IlcInstructionSet>native</IlcInstructionSet>
+    <IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
+    <TrimMode>partial</TrimMode>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <StripSymbols>true</StripSymbols>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <IlcInstructionSet>sse4.2</IlcInstructionSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NPlug.Validator" Version="1.3.1.377" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tsumiki.Core\Tsumiki.Core.csproj" />
+    <ProjectReference Include="..\Tsumiki\Tsumiki.csproj" />
+  </ItemGroup>
+
+</Project>
