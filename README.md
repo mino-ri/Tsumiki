@@ -1,5 +1,11 @@
-# Tsumiki
+# Tsumiki.vst3
  Microtonal Virtual Analog/FM Synthesizer
+
+Download latest version:
+
+| Windows(x64) |Windows(ARM64) | Mac(Intel) | Mac(Apple Silicon) |
+|---|---|---|---|
+| [v1.0.0](https://github.com/mino-ri/Tsumiki/releases/download/v1.0.0/Tsumiki.zip) | Not Supported | Not Supported | Not Supported |
 
 [THIRD PARTY LICENSES](./THIRD-PARTY-LICENSES)
 
