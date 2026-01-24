@@ -11,7 +11,7 @@ Download latest version:
 
 | Windows(x64) |Windows(ARM64) | Mac(Apple Silicon) | Linux(x64) | Linux(ARM64) |
 |---|---|---|---|---|
-| [v1.0.0](https://github.com/mino-ri/Tsumiki/releases/download/v1.0.0/Tsumiki.zip) | Not Supported | Not Supported | Not Supported | Not Supported |
+| [v1.0.1](https://github.com/mino-ri/Tsumiki/releases/download/v1.0.1/Tsumiki.zip) | Not Supported | Not Supported | Not Supported | Not Supported |
 
 [THIRD PARTY LICENSES](./THIRD-PARTY-LICENSES)
 

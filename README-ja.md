@@ -11,7 +11,7 @@ VST3 プラグインが動作する DAW で使用できます。
 
 | Windows(x64) |Windows(ARM64) | Mac(Apple Silicon) | Linux(x64) | Linux(ARM64) |
 |---|---|---|---|---|
-| [v1.0.0](https://github.com/mino-ri/Tsumiki/releases/download/v1.0.0/Tsumiki.zip) | 非対応 | 非対応 | 非対応 | 非対応 |
+| [v1.0.1](https://github.com/mino-ri/Tsumiki/releases/download/v1.0.1/Tsumiki.zip) | 非対応 | 非対応 | 非対応 | 非対応 |
 
 [THIRD PARTY LICENSES](./THIRD-PARTY-LICENSES)
 

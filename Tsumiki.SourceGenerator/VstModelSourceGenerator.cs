@@ -342,7 +342,8 @@ public class VstModelSourceGenerator : IIncrementalGenerator
             sourceBuilder.Append($", {ToCamelCase(namedArgument.Key)}: {value}");
         }
 
-        sourceBuilder.AppendLine("));");
+        var returnType = property.Type.ToDisplayString();
+        sourceBuilder.AppendLine($"){{ Precision = {(returnType is "double" or "float" ? "4" : "0")} }});");
     }
 
     private static string ToCamelCase(string name)
